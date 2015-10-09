@@ -24,18 +24,17 @@
 
 package pl.coffeepower.blog.examples;
 
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import lombok.Getter;
-
 public final class AtomicValuesMap {
 
     public static final int SIZE = 1_000_000;
     @Getter
-    private final Map<Integer, AtomicInteger> map = new HashMap<Integer, AtomicInteger>();
+    private final Map<Integer, AtomicInteger> map = new HashMap<>();
 
     public AtomicValuesMap() {
         for (int i = 0; i < SIZE; i++) {

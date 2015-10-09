@@ -24,17 +24,16 @@
 
 package pl.coffeepower.blog.examples;
 
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import lombok.Getter;
 
 public final class ClassicValuesMap {
 
     public static final int SIZE = 1_000_000;
     @Getter
-    private final Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+    private final Map<Integer, Integer> map = new HashMap<>();
 
     public ClassicValuesMap() {
         for (int i = 0; i < SIZE; i++) {

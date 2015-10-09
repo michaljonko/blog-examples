@@ -26,36 +26,36 @@ package pl.coffeepower.blog.examples;
 
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertThat;
 
 public class MapsTest {
 
     @Test
-    public void testName() throws Exception {
+    public void testClassicValuesMap() throws Exception {
         ClassicValuesMap valuesMap = new ClassicValuesMap();
         valuesMap.increase();
-        for (Integer i : valuesMap.getMap().values()) {
-            assertTrue("i=0", i > 0);
-        }
+        valuesMap.getMap().values().forEach(value -> assertThat("ASSERT!", value.intValue(), greaterThan(0)));
     }
 
     @Test
-    public void testName2() throws Exception {
+    public void testAtomicValuesMap() throws Exception {
         AtomicValuesMap valuesMap = new AtomicValuesMap();
         valuesMap.increase();
-        for (AtomicInteger i : valuesMap.getMap().values()) {
-            assertTrue("i=0", i.get() > 0);
-        }
+        valuesMap.getMap().values().forEach(value -> assertThat("ASSERT!", value.intValue(), greaterThan(0)));
     }
 
     @Test
-    public void testName3() throws Exception {
+    public void testArrayValuesMap() throws Exception {
         ArrayValuesMap valuesMap = new ArrayValuesMap();
         valuesMap.increase();
-        for (int[] i : valuesMap.getMap().values()) {
-            assertTrue("i=0", i[0] > 0);
-        }
+        valuesMap.getMap().values().forEach(value -> assertThat("ASSERT!", value[0], greaterThan(0)));
+    }
+
+    @Test
+    public void testClassValuesMap() throws Exception {
+        ClassValuesMap valuesMap = new ClassValuesMap();
+        valuesMap.increase();
+        valuesMap.getMap().values().forEach(value -> assertThat("ASSERT!", value.getValue(), greaterThan(0)));
     }
 }

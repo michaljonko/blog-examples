@@ -24,27 +24,35 @@
 
 package pl.coffeepower.blog.examples;
 
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public final class ArrayValuesMap {
+public final class ClassValuesMap {
 
     public static final int SIZE = 1_000_000;
     @Getter
-    private final Map<Integer, int[]> map = new HashMap<>();
+    private final Map<Integer, Value> map = new HashMap<>();
 
-    public ArrayValuesMap() {
+    public ClassValuesMap() {
         for (int i = 0; i < SIZE; i++) {
-            map.put(i, new int[]{0});
+            map.put(i, new Value());
         }
     }
 
     public final void increase() {
-        map.forEach((key, value) -> {
-            value[0]++;
-            map.put(key, value);
-        });
+        map.forEach((key, value) -> value.inc());
+    }
+
+    @Data
+    public static final class Value {
+
+        private int value;
+
+        public void inc() {
+            value++;
+        }
     }
 }
