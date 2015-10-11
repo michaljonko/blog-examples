@@ -24,27 +24,15 @@
 
 package pl.coffeepower.blog.examples;
 
-import lombok.Getter;
-
-import java.util.HashMap;
 import java.util.Map;
 
-public final class ArrayValuesMap {
+public interface WordsCounter {
 
-    public static final int SIZE = 1_000_000;
-    @Getter
-    private final Map<Integer, int[]> map = new HashMap<>();
+    void increaseAll();
 
-    public ArrayValuesMap() {
-        for (int i = 0; i < SIZE; i++) {
-            map.put(i, new int[]{0});
-        }
-    }
+    void increase(String word);
 
-    public final void increase() {
-        map.forEach((key, value) -> {
-            value[0]++;
-            map.put(key, value);
-        });
-    }
+    void decrease(String word);
+
+    Map<String, ?> wordsFrequency();
 }

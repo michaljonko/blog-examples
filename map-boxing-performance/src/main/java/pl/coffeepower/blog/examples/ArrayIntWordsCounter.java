@@ -24,35 +24,46 @@
 
 package pl.coffeepower.blog.examples;
 
-import lombok.Data;
-import lombok.Getter;
+import com.google.common.collect.Maps;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public final class ClassValuesMap {
+import lombok.NoArgsConstructor;
 
-    public static final int SIZE = 1_000_000;
-    @Getter
-    private final Map<Integer, Value> map = new HashMap<>();
+@NoArgsConstructor
+public final class ArrayIntWordsCounter implements WordsCounter {
 
-    public ClassValuesMap() {
-        for (int i = 0; i < SIZE; i++) {
-            map.put(i, new Value());
+    private final Map<String, int[]> map = Maps.newConcurrentMap();
+
+    @Override
+    public final void increaseAll() {
+        map.forEach((key, value) -> {
+            value[0]++;
+            map.put(key, value);
+        });
+    }
+
+    @Override
+    public final void increase(String word) {
+        int[] counter = map.get(word);
+        if (counter == null) {
+            counter = new int[]{1};
+            map.put(word, counter);
+        } else {
+            counter[0]++;
         }
     }
 
-    public final void increase() {
-        map.forEach((key, value) -> value.inc());
+    @Override
+    public final void decrease(String word) {
+        int[] counter = map.get(word);
+        if (counter != null && counter[0] > 0) {
+            counter[0]--;
+        }
     }
 
-    @Data
-    public static final class Value {
-
-        private int value;
-
-        public void inc() {
-            value++;
-        }
+    @Override
+    public final Map<String, ?> wordsFrequency() {
+        return map;
     }
 }

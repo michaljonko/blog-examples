@@ -24,6 +24,7 @@ subprojects {
 
     dependencies {
         compile 'org.projectlombok:lombok:1.16.6'
+        compile 'com.google.guava:guava:18.0'
 
         testCompile 'junit:junit:4.12'
         testCompile 'org.mockito:mockito-all:1.10.19'

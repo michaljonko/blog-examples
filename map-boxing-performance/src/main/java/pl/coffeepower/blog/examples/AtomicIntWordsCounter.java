@@ -24,24 +24,44 @@
 
 package pl.coffeepower.blog.examples;
 
-import lombok.Getter;
+import com.google.common.collect.Maps;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public final class ClassicValuesMap {
+import lombok.NoArgsConstructor;
 
-    public static final int SIZE = 1_000_000;
-    @Getter
-    private final Map<Integer, Integer> map = new HashMap<>();
+@NoArgsConstructor
+public final class AtomicIntWordsCounter implements WordsCounter {
 
-    public ClassicValuesMap() {
-        for (int i = 0; i < SIZE; i++) {
-            map.put(i, 0);
+    private final Map<String, AtomicInteger> map = Maps.newConcurrentMap();
+
+    @Override
+    public final void increaseAll() {
+        map.forEach((key, value) -> value.incrementAndGet());
+    }
+
+    @Override
+    public final void increase(String word) {
+        AtomicInteger counter = map.get(word);
+        if (counter == null) {
+            counter = new AtomicInteger(1);
+            map.put(word, counter);
+        } else {
+            counter.incrementAndGet();
         }
     }
 
-    public final void increase() {
-        map.forEach((key, value) -> map.put(key, value + 1));
+    @Override
+    public final void decrease(String word) {
+        AtomicInteger counter = map.get(word);
+        if (counter != null && counter.get() > 0) {
+            counter.decrementAndGet();
+        }
+    }
+
+    @Override
+    public final Map<String, ?> wordsFrequency() {
+        return map;
     }
 }
