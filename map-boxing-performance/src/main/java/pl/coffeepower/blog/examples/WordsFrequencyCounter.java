@@ -30,7 +30,5 @@ public interface WordsFrequencyCounter {
 
     void increase(String word);
 
-    void decrease(String word);
-
     Map<String, Integer> wordsFrequency();
 }

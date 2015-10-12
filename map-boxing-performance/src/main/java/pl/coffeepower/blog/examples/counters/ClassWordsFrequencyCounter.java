@@ -22,40 +22,62 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.examples;
+package pl.coffeepower.blog.examples.counters;
 
 import com.google.common.collect.Maps;
 
-import lombok.NoArgsConstructor;
+import pl.coffeepower.blog.examples.WordsFrequencyCounter;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor
-public final class IntWordsFrequencyCounter implements WordsFrequencyCounter {
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-    private final Map<String, Integer> map = Maps.newConcurrentMap();
+@NoArgsConstructor
+public final class ClassWordsFrequencyCounter implements WordsFrequencyCounter {
+
+    private final Map<String, Frequency> map = Maps.newConcurrentMap();
 
     @Override
     public final void increase(String word) {
-        Integer counter = map.get(word);
-        counter = counter == null ? new Integer(1) : counter + 1;
-        map.put(word, counter);
-    }
-
-    @Override
-    public final void decrease(String word) {
-        Integer counter = map.get(word);
-        if (counter != null && counter.intValue() > 0) {
-            counter--;
+        Frequency counter = map.get(word);
+        if (counter == null) {
+            counter = new Frequency(1);
+            map.put(word, counter);
+        } else {
+            counter.inc();
         }
-        map.put(word, counter);
     }
 
     @Override
     public final Map<String, Integer> wordsFrequency() {
         return map.entrySet()
                 .stream()
-                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().getValue()));
+    }
+
+    @EqualsAndHashCode
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class Frequency {
+
+        @Getter
+        private int value;
+
+        public final void inc() {
+            value++;
+        }
+
+        public final void dec() {
+            value--;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
     }
 }

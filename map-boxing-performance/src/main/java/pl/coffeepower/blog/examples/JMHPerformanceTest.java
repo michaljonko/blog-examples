@@ -15,6 +15,11 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import pl.coffeepower.blog.examples.counters.ArrayWordsFrequencyCounter;
+import pl.coffeepower.blog.examples.counters.AtomicWordsFrequencyCounter;
+import pl.coffeepower.blog.examples.counters.ClassWordsFrequencyCounter;
+import pl.coffeepower.blog.examples.counters.SimpleWordsFrequencyCounter;
+
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -29,9 +34,9 @@ public class JMHPerformanceTest {
     private static final boolean FAIL_ON_ERROR = true;
 
     private final String word = UUID.randomUUID().toString();
-    private WordsFrequencyCounter intWordsFrequencyCounter;
-    private WordsFrequencyCounter atomicIntWordsFrequencyCounter;
-    private WordsFrequencyCounter arrayIntWordsFrequencyCounter;
+    private WordsFrequencyCounter simpleWordsFrequencyCounter;
+    private WordsFrequencyCounter atomicWordsFrequencyCounter;
+    private WordsFrequencyCounter arrayWordsFrequencyCounter;
     private WordsFrequencyCounter classWordsFrequencyCounter;
 
     public static void main(String[] args) throws RunnerException {
@@ -44,28 +49,28 @@ public class JMHPerformanceTest {
 
     @Setup
     public void setup() {
-        intWordsFrequencyCounter = new IntWordsFrequencyCounter();
-        atomicIntWordsFrequencyCounter = new AtomicIntWordsFrequencyCounter();
-        arrayIntWordsFrequencyCounter = new ArrayIntWordsFrequencyCounter();
+        simpleWordsFrequencyCounter = new SimpleWordsFrequencyCounter();
+        atomicWordsFrequencyCounter = new AtomicWordsFrequencyCounter();
+        arrayWordsFrequencyCounter = new ArrayWordsFrequencyCounter();
         classWordsFrequencyCounter = new ClassWordsFrequencyCounter();
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureClassicValues() {
-        intWordsFrequencyCounter.increase(word);
+        simpleWordsFrequencyCounter.increase(word);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureAtomicValues() {
-        atomicIntWordsFrequencyCounter.increase(word);
+        atomicWordsFrequencyCounter.increase(word);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureArrayValues() {
-        arrayIntWordsFrequencyCounter.increase(word);
+        arrayWordsFrequencyCounter.increase(word);
     }
 
     @Benchmark

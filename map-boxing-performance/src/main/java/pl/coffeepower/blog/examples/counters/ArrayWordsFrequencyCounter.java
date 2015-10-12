@@ -22,17 +22,19 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.examples;
+package pl.coffeepower.blog.examples.counters;
 
 import com.google.common.collect.Maps;
 
-import lombok.NoArgsConstructor;
+import pl.coffeepower.blog.examples.WordsFrequencyCounter;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.NoArgsConstructor;
+
 @NoArgsConstructor
-public final class ArrayIntWordsFrequencyCounter implements WordsFrequencyCounter {
+public final class ArrayWordsFrequencyCounter implements WordsFrequencyCounter {
 
     private final Map<String, int[]> map = Maps.newConcurrentMap();
 
@@ -44,14 +46,6 @@ public final class ArrayIntWordsFrequencyCounter implements WordsFrequencyCounte
             map.put(word, counter);
         } else {
             counter[0]++;
-        }
-    }
-
-    @Override
-    public final void decrease(String word) {
-        int[] counter = map.get(word);
-        if (counter != null && counter[0] > 0) {
-            counter[0]--;
         }
     }
 

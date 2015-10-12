@@ -28,8 +28,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
-import lombok.extern.java.Log;
-
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
@@ -48,9 +46,16 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import pl.coffeepower.blog.examples.counters.ArrayWordsFrequencyCounter;
+import pl.coffeepower.blog.examples.counters.AtomicWordsFrequencyCounter;
+import pl.coffeepower.blog.examples.counters.ClassWordsFrequencyCounter;
+import pl.coffeepower.blog.examples.counters.SimpleWordsFrequencyCounter;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
+import lombok.extern.java.Log;
 
 @Log
 @State(Scope.Benchmark)
@@ -64,9 +69,9 @@ public class JMHMobyDickPerformanceTest {
 
     private final List<String> words = Lists.newLinkedList();
 
-    private WordsFrequencyCounter intWordsFrequencyCounter;
-    private WordsFrequencyCounter atomicIntWordsFrequencyCounter;
-    private WordsFrequencyCounter arrayIntWordsFrequencyCounter;
+    private WordsFrequencyCounter simpleWordsFrequencyCounter;
+    private WordsFrequencyCounter atomicWordsFrequencyCounter;
+    private WordsFrequencyCounter arrayWordsFrequencyCounter;
     private WordsFrequencyCounter classWordsFrequencyCounter;
 
     {
@@ -91,28 +96,28 @@ public class JMHMobyDickPerformanceTest {
 
     @Setup
     public void setup() throws IOException {
-        this.intWordsFrequencyCounter = new IntWordsFrequencyCounter();
-        this.atomicIntWordsFrequencyCounter = new AtomicIntWordsFrequencyCounter();
-        this.arrayIntWordsFrequencyCounter = new ArrayIntWordsFrequencyCounter();
+        this.simpleWordsFrequencyCounter = new SimpleWordsFrequencyCounter();
+        this.atomicWordsFrequencyCounter = new AtomicWordsFrequencyCounter();
+        this.arrayWordsFrequencyCounter = new ArrayWordsFrequencyCounter();
         this.classWordsFrequencyCounter = new ClassWordsFrequencyCounter();
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureClassicValues() {
-        this.words.forEach(word -> intWordsFrequencyCounter.increase(word));
+        this.words.forEach(word -> simpleWordsFrequencyCounter.increase(word));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureAtomicValues() {
-        this.words.forEach(word -> atomicIntWordsFrequencyCounter.increase(word));
+        this.words.forEach(word -> atomicWordsFrequencyCounter.increase(word));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureArrayValues() {
-        this.words.forEach(word -> arrayIntWordsFrequencyCounter.increase(word));
+        this.words.forEach(word -> arrayWordsFrequencyCounter.increase(word));
     }
 
     @Benchmark

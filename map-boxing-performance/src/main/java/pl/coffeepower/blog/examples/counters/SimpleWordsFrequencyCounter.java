@@ -22,44 +22,30 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.examples;
+package pl.coffeepower.blog.examples.counters;
 
 import com.google.common.collect.Maps;
 
-import lombok.NoArgsConstructor;
+import pl.coffeepower.blog.examples.WordsFrequencyCounter;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-public final class AtomicIntWordsFrequencyCounter implements WordsFrequencyCounter {
+public final class SimpleWordsFrequencyCounter implements WordsFrequencyCounter {
 
-    private final Map<String, AtomicInteger> map = Maps.newConcurrentMap();
+    private final Map<String, Integer> map = Maps.newConcurrentMap();
 
     @Override
     public final void increase(String word) {
-        AtomicInteger counter = map.get(word);
-        if (counter == null) {
-            counter = new AtomicInteger(1);
-            map.put(word, counter);
-        } else {
-            counter.incrementAndGet();
-        }
-    }
-
-    @Override
-    public final void decrease(String word) {
-        AtomicInteger counter = map.get(word);
-        if (counter != null && counter.get() > 0) {
-            counter.decrementAndGet();
-        }
+        Integer counter = map.get(word);
+        counter = counter == null ? new Integer(1) : counter + 1;
+        map.put(word, counter);
     }
 
     @Override
     public final Map<String, Integer> wordsFrequency() {
-        return map.entrySet()
-                .stream()
-                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().get()));
+        return map;
     }
 }
