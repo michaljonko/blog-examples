@@ -17,5 +17,5 @@ hs_err_pid*
 
 !gradle/wrapper/gradle-wrapper.jar
 
+/build/
 map-boxing-performance/build/
-pen books

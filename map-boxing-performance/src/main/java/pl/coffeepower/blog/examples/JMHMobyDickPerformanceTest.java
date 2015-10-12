@@ -28,6 +28,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
+import lombok.extern.java.Log;
+
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
@@ -50,14 +52,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import lombok.extern.java.Log;
-
 @Log
 @State(Scope.Benchmark)
-@Warmup(iterations = 2)
-@Measurement(iterations = 3)
+@Warmup(iterations = 10)
+@Measurement(iterations = 10)
 @Threads(1)
-@Fork(value = 1, jvmArgsAppend = "-ea")
+@Fork(value = 3, jvmArgsAppend = "-ea")
 public class JMHMobyDickPerformanceTest {
 
     private static final boolean FAIL_ON_ERROR = true;

@@ -5,6 +5,7 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -15,12 +16,14 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
-@Warmup(iterations = 2)
-@Measurement(iterations = 3)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@Warmup(iterations = 10)
+@Measurement(iterations = 10)
 @Threads(1)
-@Fork(value = 1, jvmArgsAppend = "-ea")
+@Fork(value = 3, jvmArgsAppend = "-ea")
 public class JMHPerformanceTest {
 
     private static final boolean FAIL_ON_ERROR = true;

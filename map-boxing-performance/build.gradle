@@ -1,11 +1,11 @@
-task fatJar(type: Jar) {
-    baseName = project.name + '-all';
-    from {
-        configurations.compile.collect {
-            it.isDirectory() ? it : zipTree(it);
-        }
+jar {
+    manifest {
+        attributes 'Main-Class': 'pl.coffeepower.blog.examples.JMHMobyDickPerformanceTest';
     }
-    with clean jar;
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 dependencies {

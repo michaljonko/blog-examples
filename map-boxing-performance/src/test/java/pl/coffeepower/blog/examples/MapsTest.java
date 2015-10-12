@@ -26,8 +26,6 @@ package pl.coffeepower.blog.examples;
 
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -41,7 +39,7 @@ public class MapsTest {
         valuesMap.increase(word);
         valuesMap.increase(word);
         valuesMap.wordsFrequency().values()
-                .forEach(value -> assertThat("ASSERT!", ((Integer) value).intValue(), is(2)));
+                .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
     }
 
     @Test
@@ -50,7 +48,7 @@ public class MapsTest {
         valuesMap.increase(word);
         valuesMap.increase(word);
         valuesMap.wordsFrequency().values()
-                .forEach(value -> assertThat("ASSERT!", ((AtomicInteger) value).get(), is(2)));
+                .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
     }
 
     @Test
@@ -59,7 +57,7 @@ public class MapsTest {
         valuesMap.increase(word);
         valuesMap.increase(word);
         valuesMap.wordsFrequency().values()
-                .forEach(value -> assertThat("ASSERT!", ((int[]) value)[0], is(2)));
+                .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
     }
 
     @Test
@@ -68,6 +66,6 @@ public class MapsTest {
         valuesMap.increase(word);
         valuesMap.increase(word);
         valuesMap.wordsFrequency().values()
-                .forEach(value -> assertThat("ASSERT!", ((ClassWordsCounter.Value) value).getValue(), is(2)));
+                .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
     }
 }

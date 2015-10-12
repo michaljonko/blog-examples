@@ -26,9 +26,10 @@ package pl.coffeepower.blog.examples;
 
 import com.google.common.collect.Maps;
 
-import java.util.Map;
-
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 public final class IntegerWordsCounter implements WordsCounter {
@@ -36,18 +37,9 @@ public final class IntegerWordsCounter implements WordsCounter {
     private final Map<String, Integer> map = Maps.newConcurrentMap();
 
     @Override
-    public final void increaseAll() {
-        map.forEach((key, value) -> map.put(key, value + 1));
-    }
-
-    @Override
     public final void increase(String word) {
         Integer counter = map.get(word);
-        if (counter == null) {
-            counter = new Integer(1);
-        } else {
-            counter++;
-        }
+        counter = counter == null ? new Integer(1) : counter + 1;
         map.put(word, counter);
     }
 
@@ -56,13 +48,14 @@ public final class IntegerWordsCounter implements WordsCounter {
         Integer counter = map.get(word);
         if (counter != null && counter.intValue() > 0) {
             counter--;
-            map.put(word, counter);
         }
+        map.put(word, counter);
     }
 
-
     @Override
-    public final Map<String, ?> wordsFrequency() {
-        return map;
+    public final Map<String, Integer> wordsFrequency() {
+        return map.entrySet()
+                .stream()
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
     }
 }
