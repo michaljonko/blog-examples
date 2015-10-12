@@ -29,13 +29,13 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class MapsTest {
+public class WordsFrequencyCountersTest {
 
     private final String word = "qwertyuiopasdfghjklzxcvbnm";
 
     @Test
     public void testIntegerWordsCounter() throws Exception {
-        WordsCounter valuesMap = new IntegerWordsCounter();
+        WordsFrequencyCounter valuesMap = new IntWordsFrequencyCounter();
         valuesMap.increase(word);
         valuesMap.increase(word);
         valuesMap.wordsFrequency().values()
@@ -44,7 +44,7 @@ public class MapsTest {
 
     @Test
     public void testAtomicIntWordsCounter() throws Exception {
-        WordsCounter valuesMap = new AtomicIntWordsCounter();
+        WordsFrequencyCounter valuesMap = new AtomicIntWordsFrequencyCounter();
         valuesMap.increase(word);
         valuesMap.increase(word);
         valuesMap.wordsFrequency().values()
@@ -53,7 +53,7 @@ public class MapsTest {
 
     @Test
     public void testArrayIntWordsCounter() throws Exception {
-        WordsCounter valuesMap = new ArrayIntWordsCounter();
+        WordsFrequencyCounter valuesMap = new ArrayIntWordsFrequencyCounter();
         valuesMap.increase(word);
         valuesMap.increase(word);
         valuesMap.wordsFrequency().values()
@@ -62,7 +62,7 @@ public class MapsTest {
 
     @Test
     public void testClassWordsCounter() throws Exception {
-        WordsCounter valuesMap = new ClassWordsCounter();
+        WordsFrequencyCounter valuesMap = new ClassWordsFrequencyCounter();
         valuesMap.increase(word);
         valuesMap.increase(word);
         valuesMap.wordsFrequency().values()

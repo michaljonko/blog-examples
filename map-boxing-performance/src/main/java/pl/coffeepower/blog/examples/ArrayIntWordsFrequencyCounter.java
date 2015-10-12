@@ -24,13 +24,41 @@
 
 package pl.coffeepower.blog.examples;
 
+import com.google.common.collect.Maps;
+
+import lombok.NoArgsConstructor;
+
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public interface WordsCounter {
+@NoArgsConstructor
+public final class ArrayIntWordsFrequencyCounter implements WordsFrequencyCounter {
 
-    void increase(String word);
+    private final Map<String, int[]> map = Maps.newConcurrentMap();
 
-    void decrease(String word);
+    @Override
+    public final void increase(String word) {
+        int[] counter = map.get(word);
+        if (counter == null) {
+            counter = new int[]{1};
+            map.put(word, counter);
+        } else {
+            counter[0]++;
+        }
+    }
 
-    Map<String, Integer> wordsFrequency();
+    @Override
+    public final void decrease(String word) {
+        int[] counter = map.get(word);
+        if (counter != null && counter[0] > 0) {
+            counter[0]--;
+        }
+    }
+
+    @Override
+    public final Map<String, Integer> wordsFrequency() {
+        return map.entrySet()
+                .stream()
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()[0]));
+    }
 }

@@ -29,29 +29,30 @@ import com.google.common.collect.Maps;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
-public final class ArrayIntWordsCounter implements WordsCounter {
+public final class AtomicIntWordsFrequencyCounter implements WordsFrequencyCounter {
 
-    private final Map<String, int[]> map = Maps.newConcurrentMap();
+    private final Map<String, AtomicInteger> map = Maps.newConcurrentMap();
 
     @Override
     public final void increase(String word) {
-        int[] counter = map.get(word);
+        AtomicInteger counter = map.get(word);
         if (counter == null) {
-            counter = new int[]{1};
+            counter = new AtomicInteger(1);
             map.put(word, counter);
         } else {
-            counter[0]++;
+            counter.incrementAndGet();
         }
     }
 
     @Override
     public final void decrease(String word) {
-        int[] counter = map.get(word);
-        if (counter != null && counter[0] > 0) {
-            counter[0]--;
+        AtomicInteger counter = map.get(word);
+        if (counter != null && counter.get() > 0) {
+            counter.decrementAndGet();
         }
     }
 
@@ -59,6 +60,6 @@ public final class ArrayIntWordsCounter implements WordsCounter {
     public final Map<String, Integer> wordsFrequency() {
         return map.entrySet()
                 .stream()
-                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()[0]));
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().get()));
     }
 }

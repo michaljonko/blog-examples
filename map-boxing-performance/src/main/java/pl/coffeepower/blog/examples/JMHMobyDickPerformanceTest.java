@@ -64,11 +64,10 @@ public class JMHMobyDickPerformanceTest {
 
     private final List<String> words = Lists.newLinkedList();
 
-    private WordsCounter classicValuesMap;
-    private WordsCounter atomicIntWordsCounter;
-    private WordsCounter arrayAsValueWordsCounter;
-
-    private WordsCounter classValuesMap;
+    private WordsFrequencyCounter intWordsFrequencyCounter;
+    private WordsFrequencyCounter atomicIntWordsFrequencyCounter;
+    private WordsFrequencyCounter arrayIntWordsFrequencyCounter;
+    private WordsFrequencyCounter classWordsFrequencyCounter;
 
     {
         try {
@@ -92,33 +91,33 @@ public class JMHMobyDickPerformanceTest {
 
     @Setup
     public void setup() throws IOException {
-        this.classicValuesMap = new IntegerWordsCounter();
-        this.atomicIntWordsCounter = new AtomicIntWordsCounter();
-        this.arrayAsValueWordsCounter = new ArrayIntWordsCounter();
-        this.classValuesMap = new ClassWordsCounter();
+        this.intWordsFrequencyCounter = new IntWordsFrequencyCounter();
+        this.atomicIntWordsFrequencyCounter = new AtomicIntWordsFrequencyCounter();
+        this.arrayIntWordsFrequencyCounter = new ArrayIntWordsFrequencyCounter();
+        this.classWordsFrequencyCounter = new ClassWordsFrequencyCounter();
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureClassicValues() {
-        this.words.forEach(word -> classicValuesMap.increase(word));
+        this.words.forEach(word -> intWordsFrequencyCounter.increase(word));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureAtomicValues() {
-        this.words.forEach(word -> atomicIntWordsCounter.increase(word));
+        this.words.forEach(word -> atomicIntWordsFrequencyCounter.increase(word));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureArrayValues() {
-        this.words.forEach(word -> arrayAsValueWordsCounter.increase(word));
+        this.words.forEach(word -> arrayIntWordsFrequencyCounter.increase(word));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureClassValues() {
-        this.words.forEach(word -> classValuesMap.increase(word));
+        this.words.forEach(word -> classWordsFrequencyCounter.increase(word));
     }
 }

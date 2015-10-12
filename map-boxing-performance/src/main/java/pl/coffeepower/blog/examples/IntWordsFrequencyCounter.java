@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
-public final class IntegerWordsCounter implements WordsCounter {
+public final class IntWordsFrequencyCounter implements WordsFrequencyCounter {
 
     private final Map<String, Integer> map = Maps.newConcurrentMap();
 

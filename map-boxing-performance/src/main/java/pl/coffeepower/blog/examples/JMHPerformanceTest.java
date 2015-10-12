@@ -29,10 +29,10 @@ public class JMHPerformanceTest {
     private static final boolean FAIL_ON_ERROR = true;
 
     private final String word = UUID.randomUUID().toString();
-    private WordsCounter classicValuesMap;
-    private WordsCounter atomicIntWordsCounter;
-    private WordsCounter arrayAsValueWordsCounter;
-    private WordsCounter classValuesMap;
+    private WordsFrequencyCounter intWordsFrequencyCounter;
+    private WordsFrequencyCounter atomicIntWordsFrequencyCounter;
+    private WordsFrequencyCounter arrayIntWordsFrequencyCounter;
+    private WordsFrequencyCounter classWordsFrequencyCounter;
 
     public static void main(String[] args) throws RunnerException {
         new Runner(new OptionsBuilder()
@@ -44,33 +44,33 @@ public class JMHPerformanceTest {
 
     @Setup
     public void setup() {
-        classicValuesMap = new IntegerWordsCounter();
-        atomicIntWordsCounter = new AtomicIntWordsCounter();
-        arrayAsValueWordsCounter = new ArrayIntWordsCounter();
-        classValuesMap = new ClassWordsCounter();
+        intWordsFrequencyCounter = new IntWordsFrequencyCounter();
+        atomicIntWordsFrequencyCounter = new AtomicIntWordsFrequencyCounter();
+        arrayIntWordsFrequencyCounter = new ArrayIntWordsFrequencyCounter();
+        classWordsFrequencyCounter = new ClassWordsFrequencyCounter();
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureClassicValues() {
-        classicValuesMap.increase(word);
+        intWordsFrequencyCounter.increase(word);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureAtomicValues() {
-        atomicIntWordsCounter.increase(word);
+        atomicIntWordsFrequencyCounter.increase(word);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureArrayValues() {
-        arrayAsValueWordsCounter.increase(word);
+        arrayIntWordsFrequencyCounter.increase(word);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.All)
     public void measureClassValues() {
-        classValuesMap.increase(word);
+        classWordsFrequencyCounter.increase(word);
     }
 }

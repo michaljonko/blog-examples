@@ -36,15 +36,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
-public final class ClassWordsCounter implements WordsCounter {
+public final class ClassWordsFrequencyCounter implements WordsFrequencyCounter {
 
-    private final Map<String, Value> map = Maps.newConcurrentMap();
+    private final Map<String, Frequency> map = Maps.newConcurrentMap();
 
     @Override
     public final void increase(String word) {
-        Value counter = map.get(word);
+        Frequency counter = map.get(word);
         if (counter == null) {
-            counter = new Value(1);
+            counter = new Frequency(1);
             map.put(word, counter);
         } else {
             counter.inc();
@@ -53,7 +53,7 @@ public final class ClassWordsCounter implements WordsCounter {
 
     @Override
     public final void decrease(String word) {
-        Value counter = map.get(word);
+        Frequency counter = map.get(word);
         if (counter != null && counter.getValue() > 0) {
             counter.dec();
         }
@@ -68,7 +68,7 @@ public final class ClassWordsCounter implements WordsCounter {
 
     @EqualsAndHashCode
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static final class Value {
+    public static final class Frequency {
 
         @Getter
         private int value;
