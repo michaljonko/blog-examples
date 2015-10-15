@@ -17,5 +17,6 @@ hs_err_pid*
 
 !gradle/wrapper/gradle-wrapper.jar
 
-/build/
-/words-frequency-counter/build/
+build/
+words-frequency-counter/build/
+

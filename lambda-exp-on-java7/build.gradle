@@ -1,0 +1,36 @@
+apply plugin: 'me.tatarka.retrolambda'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'me.tatarka:gradle-retrolambda:3.2.3'
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'pl.coffeepower.blog.examples.LambdaExpExample'
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
+dependencies {
+    compile 'net.sourceforge.streamsupport:streamsupport:1.3.2'
+}
+
+retrolambda {
+    jdk System.getenv("JAVA8_HOME")
+    oldJdk System.getenv("JAVA7_HOME")
+    javaVersion JavaVersion.VERSION_1_7
+}
+
