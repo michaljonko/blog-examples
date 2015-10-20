@@ -24,17 +24,31 @@
 
 package pl.coffeepower.blog.examples;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.hamcrest.CustomMatcher;
+import org.junit.Test;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class NumberUtils {
+import static org.hamcrest.Matchers.everyItem;
+import static org.junit.Assert.assertThat;
 
-    public static boolean isOddNumber(Number number) {
-        return number.intValue() % 2 != 0;
-    }
+public class StreamsExampleTest {
 
-    public static boolean isEvenNumber(Number number) {
-        return number.intValue() % 2 == 0;
+    @Test
+    public void shouldGetCorrectResults() throws Exception {
+        StreamsExample example = new StreamsExample();
+
+        assertThat(example.getOddNumbers(), everyItem(
+                new CustomMatcher<Integer>("Odd matcher") {
+                    @Override
+                    public boolean matches(Object item) {
+                        return (item instanceof Integer) && ((Integer) item) % 2 == 1;
+                    }
+                }));
+        assertThat(example.changeOddToEvenNumbers(), everyItem(
+                new CustomMatcher<Integer>("Even matcher") {
+                    @Override
+                    public boolean matches(Object item) {
+                        return (item instanceof Integer) && ((Integer) item) % 2 == 0;
+                    }
+                }));
     }
 }
