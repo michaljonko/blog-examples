@@ -24,17 +24,29 @@
 
 package pl.coffeepower.blog.examples;
 
+import com.google.common.collect.Collections2;
+
+import java.util.Collection;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NumberUtils {
 
-    public static boolean isOddNumber(Number number) {
+    public static Collection<? extends Number> getOddNumbers(Collection<? extends Number> numbers) {
+        return Collections2.filter(numbers, number -> isOddNumber(number));
+    }
+
+    public static Collection<? extends Number> getEvenNumbers(Collection<? extends Number> numbers) {
+        return Collections2.filter(numbers, number -> isEvenNumber(number));
+    }
+
+    public static <T extends Number> boolean isOddNumber(T number) {
         return number.intValue() % 2 != 0;
     }
 
-    public static boolean isEvenNumber(Number number) {
+    public static <T extends Number> boolean isEvenNumber(T number) {
         return number.intValue() % 2 == 0;
     }
 }
