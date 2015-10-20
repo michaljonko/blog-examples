@@ -40,14 +40,14 @@ public class StreamsExampleTest {
                 new CustomMatcher<Integer>("Odd matcher") {
                     @Override
                     public boolean matches(Object item) {
-                        return (item instanceof Integer) && ((Integer) item) % 2 == 1;
+                        return (item instanceof Integer) && NumberUtils.isOddNumber((Integer) item);
                     }
                 }));
         assertThat(example.changeOddToEvenNumbers(), everyItem(
                 new CustomMatcher<Integer>("Even matcher") {
                     @Override
                     public boolean matches(Object item) {
-                        return (item instanceof Integer) && ((Integer) item) % 2 == 0;
+                        return (item instanceof Integer) && NumberUtils.isEvenNumber((Integer) item);
                     }
                 }));
     }
