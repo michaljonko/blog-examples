@@ -53,7 +53,7 @@ public final class StreamsExample {
         StreamsExample example = new StreamsExample();
         log.info("odd numbers: " + Joiner.on(", ").join(example.getOddNumbers()));
         example.changeOddToEvenNumbers()
-                .forEach(number -> log.info("odd value changed to even:" + (++number)));
+                .forEach(number -> log.info("odd value changed to even:" + number));
     }
 
     public final List<Integer> getOddNumbers() {
