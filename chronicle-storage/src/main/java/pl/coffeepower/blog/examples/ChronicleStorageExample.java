@@ -73,12 +73,7 @@ public final class ChronicleStorageExample implements Closeable {
         try (ExcerptTailer tailer = chronicle.createTailer()) {
             long expectedSequence = startSequenceValue;
             byte[] buffer = new byte[Longs.BYTES];
-            while (expectedSequence <= endSequenceValue && tailer.nextIndex()) {
-                tailer.read(buffer);
-                tailer.finish();
-                long value = Longs.fromByteArray(buffer);
-                Verify.verify(value == expectedSequence++, "Long value (%s) does not equal to expected value (%s)", value, expectedSequence);
-            }
+            expectedSequence = readData(tailer, expectedSequence, buffer);
             Verify.verify(expectedSequence == endSequenceValue, "Did not read all data (%s)", expectedSequence - 1);
         }
     }
@@ -88,13 +83,19 @@ public final class ChronicleStorageExample implements Closeable {
             long expectedSequence = startSequenceValue + 2 * endSequenceValue / 3;
             tailer.index(expectedSequence);
             byte[] buffer = new byte[Longs.BYTES];
-            while (expectedSequence <= endSequenceValue && tailer.nextIndex()) {
-                tailer.read(buffer);
-                tailer.finish();
-                long value = Longs.fromByteArray(buffer);
-                Verify.verify(value == expectedSequence++, "Long value (%s) does not equal to expected value (%s)", value, expectedSequence);
-            }
+            expectedSequence = readData(tailer, expectedSequence, buffer);
+            Verify.verify(expectedSequence == endSequenceValue, "Did not read all data (%s)", expectedSequence - 1);
         }
+    }
+
+    private long readData(ExcerptTailer tailer, long expectedSequence, byte[] buffer) {
+        while (expectedSequence <= endSequenceValue && tailer.nextIndex()) {
+            tailer.read(buffer);
+            tailer.finish();
+            long value = Longs.fromByteArray(buffer);
+            Verify.verify(value == expectedSequence++, "Long value (%s) does not equal to expected value (%s)", value, expectedSequence);
+        }
+        return expectedSequence;
     }
 
     @Override
