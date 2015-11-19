@@ -24,7 +24,6 @@
 
 package pl.coffeepower.blog.examples;
 
-
 import com.google.common.primitives.Longs;
 
 import net.openhft.chronicle.Chronicle;
@@ -38,13 +37,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
+import java.util.function.LongConsumer;
 import java.util.stream.LongStream;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Log
 public class IndexedChronicleTest {
@@ -54,9 +57,10 @@ public class IndexedChronicleTest {
     @Before
     public void setUp() throws Exception {
         File chronicleFilePath = createChronicleFilePath();
+        log.info("chronicleFilePath=" + chronicleFilePath.getAbsolutePath());
         chronicle = ChronicleQueueBuilder
                 .indexed(chronicleFilePath)
-                .dataBlockSize(2 * 1024 * 1024)
+                .dataBlockSize(2 * 1_024 * 1_024)
                 .build();
         ChronicleTools.deleteOnExit(chronicleFilePath.getAbsolutePath());
     }
@@ -69,31 +73,52 @@ public class IndexedChronicleTest {
     }
 
     @Test
-    public void testName() throws Exception {
+    public void notWorkingTest() throws Exception {
+        createQueue();
+
+        byte[] buffer = new byte[Longs.BYTES];
+        ExcerptTailer tailer = chronicle.createTailer().toStart();
+
+        readQueue(tailer, value -> {
+            tailer.index(value - 1);
+            assertTrue("Cannot move index to position " + value, tailer.nextIndex() || tailer.nextIndex());
+            assertEquals("Different length. Expected " + Longs.BYTES, tailer.read(buffer), Longs.BYTES);
+            assertEquals("Different data. Expected " + value, Longs.fromByteArray(buffer), value);
+        });
+    }
+
+    @Test
+    public void workingTest() throws Exception {
+        createQueue();
+
+        byte[] buffer = new byte[Longs.BYTES];
+        ExcerptTailer tailer = chronicle.createTailer().toStart();
+
+        readQueue(tailer, value -> {
+            assertTrue("Cannot move index to position " + value, tailer.nextIndex() || tailer.nextIndex());
+            assertEquals("Different length. Expected " + Longs.BYTES, tailer.read(buffer), Longs.BYTES);
+            assertEquals("Different data. Expected " + value, Longs.fromByteArray(buffer), value);
+        });
+    }
+
+    private void readQueue(ExcerptTailer tailer, LongConsumer consumer) throws IOException {
+        LongStream
+                .rangeClosed(Fixtures.START_SEQUENCE_VALUE, Fixtures.END_SEQUENCE_VALUE)
+                .onClose(tailer::close)
+                .sorted()
+                .forEach(consumer);
+    }
+
+    private void createQueue() throws IOException {
         ExcerptAppender appender = chronicle.createAppender();
         LongStream
                 .rangeClosed(Fixtures.START_SEQUENCE_VALUE, Fixtures.END_SEQUENCE_VALUE)
-                .onClose(() -> appender.close())
+                .onClose(appender::close)
                 .sorted()
                 .forEach(value -> {
                     appender.startExcerpt(Longs.BYTES);
                     appender.write(Longs.toByteArray(value));
                     appender.finish();
-                });
-
-        ExcerptTailer tailer = chronicle.createTailer();
-        byte[] buffer = new byte[Longs.BYTES];
-        LongStream
-                .rangeClosed(Fixtures.START_SEQUENCE_VALUE, Fixtures.END_SEQUENCE_VALUE)
-                .onClose(() -> tailer.close())
-                .sorted()
-                .filter(value -> value % 1_000 == 0)
-                .forEach(value -> {
-                    tailer.toStart().index(value - 1);
-                    assertThat("Cannot increase index=" + value, tailer.nextIndex() || tailer.nextIndex(), is(true));
-                    assertThat("Read problem for index=" + value, tailer.read(buffer), is(Longs.BYTES));
-                    assertThat("Different value for index=" + value, Longs.fromByteArray(buffer), is(value));
-                    System.out.println(value);
                 });
     }
 
@@ -101,8 +126,9 @@ public class IndexedChronicleTest {
         return new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString());
     }
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     private static final class Fixtures {
         public static final long START_SEQUENCE_VALUE = 0L;
-        public static final long END_SEQUENCE_VALUE = 5_000_000L;
+        public static final long END_SEQUENCE_VALUE = 300_000L;
     }
 }
