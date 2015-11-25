@@ -33,11 +33,11 @@ package pl.coffeepower.blog.messagebus.fastcast;
 import com.google.common.net.InetAddresses;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.Scopes;
 
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
 import org.nustaq.fastcast.config.SubscriberConf;
+import org.nustaq.fastcast.util.FCLog;
 
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Receiver;
@@ -55,8 +55,9 @@ public final class FastCastModule extends AbstractModule {
     private static final int TOPIC_ID = 1;
 
     protected void configure() {
-        bind(Sender.class).to(FastCastSender.class).in(Scopes.SINGLETON);
-        bind(Receiver.class).to(FastCastReceiver.class).in(Scopes.SINGLETON);
+        bind(Sender.class).to(FastCastSender.class);
+        bind(Receiver.class).to(FastCastReceiver.class);
+        FCLog.get().setLogLevel(FCLog.SEVER);
     }
 
     @Provides
@@ -64,30 +65,31 @@ public final class FastCastModule extends AbstractModule {
     @Inject
     private PhysicalTransportConf createPhysicalTransportConf(@NonNull Configuration configuration) {
         return new PhysicalTransportConf(configuration.getChannelId())
-                .loopBack(InetAddresses.forString(configuration.getInterfaceAddress()).isLoopbackAddress())
+                .loopBack(InetAddresses.forString(configuration.getInterfaceAddress())
+                        .isLoopbackAddress())
                 .interfaceAdr(configuration.getInterfaceAddress())
                 .mulitcastAdr(configuration.getMulticastAddress())
                 .port(configuration.getMulticastPort())
-                .setDgramsize(1_500)
+                .setDgramsize(1_000)
                 .idleParkMicros(10)
-                .spinLoopMicros(1_000);
+                .spinLoopMicros(10_000);
     }
 
     @Provides
     @Singleton
     private PublisherConf createPublisherConf() {
         return new PublisherConf(TOPIC_ID)
-                .heartbeatInterval(5)
-                .numPacketHistory(30_000)
-                .pps(5_000);
+                .numPacketHistory(100_000)
+                .pps(100_000)
+                .heartbeatInterval(500);
     }
 
     @Provides
     @Singleton
     private SubscriberConf createSubscriberConf() {
         return new SubscriberConf(TOPIC_ID)
-                .receiveBufferPackets(30_000)
+                .receiveBufferPackets(100_000)
                 .maxDelayRetransMS(1)
-                .maxDelayNextRetransMS(1);
+                .maxDelayNextRetransMS(10);
     }
 }

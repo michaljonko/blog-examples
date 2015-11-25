@@ -48,31 +48,34 @@ final class FastCastReceiver implements Receiver {
 
     private final String nodeId = UUID.randomUUID().toString().substring(0, 4);
     private final AtomicBoolean opened = new AtomicBoolean(false);
+    private Handler handler;
 
     @Inject
-    private FastCastReceiver(@NonNull PhysicalTransportConf physicalTransportConf, @NonNull SubscriberConf subscriberConf) {
+    private FastCastReceiver(@NonNull PhysicalTransportConf physicalTransportConf,
+                             @NonNull SubscriberConf subscriberConf) {
         FastCast fastCast = FastCast.getFastCast();
         fastCast.setNodeId(nodeId);
         fastCast.addTransport(physicalTransportConf);
-        fastCast.onTransport(physicalTransportConf.getName()).subscribe(subscriberConf,
-                new ByteArraySubscriber() {
+        fastCast.onTransport(physicalTransportConf.getName())
+                .subscribe(subscriberConf, new ByteArraySubscriber(false) {
                     @Override
                     protected void messageReceived(String sender, long sequence, byte[] msg, int off, int len) {
-                        received(msg);
+                        Preconditions.checkState(opened.get(), "Already closed");
+                        Preconditions.checkNotNull(handler);
+                        handler.received(msg);
                     }
                 });
         opened.set(true);
     }
 
     @Override
-    public void received(byte[] data) {
-        Preconditions.checkState(opened.get(), "Already closed");
-        log.info(new String(data));
-    }
-
-    @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
         opened.set(false);
+    }
+
+    @Override
+    public void register(@NonNull Handler handler) {
+        this.handler = handler;
     }
 }

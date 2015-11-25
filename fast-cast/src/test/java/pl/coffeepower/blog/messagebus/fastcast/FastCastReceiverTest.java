@@ -24,6 +24,7 @@
 
 package pl.coffeepower.blog.messagebus.fastcast;
 
+import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -32,14 +33,31 @@ import org.junit.Test;
 import pl.coffeepower.blog.messagebus.ConfigModule;
 import pl.coffeepower.blog.messagebus.Receiver;
 
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
 public class FastCastReceiverTest {
 
     private final Injector injector = Guice.createInjector(new ConfigModule(), new FastCastModule());
 
     @Test
     public void shouldRecCurrentTime() throws Exception {
+        AtomicLong lastReceived = new AtomicLong(0);
         Receiver receiver = injector.getInstance(Receiver.class);
-        System.in.read();
+        receiver.register(data -> {
+            assertThat(data.length, is(Longs.BYTES + 123));
+            long prevReceived = lastReceived.getAndSet(
+                    Longs.fromByteArray(Arrays.copyOf(data, Longs.BYTES)));
+            assertThat(lastReceived.get(), is(prevReceived + 1));
+        });
+        while (lastReceived.get() < 10_000_000L) {
+            TimeUnit.SECONDS.sleep(1L);
+            System.out.println("lastReceived: " + lastReceived.get());
+        }
         receiver.close();
     }
 }

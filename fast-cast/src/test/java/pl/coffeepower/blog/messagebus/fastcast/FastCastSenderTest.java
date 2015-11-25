@@ -24,6 +24,8 @@
 
 package pl.coffeepower.blog.messagebus.fastcast;
 
+import com.google.common.primitives.Bytes;
+import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -32,7 +34,7 @@ import org.junit.Test;
 import pl.coffeepower.blog.messagebus.ConfigModule;
 import pl.coffeepower.blog.messagebus.Sender;
 
-import java.time.LocalTime;
+import java.util.stream.LongStream;
 
 public class FastCastSenderTest {
 
@@ -40,7 +42,10 @@ public class FastCastSenderTest {
 
     @Test
     public void shouldSendCurrentTime() throws Exception {
+        byte[] additionalData = new byte[123];
         Sender sender = injector.getInstance(Sender.class);
-        while (sender.send(("Current time is " + LocalTime.now().toString()).getBytes())) ;
+        LongStream.rangeClosed(0L, 10_000_000L).forEach(value -> {
+            sender.send(Bytes.concat(Longs.toByteArray(value), additionalData));
+        });
     }
 }

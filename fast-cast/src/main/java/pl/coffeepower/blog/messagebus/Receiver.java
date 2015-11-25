@@ -26,5 +26,10 @@ package pl.coffeepower.blog.messagebus;
 
 public interface Receiver extends AutoCloseable {
 
-    void received(byte[] data);
+    void register(Handler handler);
+
+    interface Handler {
+
+        void received(byte[] data);
+    }
 }

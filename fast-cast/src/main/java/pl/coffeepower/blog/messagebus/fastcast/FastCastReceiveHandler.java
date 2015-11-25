@@ -24,22 +24,15 @@
 
 package pl.coffeepower.blog.messagebus.fastcast;
 
-import com.google.inject.Guice;
+import pl.coffeepower.blog.messagebus.Receiver;
 
-import org.junit.Test;
+import lombok.extern.java.Log;
 
-import pl.coffeepower.blog.messagebus.ConfigModule;
-import pl.coffeepower.blog.messagebus.Sender;
+@Log
+final class FastCastReceiveHandler implements Receiver.Handler {
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-
-public class FastCastModuleTest {
-
-    @Test
-    public void shouldCreateSender() throws Exception {
-        assertThat(
-                Guice.createInjector(new ConfigModule(), new FastCastModule()).getInstance(Sender.class),
-                notNullValue());
+    @Override
+    public void received(byte[] data) {
+        log.info(new String(data));
     }
 }
