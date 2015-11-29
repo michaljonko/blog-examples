@@ -58,8 +58,14 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
     @Override
     protected void run() throws Exception {
         byte[] additionalData = new byte[32];
-        LongStream.rangeClosed(1L, 1_000_000L).forEach(value ->
-                publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData)));
+        LongStream.rangeClosed(1L, 1_000_000L)
+                .onClose(() -> System.exit(0))
+                .forEach(value -> {
+                    publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData));
+                    if (value % 10_000 == 0) {
+                        log.info("Sent " + value + " messages");
+                    }
+                });
     }
 
     @Override
