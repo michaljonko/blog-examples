@@ -2,17 +2,17 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.7'
 }
 
-subprojects {
+allprojects {
     apply plugin: 'java'
     apply plugin: 'eclipse'
     apply plugin: 'idea'
 
-    compileJava.options.encoding = 'UTF-8'
+    group = 'pl.coffeepower.blog'
+    version = '1.0.0'
 
-    task initSourceFolders {
-        sourceSets*.java.srcDirs*.each { it.mkdirs() }
-        sourceSets*.resources.srcDirs*.each { it.mkdirs() }
-    }
+    compileJava.options.encoding = 'UTF-8'
+    compileJava.sourceCompatibility = JavaVersion.VERSION_1_8
+    compileJava.targetCompatibility = JavaVersion.VERSION_1_8
 
     repositories {
         mavenCentral()
