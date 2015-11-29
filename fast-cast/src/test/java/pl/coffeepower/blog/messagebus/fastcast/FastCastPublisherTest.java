@@ -29,23 +29,25 @@ import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import pl.coffeepower.blog.messagebus.ConfigModule;
-import pl.coffeepower.blog.messagebus.Sender;
+import pl.coffeepower.blog.messagebus.Publisher;
 
 import java.util.stream.LongStream;
 
-public class FastCastSenderTest {
+public class FastCastPublisherTest {
 
-    private final Injector injector = Guice.createInjector(new ConfigModule(), new FastCastModule());
+    private final Injector injector = Guice.createInjector(
+            new ConfigModule(), new FastCastModule());
 
+    @Ignore
     @Test
     public void shouldSendCurrentTime() throws Exception {
         byte[] additionalData = new byte[123];
-        Sender sender = injector.getInstance(Sender.class);
-        LongStream.rangeClosed(0L, 10_000_000L).forEach(value -> {
-            sender.send(Bytes.concat(Longs.toByteArray(value), additionalData));
-        });
+        Publisher publisher = injector.getInstance(Publisher.class);
+        LongStream.rangeClosed(0L, 1_000_000L).forEach(value ->
+                publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData)));
     }
 }

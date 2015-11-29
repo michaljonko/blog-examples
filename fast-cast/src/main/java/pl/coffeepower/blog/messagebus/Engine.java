@@ -22,17 +22,21 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus.fastcast;
+package pl.coffeepower.blog.messagebus;
 
-import pl.coffeepower.blog.messagebus.Subscriber;
+import com.google.inject.Module;
 
-import lombok.extern.java.Log;
+import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
 
-@Log
-final class FastCastReceiveHandler implements Subscriber.Handler {
+import lombok.Getter;
 
-    @Override
-    public void received(byte[] data) {
-        log.info(new String(data));
+public enum Engine {
+    FAST_CAST(new FastCastModule());
+
+    @Getter
+    private final Module module;
+
+    Engine(Module module) {
+        this.module = module;
     }
 }

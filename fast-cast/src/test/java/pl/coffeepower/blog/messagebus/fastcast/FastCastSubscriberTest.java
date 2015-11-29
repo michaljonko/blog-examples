@@ -24,22 +24,47 @@
 
 package pl.coffeepower.blog.messagebus.fastcast;
 
+import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import pl.coffeepower.blog.messagebus.ConfigModule;
-import pl.coffeepower.blog.messagebus.Sender;
+import pl.coffeepower.blog.messagebus.Subscriber;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class FastCastModuleTest {
+import lombok.extern.java.Log;
 
+import static org.junit.Assert.fail;
+
+@Log
+public class FastCastSubscriberTest {
+
+    private final Injector injector = Guice.createInjector(
+            new ConfigModule(), new FastCastModule());
+
+    @Ignore
     @Test
-    public void shouldCreateSender() throws Exception {
-        assertThat(
-                Guice.createInjector(new ConfigModule(), new FastCastModule()).getInstance(Sender.class),
-                notNullValue());
+    public void shouldRecCurrentTime() throws Exception {
+        AtomicLong lastReceived = new AtomicLong(0);
+        Subscriber subscriber = injector.getInstance(Subscriber.class);
+        subscriber.register(data -> {
+            long prevReceived = lastReceived.getAndSet(
+                    Longs.fromByteArray(Arrays.copyOf(data, Longs.BYTES)));
+            if (lastReceived.get() != (prevReceived + 1)) {
+                fail();
+                System.exit(-1);
+            }
+        });
+        while (lastReceived.get() < 1_000_000L) {
+            TimeUnit.SECONDS.sleep(1L);
+            log.info("lastReceived: " + lastReceived.get());
+        }
+        subscriber.close();
     }
 }

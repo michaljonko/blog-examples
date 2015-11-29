@@ -31,12 +31,13 @@ import org.nustaq.fastcast.api.util.ByteArraySubscriber;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.SubscriberConf;
 
-import pl.coffeepower.blog.messagebus.Receiver;
+import pl.coffeepower.blog.messagebus.Configuration.Const;
+import pl.coffeepower.blog.messagebus.Subscriber;
 
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import lombok.NonNull;
@@ -44,16 +45,16 @@ import lombok.extern.java.Log;
 
 @Singleton
 @Log
-final class FastCastReceiver implements Receiver {
+final class FastCastSubscriber implements Subscriber {
 
-    private final String nodeId = UUID.randomUUID().toString().substring(0, 4);
     private final AtomicBoolean opened = new AtomicBoolean(false);
+    private final FastCast fastCast = FastCast.getFastCast();
     private Handler handler;
 
     @Inject
-    private FastCastReceiver(@NonNull PhysicalTransportConf physicalTransportConf,
-                             @NonNull SubscriberConf subscriberConf) {
-        FastCast fastCast = FastCast.getFastCast();
+    private FastCastSubscriber(@NonNull @Named(Const.SUBSCRIBER_NAME_KEY) String nodeId,
+                               @NonNull PhysicalTransportConf physicalTransportConf,
+                               @NonNull SubscriberConf subscriberConf) {
         fastCast.setNodeId(nodeId);
         fastCast.addTransport(physicalTransportConf);
         fastCast.onTransport(physicalTransportConf.getName())

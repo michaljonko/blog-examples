@@ -31,12 +31,13 @@ import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
 
-import pl.coffeepower.blog.messagebus.Sender;
+import pl.coffeepower.blog.messagebus.Configuration.Const;
+import pl.coffeepower.blog.messagebus.Publisher;
 
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import lombok.NonNull;
@@ -44,15 +45,17 @@ import lombok.extern.java.Log;
 
 @Singleton
 @Log
-final class FastCastSender implements Sender {
+final class FastCastPublisher implements Publisher {
 
-    private final String nodeId = UUID.randomUUID().toString().substring(0, 4);
-    private final FCPublisher publisher;
     private final AtomicBoolean opened = new AtomicBoolean(false);
+    private final AtomicBoolean lock = new AtomicBoolean(false);
+    private final FastCast fastCast = FastCast.getFastCast();
+    private final FCPublisher publisher;
 
     @Inject
-    private FastCastSender(@NonNull PhysicalTransportConf physicalTransportConf, @NonNull PublisherConf publisherConf) {
-        FastCast fastCast = FastCast.getFastCast();
+    private FastCastPublisher(@NonNull @Named(Const.PUBLISHER_NAME_KEY) String nodeId,
+                              @NonNull PhysicalTransportConf physicalTransportConf,
+                              @NonNull PublisherConf publisherConf) {
         fastCast.setNodeId(nodeId);
         fastCast.addTransport(physicalTransportConf);
         publisher = fastCast.onTransport(physicalTransportConf.getName())
@@ -63,7 +66,12 @@ final class FastCastSender implements Sender {
     @Override
     public boolean send(@NonNull byte[] data) {
         Preconditions.checkState(opened.get(), "Already closed");
-        return publisher.offer(null, data, 0, data.length, true);
+        try {
+            lock();
+            return publisher.offer(null, data, 0, data.length, true);
+        } finally {
+            unlock();
+        }
     }
 
     @Override
@@ -71,5 +79,13 @@ final class FastCastSender implements Sender {
         Preconditions.checkState(opened.get(), "Already closed");
         publisher.flush();
         opened.set(false);
+    }
+
+    private void lock() {
+        while (!lock.compareAndSet(false, true)) ;
+    }
+
+    private void unlock() {
+        lock.set(false);
     }
 }

@@ -24,7 +24,12 @@
 
 package pl.coffeepower.blog.messagebus;
 
-public interface Sender extends AutoCloseable {
+public interface Subscriber extends AutoCloseable {
 
-    boolean send(byte[] data);
+    void register(Handler handler);
+
+    interface Handler {
+
+        void received(byte[] data);
+    }
 }

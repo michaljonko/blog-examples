@@ -33,6 +33,7 @@ package pl.coffeepower.blog.messagebus.fastcast;
 import com.google.common.net.InetAddresses;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.name.Names;
 
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
@@ -40,8 +41,11 @@ import org.nustaq.fastcast.config.SubscriberConf;
 import org.nustaq.fastcast.util.FCLog;
 
 import pl.coffeepower.blog.messagebus.Configuration;
-import pl.coffeepower.blog.messagebus.Receiver;
-import pl.coffeepower.blog.messagebus.Sender;
+import pl.coffeepower.blog.messagebus.Configuration.Const;
+import pl.coffeepower.blog.messagebus.Publisher;
+import pl.coffeepower.blog.messagebus.Subscriber;
+
+import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -52,44 +56,65 @@ import lombok.extern.java.Log;
 @Log
 public final class FastCastModule extends AbstractModule {
 
-    private static final int TOPIC_ID = 1;
+    public static final int DATAGRAM_SIZE = 1_000;
+    public static final int IDLE_PARK_MICROS = 10;
+    public static final int SPIN_LOOP_MICROS = 1_000;
+    public static final int PUBLISHER_PACKET_HISTORY = 200_000;
+    public static final int PUBLISHER_PPS = 50_000;
+    public static final int PUBLISHER_HEARTBEAT_INTERVAL = 500;
+    public static final int SUBSCRIBER_BUFFER_PACKETS = 100_000;
+    public static final int SUBSCRIBER_MAX_DELAY_RETRANS_MS = 1;
+    public static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 5;
+    public static final boolean SUBSCRIBER_UNRELIABLE = false;
+    public static final int TOPIC_ID = 1;
+    private final Properties properties = new Properties();
+
+    public FastCastModule() {
+        FCLog.get().setLogLevel(FCLog.INFO);
+        properties.setProperty(Const.PUBLISHER_NAME_KEY,
+                System.getProperty(Const.PUBLISHER_NAME_KEY, "PUB"));
+        properties.setProperty(Const.SUBSCRIBER_NAME_KEY,
+                System.getProperty(Const.SUBSCRIBER_NAME_KEY, "SUB"));
+    }
 
     protected void configure() {
-        bind(Sender.class).to(FastCastSender.class);
-        bind(Receiver.class).to(FastCastReceiver.class);
-        FCLog.get().setLogLevel(FCLog.SEVER);
+        bind(Publisher.class).to(FastCastPublisher.class);
+        bind(Subscriber.class).to(FastCastSubscriber.class);
+        Names.bindProperties(binder(), properties);
     }
 
     @Provides
     @Singleton
     @Inject
     private PhysicalTransportConf createPhysicalTransportConf(@NonNull Configuration configuration) {
+        log.info("Creating PhysicalTransportConf with Configuration: " + configuration);
         return new PhysicalTransportConf(configuration.getChannelId())
-                .loopBack(InetAddresses.forString(configuration.getInterfaceAddress())
+                .loopBack(InetAddresses.forString(configuration.getBindAddress())
                         .isLoopbackAddress())
-                .interfaceAdr(configuration.getInterfaceAddress())
+                .interfaceAdr(configuration.getBindAddress())
                 .mulitcastAdr(configuration.getMulticastAddress())
                 .port(configuration.getMulticastPort())
-                .setDgramsize(1_000)
-                .idleParkMicros(10)
-                .spinLoopMicros(10_000);
+                .setDgramsize(DATAGRAM_SIZE)
+                .idleParkMicros(IDLE_PARK_MICROS)
+                .spinLoopMicros(SPIN_LOOP_MICROS);
     }
 
     @Provides
     @Singleton
     private PublisherConf createPublisherConf() {
         return new PublisherConf(TOPIC_ID)
-                .numPacketHistory(100_000)
-                .pps(100_000)
-                .heartbeatInterval(500);
+                .numPacketHistory(PUBLISHER_PACKET_HISTORY)
+                .pps(PUBLISHER_PPS)
+                .heartbeatInterval(PUBLISHER_HEARTBEAT_INTERVAL);
     }
 
     @Provides
     @Singleton
     private SubscriberConf createSubscriberConf() {
         return new SubscriberConf(TOPIC_ID)
-                .receiveBufferPackets(100_000)
-                .maxDelayRetransMS(1)
-                .maxDelayNextRetransMS(10);
+                .receiveBufferPackets(SUBSCRIBER_BUFFER_PACKETS)
+                .maxDelayRetransMS(SUBSCRIBER_MAX_DELAY_RETRANS_MS)
+                .maxDelayNextRetransMS(SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS)
+                .unreliable(SUBSCRIBER_UNRELIABLE);
     }
 }

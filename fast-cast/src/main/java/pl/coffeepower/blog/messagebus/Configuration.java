@@ -24,13 +24,26 @@
 
 package pl.coffeepower.blog.messagebus;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 public interface Configuration {
 
     String getMulticastAddress();
 
     int getMulticastPort();
 
-    String getInterfaceAddress();
+    String getBindAddress();
 
     String getChannelId();
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    final class Const {
+        public static final String CHANNEL_ID_KEY = "channel.id";
+        public static final String MULTICAST_ADDRESS_KEY = "multicast.address";
+        public static final String MULTICAST_PORT_KEY = "multicast.port";
+        public static final String BIND_ADDRESS_KEY = "bind.address";
+        public static final String PUBLISHER_NAME_KEY = "publisher.name";
+        public static final String SUBSCRIBER_NAME_KEY = "subscriber.name";
+    }
 }

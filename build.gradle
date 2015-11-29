@@ -7,6 +7,8 @@ subprojects {
     apply plugin: 'eclipse'
     apply plugin: 'idea'
 
+    compileJava.options.encoding = 'UTF-8'
+
     task initSourceFolders {
         sourceSets*.java.srcDirs*.each { it.mkdirs() }
         sourceSets*.resources.srcDirs*.each { it.mkdirs() }
