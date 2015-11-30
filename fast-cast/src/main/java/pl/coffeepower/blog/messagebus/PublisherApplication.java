@@ -30,10 +30,10 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 
+import lombok.extern.java.Log;
+
 import java.util.Collections;
 import java.util.stream.LongStream;
-
-import lombok.extern.java.Log;
 
 @Log
 public final class PublisherApplication extends AbstractExecutionThreadService {
@@ -58,8 +58,7 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
     @Override
     protected void run() throws Exception {
         byte[] additionalData = new byte[32];
-        LongStream.rangeClosed(1L, 1_000_000L)
-                .onClose(() -> System.exit(0))
+        LongStream.rangeClosed(1L, 10_000_000L)
                 .forEach(value -> {
                     publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData));
                     if (value % 10_000 == 0) {

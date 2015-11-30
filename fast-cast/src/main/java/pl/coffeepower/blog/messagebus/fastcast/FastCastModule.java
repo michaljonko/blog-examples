@@ -35,6 +35,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
+import lombok.NonNull;
+import lombok.extern.java.Log;
+
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
 import org.nustaq.fastcast.config.SubscriberConf;
@@ -50,19 +53,16 @@ import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import lombok.NonNull;
-import lombok.extern.java.Log;
-
 @Log
 public final class FastCastModule extends AbstractModule {
 
     public static final int DATAGRAM_SIZE = 1_000;
     public static final int IDLE_PARK_MICROS = 10;
     public static final int SPIN_LOOP_MICROS = 1_000;
-    public static final int PUBLISHER_PACKET_HISTORY = 200_000;
-    public static final int PUBLISHER_PPS = 50_000;
+    public static final int PUBLISHER_PACKET_HISTORY = 400_000;
+    public static final int PUBLISHER_PPS = 100_000;
     public static final int PUBLISHER_HEARTBEAT_INTERVAL = 500;
-    public static final int SUBSCRIBER_BUFFER_PACKETS = 100_000;
+    public static final int SUBSCRIBER_BUFFER_PACKETS = 200_000;
     public static final int SUBSCRIBER_MAX_DELAY_RETRANS_MS = 1;
     public static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 5;
     public static final boolean SUBSCRIBER_UNRELIABLE = false;
