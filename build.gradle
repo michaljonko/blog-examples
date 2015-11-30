@@ -32,6 +32,12 @@ allprojects {
         from configurations.compile
         into "${project.buildDir}/libs"
     }
+
+    build {
+        doLast {
+            tasks.copyDeps.execute()
+        }
+    }
 }
 
 
