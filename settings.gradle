@@ -1,2 +1,5 @@
 rootProject.name = 'blog-examples'
-include 'words-frequency-counter', 'lambda-exp-on-java7', 'chronicle-storage', 'fast-cast'
+include 'words-frequency-counter',
+        'lambda-exp-on-java7',
+        'chronicle-storage',
+        'fast-cast'

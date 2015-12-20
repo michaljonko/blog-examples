@@ -8,7 +8,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'pl.coffeepower.blog'
-    version = '1.0.0'
+    version = '0.0.1'
 
     compileJava.options.encoding = 'UTF-8'
     compileJava.sourceCompatibility = JavaVersion.VERSION_1_8
@@ -33,11 +33,15 @@ allprojects {
         into "${project.buildDir}/libs"
     }
 
+    task fatJar(type: Jar) {
+        baseName = project.name + '-all'
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+        with jar
+    }
+
     build {
         doLast {
             tasks.copyDeps.execute()
         }
     }
 }
-
-
