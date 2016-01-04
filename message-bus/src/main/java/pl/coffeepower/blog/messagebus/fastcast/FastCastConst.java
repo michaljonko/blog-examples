@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Michał Jonko
+ * Copyright (c) 2016 Michał Jonko
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,21 +22,23 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus;
+package pl.coffeepower.blog.messagebus.fastcast;
 
-import com.google.inject.Module;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class FastCastConst {
 
-import lombok.Getter;
-
-public enum Engine {
-    FAST_CAST(new FastCastModule());
-
-    @Getter
-    private final Module module;
-
-    Engine(Module module) {
-        this.module = module;
-    }
+    public static final int DATAGRAM_SIZE = 800;
+    public static final int IDLE_PARK_MICROS = 5;
+    public static final int SPIN_LOOP_MICROS = 100;
+    public static final int PUBLISHER_PACKET_HISTORY = 80_000;
+    public static final int PUBLISHER_PPS = 20_000;
+    public static final int PUBLISHER_HEARTBEAT_INTERVAL = 500;
+    public static final int SUBSCRIBER_BUFFER_PACKETS = 40_000;
+    public static final int SUBSCRIBER_MAX_DELAY_RETRANS_MS = 1;
+    public static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 3;
+    public static final boolean SUBSCRIBER_UNRELIABLE = false;
+    public static final int TOPIC_ID = 1;
 }

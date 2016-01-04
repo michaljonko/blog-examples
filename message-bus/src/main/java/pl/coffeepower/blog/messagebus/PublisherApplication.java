@@ -24,20 +24,24 @@
 
 package pl.coffeepower.blog.messagebus;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
-import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 
-import lombok.extern.java.Log;
+import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 
-import java.util.Collections;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
+
+import lombok.extern.java.Log;
 
 @Log
 public final class PublisherApplication extends AbstractExecutionThreadService {
 
+    public static final long MESSAGES_COUNT = 500_000L;
     private final Publisher publisher;
 
     PublisherApplication(Engine engine) {
@@ -45,31 +49,39 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
                 .getInstance(Publisher.class);
     }
 
-    public static void main(String[] args) {
-        ServiceManager serviceManager =
-                new ServiceManager(
-                        Collections.singleton(new PublisherApplication(Engine.FAST_CAST)));
-        serviceManager.startAsync().awaitHealthy();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            serviceManager.stopAsync().awaitStopped();
-        }));
+    public static void main(String[] args) throws Exception {
+        new DefaultBasicService(new PublisherApplication(Engine.FAST_CAST)).start();
     }
 
     @Override
     protected void run() throws Exception {
-        byte[] additionalData = new byte[32];
-        LongStream.rangeClosed(1L, 10_000_000L)
+        byte[] additionalData = "Hello MessageBus".getBytes();
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        LongStream.rangeClosed(1L, MESSAGES_COUNT)
+                .onClose(() -> stopwatch.stop())
                 .forEach(value -> {
                     publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData));
                     if (value % 10_000 == 0) {
-                        log.info("Sent " + value + " messages");
+                        log.info("Sent " + value + " messages in " + stopwatch.toString());
                     }
                 });
     }
 
     @Override
+    protected void startUp() throws Exception {
+        log.info("startUp");
+    }
+
+    @Override
     protected void shutDown() throws Exception {
-        super.shutDown();
+        log.info("shutDown");
         publisher.close();
+        Executors.newCachedThreadPool().execute(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException e) {
+            }
+            System.exit(0);
+        });
     }
 }

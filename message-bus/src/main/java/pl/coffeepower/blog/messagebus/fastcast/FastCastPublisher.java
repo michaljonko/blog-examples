@@ -26,13 +26,13 @@ package pl.coffeepower.blog.messagebus.fastcast;
 
 import com.google.common.base.Preconditions;
 
+import org.nustaq.fastcast.api.FCPublisher;
 import org.nustaq.fastcast.api.FastCast;
-import org.nustaq.fastcast.api.util.ByteArraySubscriber;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
-import org.nustaq.fastcast.config.SubscriberConf;
+import org.nustaq.fastcast.config.PublisherConf;
 
 import pl.coffeepower.blog.messagebus.Configuration.Const;
-import pl.coffeepower.blog.messagebus.Subscriber;
+import pl.coffeepower.blog.messagebus.Publisher;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -45,38 +45,50 @@ import lombok.extern.java.Log;
 
 @Singleton
 @Log
-final class FastCastSubscriber implements Subscriber {
+final class FastCastPublisher implements Publisher {
 
     private final AtomicBoolean opened = new AtomicBoolean(false);
+    private final AtomicBoolean lock = new AtomicBoolean(false);
     private final FastCast fastCast = FastCast.getFastCast();
-    private Handler handler;
+    private final FCPublisher publisher;
+    private final String physicalTransportName;
 
     @Inject
-    private FastCastSubscriber(@NonNull @Named(Const.SUBSCRIBER_NAME_KEY) String nodeId,
-                               @NonNull PhysicalTransportConf physicalTransportConf,
-                               @NonNull SubscriberConf subscriberConf) {
+    private FastCastPublisher(@NonNull @Named(Const.PUBLISHER_NAME_KEY) String nodeId,
+                              @NonNull PhysicalTransportConf physicalTransportConf,
+                              @NonNull PublisherConf publisherConf) {
         fastCast.setNodeId(nodeId);
         fastCast.addTransport(physicalTransportConf);
-        fastCast.onTransport(physicalTransportConf.getName())
-                .subscribe(subscriberConf, new ByteArraySubscriber(false) {
-                    @Override
-                    protected void messageReceived(String sender, long sequence, byte[] msg, int off, int len) {
-                        Preconditions.checkState(opened.get(), "Already closed");
-                        Preconditions.checkNotNull(handler);
-                        handler.received(msg);
-                    }
-                });
+        this.physicalTransportName = physicalTransportConf.getName();
+        this.publisher = fastCast.onTransport(physicalTransportName).publish(publisherConf);
         opened.set(true);
+    }
+
+    @Override
+    public boolean send(@NonNull byte[] data) {
+        try {
+            lock();
+            Preconditions.checkState(opened.get(), "Already closed");
+            return publisher.offer(null, data, 0, data.length, true);
+        } finally {
+            unlock();
+        }
     }
 
     @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
+        publisher.flush();
+        fastCast.onTransport(physicalTransportName).terminate();
+        unlock();
         opened.set(false);
     }
 
-    @Override
-    public void register(@NonNull Handler handler) {
-        this.handler = handler;
+    private void lock() {
+        while (!lock.compareAndSet(false, true)) ;
+    }
+
+    private void unlock() {
+        lock.set(false);
     }
 }

@@ -35,8 +35,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
-import lombok.NonNull;
-import lombok.extern.java.Log;
+import com.lmax.disruptor.dsl.Disruptor;
 
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
@@ -47,30 +46,24 @@ import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.Subscriber;
+import pl.coffeepower.blog.messagebus.util.BytesEventFactory;
 
 import java.util.Properties;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import lombok.NonNull;
+import lombok.extern.java.Log;
+
 @Log
 public final class FastCastModule extends AbstractModule {
 
-    public static final int DATAGRAM_SIZE = 1_000;
-    public static final int IDLE_PARK_MICROS = 10;
-    public static final int SPIN_LOOP_MICROS = 1_000;
-    public static final int PUBLISHER_PACKET_HISTORY = 400_000;
-    public static final int PUBLISHER_PPS = 100_000;
-    public static final int PUBLISHER_HEARTBEAT_INTERVAL = 500;
-    public static final int SUBSCRIBER_BUFFER_PACKETS = 200_000;
-    public static final int SUBSCRIBER_MAX_DELAY_RETRANS_MS = 1;
-    public static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 5;
-    public static final boolean SUBSCRIBER_UNRELIABLE = false;
-    public static final int TOPIC_ID = 1;
     private final Properties properties = new Properties();
 
     public FastCastModule() {
-        FCLog.get().setLogLevel(FCLog.INFO);
+        FCLog.get().setLogLevel(FCLog.SEVER);
         properties.setProperty(Const.PUBLISHER_NAME_KEY,
                 System.getProperty(Const.PUBLISHER_NAME_KEY, "PUB"));
         properties.setProperty(Const.SUBSCRIBER_NAME_KEY,
@@ -80,6 +73,7 @@ public final class FastCastModule extends AbstractModule {
     protected void configure() {
         bind(Publisher.class).to(FastCastPublisher.class);
         bind(Subscriber.class).to(FastCastSubscriber.class);
+        bind(Subscriber.Handler.class).to(FastCastReceiveHandler.class);
         Names.bindProperties(binder(), properties);
     }
 
@@ -94,27 +88,33 @@ public final class FastCastModule extends AbstractModule {
                 .interfaceAdr(configuration.getBindAddress())
                 .mulitcastAdr(configuration.getMulticastAddress())
                 .port(configuration.getMulticastPort())
-                .setDgramsize(DATAGRAM_SIZE)
-                .idleParkMicros(IDLE_PARK_MICROS)
-                .spinLoopMicros(SPIN_LOOP_MICROS);
+                .setDgramsize(FastCastConst.DATAGRAM_SIZE)
+                .idleParkMicros(FastCastConst.IDLE_PARK_MICROS)
+                .spinLoopMicros(FastCastConst.SPIN_LOOP_MICROS);
     }
 
     @Provides
     @Singleton
     private PublisherConf createPublisherConf() {
-        return new PublisherConf(TOPIC_ID)
-                .numPacketHistory(PUBLISHER_PACKET_HISTORY)
-                .pps(PUBLISHER_PPS)
-                .heartbeatInterval(PUBLISHER_HEARTBEAT_INTERVAL);
+        return new PublisherConf(FastCastConst.TOPIC_ID)
+                .numPacketHistory(FastCastConst.PUBLISHER_PACKET_HISTORY)
+                .pps(FastCastConst.PUBLISHER_PPS)
+                .heartbeatInterval(FastCastConst.PUBLISHER_HEARTBEAT_INTERVAL);
     }
 
     @Provides
     @Singleton
     private SubscriberConf createSubscriberConf() {
-        return new SubscriberConf(TOPIC_ID)
-                .receiveBufferPackets(SUBSCRIBER_BUFFER_PACKETS)
-                .maxDelayRetransMS(SUBSCRIBER_MAX_DELAY_RETRANS_MS)
-                .maxDelayNextRetransMS(SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS)
-                .unreliable(SUBSCRIBER_UNRELIABLE);
+        return new SubscriberConf(FastCastConst.TOPIC_ID)
+                .receiveBufferPackets(FastCastConst.SUBSCRIBER_BUFFER_PACKETS)
+                .maxDelayRetransMS(FastCastConst.SUBSCRIBER_MAX_DELAY_RETRANS_MS)
+                .maxDelayNextRetransMS(FastCastConst.SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS)
+                .unreliable(FastCastConst.SUBSCRIBER_UNRELIABLE);
+    }
+
+    @Provides
+    private Disruptor<BytesEventFactory.BytesEvent> createDisruptor() {
+        return new Disruptor<>(
+                new BytesEventFactory(), 512, Executors.newCachedThreadPool()/*, ProducerType.SINGLE, new YieldingWaitStrategy()*/);
     }
 }

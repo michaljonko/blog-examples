@@ -26,16 +26,14 @@ package pl.coffeepower.blog.messagebus;
 
 import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.AbstractIdleService;
-import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 
-import lombok.extern.java.Log;
+import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+
+import lombok.extern.java.Log;
 
 @Log
 public final class SubscriberApplication extends AbstractIdleService {
@@ -47,44 +45,34 @@ public final class SubscriberApplication extends AbstractIdleService {
         subscriber = Guice.createInjector(new ConfigModule(), engine.getModule())
                 .getInstance(Subscriber.class);
         subscriber.register(data -> {
-            long prevReceivedValue = lastReceived.getAndSet(
-                    Longs.fromByteArray(Arrays.copyOf(data, Longs.BYTES)));
+            long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
             long lastReceivedValue = lastReceived.get();
             if (lastReceivedValue != (prevReceivedValue + 1)) {
                 log.severe("Broken connection on " + lastReceivedValue);
                 System.exit(-1);
             }
             if (lastReceivedValue % 10_000 == 0) {
-                log.info("Received " + lastReceivedValue + " messages");
+                log.info("Retrieved " + lastReceivedValue + " messages");
             }
-            if (lastReceivedValue >= 10_000_000) {
-                System.exit(0);
+            if (lastReceivedValue >= PublisherApplication.MESSAGES_COUNT) {
+                stopAsync();
             }
         });
     }
 
-    public static void main(String[] args) {
-        ServiceManager serviceManager = new ServiceManager(
-                Collections.singleton(new SubscriberApplication(Engine.FAST_CAST)));
-        serviceManager.startAsync().awaitHealthy();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                serviceManager.stopAsync().awaitStopped(1L, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                System.exit(-1);
-            }
-        }));
+    public static void main(String[] args) throws Exception {
+        new DefaultBasicService(new SubscriberApplication(Engine.FAST_CAST)).start();
     }
 
     @Override
     protected void startUp() throws Exception {
-        log.info("Starting...");
+        log.info("startUp");
     }
 
     @Override
     protected void shutDown() throws Exception {
-        log.info("Stopping...");
+        log.info("shutDown");
         subscriber.close();
-        subscriber.register(null);
+        Executors.newCachedThreadPool().execute(() -> System.exit(0));
     }
 }

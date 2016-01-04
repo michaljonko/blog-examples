@@ -26,13 +26,17 @@ package pl.coffeepower.blog.messagebus.fastcast;
 
 import com.google.common.base.Preconditions;
 
-import org.nustaq.fastcast.api.FCPublisher;
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.dsl.Disruptor;
+
 import org.nustaq.fastcast.api.FastCast;
+import org.nustaq.fastcast.api.util.ByteArraySubscriber;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
-import org.nustaq.fastcast.config.PublisherConf;
+import org.nustaq.fastcast.config.SubscriberConf;
 
 import pl.coffeepower.blog.messagebus.Configuration.Const;
-import pl.coffeepower.blog.messagebus.Publisher;
+import pl.coffeepower.blog.messagebus.Subscriber;
+import pl.coffeepower.blog.messagebus.util.BytesEventFactory.BytesEvent;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -45,47 +49,52 @@ import lombok.extern.java.Log;
 
 @Singleton
 @Log
-final class FastCastPublisher implements Publisher {
+final class FastCastSubscriber implements Subscriber {
 
     private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final AtomicBoolean lock = new AtomicBoolean(false);
     private final FastCast fastCast = FastCast.getFastCast();
-    private final FCPublisher publisher;
+    private final Disruptor<BytesEvent> disruptor;
+    private final RingBuffer<BytesEvent> ringBuffer;
+    @Inject
+    private Handler handler;
+    private final String physicalTransportName;
 
     @Inject
-    private FastCastPublisher(@NonNull @Named(Const.PUBLISHER_NAME_KEY) String nodeId,
-                              @NonNull PhysicalTransportConf physicalTransportConf,
-                              @NonNull PublisherConf publisherConf) {
+    private FastCastSubscriber(@NonNull @Named(Const.SUBSCRIBER_NAME_KEY) String nodeId,
+                               @NonNull PhysicalTransportConf physicalTransportConf,
+                               @NonNull SubscriberConf subscriberConf,
+                               @NonNull Disruptor<BytesEvent> disruptor) {
+        this.disruptor = disruptor;
+        this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
+            Preconditions.checkNotNull(handler);
+            handler.received(event.getBuffer());
+        });
+        this.ringBuffer = this.disruptor.start();
         fastCast.setNodeId(nodeId);
         fastCast.addTransport(physicalTransportConf);
-        publisher = fastCast.onTransport(physicalTransportConf.getName())
-                .publish(publisherConf);
-        opened.set(true);
-    }
-
-    @Override
-    public boolean send(@NonNull byte[] data) {
-        Preconditions.checkState(opened.get(), "Already closed");
-        try {
-            lock();
-            return publisher.offer(null, data, 0, data.length, true);
-        } finally {
-            unlock();
-        }
+        this.physicalTransportName = physicalTransportConf.getName();
+        fastCast.onTransport(physicalTransportName).subscribe(
+                subscriberConf, new ByteArraySubscriber(false) {
+                    @Override
+                    protected void messageReceived(String sender, long sequence, byte[] msg, int off, int len) {
+                        Preconditions.checkState(opened.get(), "Already closed");
+                        ringBuffer.publishEvent((event, seq) -> event.copyToBuffer(msg));
+                    }
+                });
+        this.opened.set(true);
     }
 
     @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
-        publisher.flush();
+        disruptor.shutdown();
+        fastCast.onTransport(physicalTransportName).terminate();
+        handler = null;
         opened.set(false);
     }
 
-    private void lock() {
-        while (!lock.compareAndSet(false, true)) ;
-    }
-
-    private void unlock() {
-        lock.set(false);
+    @Override
+    public void register(@NonNull Handler handler) {
+        this.handler = handler;
     }
 }

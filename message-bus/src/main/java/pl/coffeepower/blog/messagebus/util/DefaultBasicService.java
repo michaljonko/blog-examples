@@ -22,19 +22,38 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus.aeron;
+package pl.coffeepower.blog.messagebus.util;
 
-import pl.coffeepower.blog.messagebus.Publisher;
+import com.google.common.base.MoreObjects;
+import com.google.common.util.concurrent.Service;
+import com.google.common.util.concurrent.ServiceManager;
 
-final class AeronPublisher implements Publisher {
+import java.util.Collections;
 
-    @Override
-    public boolean send(byte[] data) {
-        return false;
+import lombok.NonNull;
+
+public final class DefaultBasicService implements BasicService {
+
+    private final ServiceManager serviceManager;
+
+    public DefaultBasicService(@NonNull Service service) {
+        this.serviceManager = new ServiceManager(Collections.singleton(service));
     }
 
     @Override
-    public void close() throws Exception {
+    public void start() throws Exception {
+        serviceManager.startAsync().awaitHealthy();
+    }
 
+    @Override
+    public void stop() throws Exception {
+        serviceManager.stopAsync().awaitStopped();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("serviceManager", serviceManager)
+                .toString();
     }
 }

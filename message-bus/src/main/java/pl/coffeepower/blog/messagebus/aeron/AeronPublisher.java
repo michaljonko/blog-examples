@@ -22,22 +22,36 @@
  * SOFTWARE.
  */
 
-/*
- * Created by IntelliJ IDEA.
- * User: yogurt
- * Date: 21.12.15
- * Time: 00:02
- */
 package pl.coffeepower.blog.messagebus.aeron;
 
-import com.google.inject.AbstractModule;
+import pl.coffeepower.blog.messagebus.Configuration;
+import pl.coffeepower.blog.messagebus.Publisher;
 
-import lombok.extern.java.Log;
+import uk.co.real_logic.aeron.Aeron;
+import uk.co.real_logic.aeron.driver.MediaDriver;
 
-@Log
-public final class AeronModule extends AbstractModule {
+import javax.inject.Inject;
 
-    protected void configure() {
-//add configuration logic here
+import lombok.NonNull;
+
+final class AeronPublisher implements Publisher {
+
+    private final MediaDriver mediaDriver;
+    private final Aeron aeron;
+
+    @Inject
+    public AeronPublisher(@NonNull MediaDriver mediaDriver, @NonNull Aeron.Context context, @NonNull Configuration configuration) {
+        this.mediaDriver = mediaDriver;
+        this.aeron = Aeron.connect(context);
+    }
+
+    @Override
+    public boolean send(byte[] data) {
+        return false;
+    }
+
+    @Override
+    public void close() throws Exception {
+        mediaDriver.close();
     }
 }
