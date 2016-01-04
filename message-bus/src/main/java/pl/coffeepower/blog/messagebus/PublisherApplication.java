@@ -30,18 +30,17 @@ import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Guice;
 
+import lombok.extern.java.Log;
+
 import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
-
-import lombok.extern.java.Log;
 
 @Log
 public final class PublisherApplication extends AbstractExecutionThreadService {
 
-    public static final long MESSAGES_COUNT = 500_000L;
+    public static final long MESSAGES_COUNT = 1_000_000L;
     private final Publisher publisher;
 
     PublisherApplication(Engine engine) {
@@ -54,13 +53,20 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
     }
 
     @Override
+    protected void startUp() throws Exception {
+        log.info("startUp");
+    }
+
+    @Override
     protected void run() throws Exception {
         byte[] additionalData = "Hello MessageBus".getBytes();
         Stopwatch stopwatch = Stopwatch.createStarted();
         LongStream.rangeClosed(1L, MESSAGES_COUNT)
                 .onClose(() -> stopwatch.stop())
                 .forEach(value -> {
-                    publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData));
+                    while (!publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData))) {
+                        Thread.yield();
+                    }
                     if (value % 10_000 == 0) {
                         log.info("Sent " + value + " messages in " + stopwatch.toString());
                     }
@@ -68,20 +74,9 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
     }
 
     @Override
-    protected void startUp() throws Exception {
-        log.info("startUp");
-    }
-
-    @Override
     protected void shutDown() throws Exception {
         log.info("shutDown");
         publisher.close();
-        Executors.newCachedThreadPool().execute(() -> {
-            try {
-                TimeUnit.SECONDS.sleep(3);
-            } catch (InterruptedException e) {
-            }
-            System.exit(0);
-        });
+        Executors.newCachedThreadPool().execute(() -> System.exit(0));
     }
 }
