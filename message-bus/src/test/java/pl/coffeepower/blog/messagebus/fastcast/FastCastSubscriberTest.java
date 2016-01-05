@@ -31,7 +31,7 @@ import com.google.inject.Injector;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import pl.coffeepower.blog.messagebus.ConfigModule;
+import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.Subscriber;
 
 import java.util.Arrays;

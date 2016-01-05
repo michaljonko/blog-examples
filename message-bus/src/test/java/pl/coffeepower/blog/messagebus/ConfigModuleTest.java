@@ -28,6 +28,8 @@ import com.google.inject.Guice;
 
 import org.junit.Test;
 
+import pl.coffeepower.blog.messagebus.config.ConfigModule;
+
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;

@@ -70,6 +70,14 @@ public final class AeronModule extends AbstractModule {
     public Aeron.Context createAeronContext(@NonNull MediaDriver mediaDriver) {
         Aeron.Context context = new Aeron.Context();
         context.aeronDirectoryName(mediaDriver.aeronDirectoryName());
+        context.errorHandler(throwable -> log.severe(throwable.getMessage()));
         return context;
+    }
+
+    @Provides
+    @Singleton
+    @Inject
+    public Aeron createAeron(@NonNull Aeron.Context context) {
+        return Aeron.connect(context);
     }
 }

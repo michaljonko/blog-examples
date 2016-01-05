@@ -32,6 +32,7 @@ import com.google.inject.Guice;
 
 import lombok.extern.java.Log;
 
+import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 
 import java.util.concurrent.Executors;

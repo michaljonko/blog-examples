@@ -22,32 +22,21 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus.fastcast;
+/*
+ * Created by IntelliJ IDEA.
+ * User: yogurt
+ * Date: 24.11.15
+ * Time: 23:07
+ */
+package pl.coffeepower.blog.messagebus.config;
 
-import com.google.common.primitives.Bytes;
-import com.google.common.primitives.Longs;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.inject.AbstractModule;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import pl.coffeepower.blog.messagebus.Configuration;
 
-import pl.coffeepower.blog.messagebus.config.ConfigModule;
-import pl.coffeepower.blog.messagebus.Publisher;
+public final class ConfigModule extends AbstractModule {
 
-import java.util.stream.LongStream;
-
-public class FastCastPublisherTest {
-
-    private final Injector injector = Guice.createInjector(
-            new ConfigModule(), new FastCastModule());
-
-    @Ignore
-    @Test
-    public void shouldSendCurrentTime() throws Exception {
-        byte[] additionalData = new byte[123];
-        Publisher publisher = injector.getInstance(Publisher.class);
-        LongStream.rangeClosed(0L, 1_000_000L).forEach(value ->
-                publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData)));
+    protected void configure() {
+        bind(Configuration.class).to(DefaultConfiguration.class).asEagerSingleton();
     }
 }
