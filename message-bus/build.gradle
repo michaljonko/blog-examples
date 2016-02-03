@@ -4,4 +4,6 @@ dependencies {
     compile 'com.lmax:disruptor:3.3.2'
     compile 'com.google.inject:guice:4.0'
     compile 'com.google.inject.extensions:guice-assistedinject:4.0'
+
+    testCompile 'org.gridkit.lab:nanocloud:0.8.10'
 }

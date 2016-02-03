@@ -33,12 +33,13 @@ public final class FastCastConst {
     public static final int DATAGRAM_SIZE = 800;
     public static final int IDLE_PARK_MICROS = 1;
     public static final int SPIN_LOOP_MICROS = 100;
-    public static final int PUBLISHER_PACKET_HISTORY = 100_000;
+    public static final int PUBLISHER_PACKET_HISTORY = 80_000;
     public static final int PUBLISHER_PPS = 20_000;
     public static final int PUBLISHER_HEARTBEAT_INTERVAL = 500;
-    public static final int SUBSCRIBER_BUFFER_PACKETS = 40_000;
+    public static final int SUBSCRIBER_BUFFER_PACKETS = 20_000;
     public static final int SUBSCRIBER_MAX_DELAY_RETRANS_MS = 1;
-    public static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 5;
+    public static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 4;
     public static final boolean SUBSCRIBER_UNRELIABLE = false;
     public static final int TOPIC_ID = 1;
+    public static final int DISRUPTOR_SIZE = 16;
 }

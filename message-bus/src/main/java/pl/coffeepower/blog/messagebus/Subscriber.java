@@ -24,11 +24,14 @@
 
 package pl.coffeepower.blog.messagebus;
 
+import java.io.Serializable;
+
 public interface Subscriber extends AutoCloseable {
 
     void register(Handler handler);
 
-    interface Handler {
+    @FunctionalInterface
+    interface Handler extends Serializable {
 
         void received(byte[] data);
     }

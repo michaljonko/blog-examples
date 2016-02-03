@@ -39,9 +39,6 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
-import lombok.NonNull;
-import lombok.extern.java.Log;
-
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
 import org.nustaq.fastcast.config.SubscriberConf;
@@ -58,6 +55,9 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import lombok.NonNull;
+import lombok.extern.java.Log;
 
 @Log
 public final class FastCastModule extends AbstractModule {
@@ -117,6 +117,6 @@ public final class FastCastModule extends AbstractModule {
     @Provides
     private Disruptor<BytesEventFactory.BytesEvent> createDisruptor() {
         return new Disruptor<>(
-                new BytesEventFactory(), 128, Executors.newCachedThreadPool(), ProducerType.SINGLE, new BlockingWaitStrategy());
+                new BytesEventFactory(), FastCastConst.DISRUPTOR_SIZE, Executors.newCachedThreadPool(), ProducerType.SINGLE, new BlockingWaitStrategy());
     }
 }
