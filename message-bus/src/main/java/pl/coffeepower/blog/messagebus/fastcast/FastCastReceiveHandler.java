@@ -24,6 +24,8 @@
 
 package pl.coffeepower.blog.messagebus.fastcast;
 
+import com.google.common.base.Charsets;
+
 import pl.coffeepower.blog.messagebus.Subscriber;
 
 import lombok.extern.java.Log;
@@ -33,6 +35,6 @@ final class FastCastReceiveHandler implements Subscriber.Handler {
 
     @Override
     public void received(byte[] data) {
-        log.info(new String(data));
+        log.info(new String(data, Charsets.UTF_8));
     }
 }

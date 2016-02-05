@@ -24,6 +24,7 @@
 
 package pl.coffeepower.blog.messagebus;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
@@ -60,7 +61,7 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
 
     @Override
     protected void run() throws Exception {
-        byte[] additionalData = "Hello MessageBus".getBytes();
+        byte[] additionalData = "Hello MessageBus".getBytes(Charsets.UTF_8);
         Stopwatch stopwatch = Stopwatch.createStarted();
         LongStream.rangeClosed(1L, MESSAGES_COUNT)
                 .onClose(() -> stopwatch.stop())
