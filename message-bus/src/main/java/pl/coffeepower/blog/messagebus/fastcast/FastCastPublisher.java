@@ -26,6 +26,9 @@ package pl.coffeepower.blog.messagebus.fastcast;
 
 import com.google.common.base.Preconditions;
 
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
+
 import org.nustaq.fastcast.api.FCPublisher;
 import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
@@ -40,27 +43,26 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import lombok.NonNull;
-import lombok.extern.java.Log;
-
 @Singleton
-@Log
+@Log4j2
 final class FastCastPublisher implements Publisher {
 
     private final AtomicBoolean opened = new AtomicBoolean(false);
     private final AtomicBoolean lock = new AtomicBoolean(false);
-    private final FastCast fastCast = FastCast.getFastCast();
+    private final FastCast fastCast;
     private final FCPublisher publisher;
     private final String physicalTransportName;
 
     @Inject
-    private FastCastPublisher(@NonNull @Named(Const.PUBLISHER_NAME_KEY) String nodeId,
+    private FastCastPublisher(@NonNull FastCast fastCast,
+                              @NonNull @Named(Const.PUBLISHER_NAME_KEY) String nodeId,
                               @NonNull PhysicalTransportConf physicalTransportConf,
                               @NonNull PublisherConf publisherConf) {
-        fastCast.setNodeId(nodeId);
-        fastCast.addTransport(physicalTransportConf);
+        this.fastCast = fastCast;
+        this.fastCast.setNodeId(nodeId);
+        this.fastCast.addTransport(physicalTransportConf);
         this.physicalTransportName = physicalTransportConf.getName();
-        this.publisher = fastCast.onTransport(physicalTransportName).publish(publisherConf);
+        this.publisher = this.fastCast.onTransport(physicalTransportName).publish(publisherConf);
         opened.set(true);
     }
 

@@ -35,7 +35,7 @@ public interface Configuration {
 
     String getBindAddress();
 
-    String getChannelId();
+    int getChannelId();
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     final class Const {

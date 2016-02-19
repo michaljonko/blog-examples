@@ -24,17 +24,63 @@
 
 package pl.coffeepower.blog.messagebus.aeron;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import lombok.NonNull;
+import lombok.extern.java.Log;
+
+import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Subscriber;
 
+import uk.co.real_logic.aeron.Aeron;
+import uk.co.real_logic.aeron.Subscription;
+import uk.co.real_logic.agrona.concurrent.IdleStrategy;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Log
+@Singleton
 final class AeronSubscriber implements Subscriber {
 
-    @Override
-    public void register(Handler handler) {
+    private final AtomicBoolean opened = new AtomicBoolean(false);
+    private final Aeron aeron;
+    private final Subscription subscription;
+    private final ExecutorService executor;
+    private final IdleStrategy idleStrategy;
 
+    @Inject
+    private AeronSubscriber(@NonNull Aeron aeron, @NonNull IdleStrategy _idleStrategy, @NonNull Configuration configuration) {
+        String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
+        this.aeron = aeron;
+        this.idleStrategy = _idleStrategy;
+        this.subscription = this.aeron.addSubscription(channel, configuration.getChannelId());
+        opened.set(true);
+        this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("subscriber-thread").build());
+        this.executor.execute(() -> {
+            while (opened.get()) {
+//idleStrategy.idle(subscription.poll());
+            }
+        });
+        this.executor.shutdown();
     }
 
     @Override
     public void close() throws Exception {
+        Preconditions.checkState(opened.get(), "Already closed");
+        opened.set(false);
+        executor.shutdownNow();
+        subscription.close();
+        aeron.close();
+    }
+
+    @Override
+    public void register(@NonNull Handler handler) {
 
     }
 }

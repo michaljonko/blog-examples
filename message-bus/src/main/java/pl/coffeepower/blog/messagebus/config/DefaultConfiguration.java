@@ -45,23 +45,20 @@ import javax.inject.Singleton;
 @Value
 final class DefaultConfiguration implements Configuration {
 
-    private String channelId;
+    private int channelId;
     private String multicastAddress;
     private int multicastPort;
     private String bindAddress;
 
     public DefaultConfiguration() {
-        Preconditions.checkArgument(
-                !Strings.isNullOrEmpty(this.channelId = System.getProperty(Const.CHANNEL_ID_KEY, "coffeepower")),
-                "channelId is empty");
+        this.channelId = Integer.parseInt(System.getProperty(Const.CHANNEL_ID_KEY, "555"));
         Preconditions.checkArgument(
                 InetAddresses.isInetAddress(this.multicastAddress = System.getProperty(Const.MULTICAST_ADDRESS_KEY, "225.0.0.10")),
                 "multicastAddress is not a valid IP");
         Preconditions.checkArgument(
                 InetAddresses.forString(this.multicastAddress).isMulticastAddress(),
                 "multicastAddress is not a valid multicast IP");
-        this.multicastPort = Integer.parseInt(
-                System.getProperty(Const.MULTICAST_PORT_KEY, "12345"));
+        this.multicastPort = Integer.parseInt(System.getProperty(Const.MULTICAST_PORT_KEY, "12345"));
         Preconditions.checkArgument(
                 this.multicastPort > 0 && this.multicastPort < 65535,
                 "multicastPort must be a number between 1 and 65535");

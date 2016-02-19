@@ -31,7 +31,7 @@ import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Guice;
 
-import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
@@ -39,7 +39,7 @@ import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 import java.util.concurrent.Executors;
 import java.util.stream.LongStream;
 
-@Log
+@Log4j2
 public final class PublisherApplication extends AbstractExecutionThreadService {
 
     public static final long MESSAGES_COUNT = 1_000_000L;
@@ -70,7 +70,7 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
                         Thread.yield();
                     }
                     if (value % 10_000 == 0) {
-                        log.info("Sent " + value + " messages in " + stopwatch.toString());
+                        log.info("Sent {} messages in {}", value, stopwatch.toString());
                     }
                 });
     }

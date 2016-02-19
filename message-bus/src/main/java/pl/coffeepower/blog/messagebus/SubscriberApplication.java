@@ -28,32 +28,31 @@ import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.inject.Guice;
 
+import lombok.extern.log4j.Log4j2;
+
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
-import lombok.extern.java.Log;
-
-@Log
+@Log4j2
 public final class SubscriberApplication extends AbstractIdleService {
 
     private final Subscriber subscriber;
     private final AtomicLong lastReceived = new AtomicLong(0);
 
     SubscriberApplication(Engine engine) {
-        subscriber = Guice.createInjector(new ConfigModule(), engine.getModule())
-                .getInstance(Subscriber.class);
+        subscriber = Guice.createInjector(new ConfigModule(), engine.getModule()).getInstance(Subscriber.class);
         subscriber.register(data -> {
             long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
             long lastReceivedValue = lastReceived.get();
             if (lastReceivedValue != (prevReceivedValue + 1)) {
-                log.severe("Broken connection on " + lastReceivedValue);
+                log.error("Broken connection on {}", lastReceivedValue);
                 System.exit(-1);
             }
             if (lastReceivedValue % 10_000 == 0) {
-                log.info("Retrieved " + lastReceivedValue + " messages");
+                log.info("Retrieved {} messages", lastReceivedValue);
             }
             if (lastReceivedValue >= PublisherApplication.MESSAGES_COUNT) {
                 stopAsync();

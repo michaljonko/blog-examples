@@ -29,6 +29,8 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
 
+import lombok.Value;
+
 import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViProps;
@@ -40,6 +42,7 @@ import org.junit.Test;
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
 
+import java.io.Serializable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +53,7 @@ import java.util.stream.LongStream;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class FastCastTest {
+public class MessageBusTest {
 
     private Cloud cloud;
 
@@ -67,47 +70,53 @@ public class FastCastTest {
     }
 
     @Test
-    public void shouldRetriveAllMessages() throws Exception {
+    public void shouldRetrieveAllMessagesWithFastCast() throws Exception {
         cloud.nodes("pub", "sub");
         cloud.node("**").touch();
-        Future<Boolean> subTask = cloud.node("sub").submit(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                AtomicBoolean state = new AtomicBoolean(true);
-                AtomicLong lastReceived = new AtomicLong(0);
-                Subscriber subscriber = Guice.createInjector(new ConfigModule(), new FastCastModule()).getInstance(Subscriber.class);
-                subscriber.register(data -> {
-                    long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
-                    long lastReceivedValue = lastReceived.get();
-                    if (lastReceivedValue != (prevReceivedValue + 1)) {
-                        state.set(false);
-                    }
-                });
-                while (lastReceived.get() < 100_000L) {
-                    Thread.yield();
+        Future<Boolean> subTask = cloud.node("sub").submit((Callable<Boolean> & Serializable) () -> {
+            Fixtures fixtures = new Fixtures();
+            AtomicBoolean state = new AtomicBoolean(true);
+            AtomicLong lastReceived = new AtomicLong();
+            Subscriber subscriber = Guice.createInjector(new ConfigModule(), new FastCastModule()).getInstance(Subscriber.class);
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            subscriber.register(data -> {
+                long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
+                long lastReceivedValue = lastReceived.get();
+                if (lastReceivedValue != (prevReceivedValue + 1)) {
+                    state.set(false);
                 }
-                System.out.println("Last received message is " + lastReceived);
-                return state.get();
+            });
+            while (state.get() && lastReceived.get() < fixtures.getNumberOfMessages()) {
+                Thread.yield();
             }
-        });
-        Future<Boolean> pubTask = cloud.node("pub").submit(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                Publisher publisher = Guice.createInjector(new ConfigModule(), new FastCastModule()).getInstance(Publisher.class);
-                byte[] additionalData = "QWERTYUIOPLKJHGFDSAZXCVBNM".getBytes();
-                Stopwatch stopwatch = Stopwatch.createStarted();
-                LongStream.rangeClosed(1L, 100_000L)
-                        .onClose(() -> stopwatch.stop())
-                        .forEach(value -> {
-                            while (!publisher.send(Bytes.concat(Longs.toByteArray(value), additionalData))) {
-                                Thread.yield();
-                            }
-                        });
-                System.out.println("Sent all messages in " + stopwatch);
-                return Boolean.TRUE;
+            System.out.println("Received messages in " + stopwatch.stop());
+            if (!state.get()) {
+                System.out.println("Broken connection on messageId=" + lastReceived.get());
             }
+            return state.get();
         });
-        assertThat(subTask.get(1L, TimeUnit.MINUTES), is(true));
-        assertThat(pubTask.get(1L, TimeUnit.MINUTES), is(true));
+        Future<Boolean> pubTask = cloud.node("pub").submit((Callable<Boolean> & Serializable) () -> {
+            Fixtures fixtures = new Fixtures();
+            Publisher publisher = Guice.createInjector(new ConfigModule(), new FastCastModule()).getInstance(Publisher.class);
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            LongStream.rangeClosed(fixtures.getFirstMessageId(), fixtures.getNumberOfMessages())
+                    .onClose(() -> stopwatch.stop())
+                    .forEach(value -> {
+                        while (!publisher.send(Bytes.concat(Longs.toByteArray(value), fixtures.getAdditionalData()))) {
+                            Thread.yield();
+                        }
+                    });
+            System.out.println("Sent all messages in " + stopwatch);
+            return Boolean.TRUE;
+        });
+        assertThat(pubTask.get(2L, TimeUnit.MINUTES), is(true));
+        assertThat(subTask.get(2L, TimeUnit.MINUTES), is(true));
+    }
+
+    @Value
+    private static final class Fixtures implements Serializable {
+        long firstMessageId = 1L;
+        long numberOfMessages = 500_000L;
+        byte[] additionalData = "QWERTYUIOPLKJHGFDSAZXCVBNM".getBytes();
     }
 }

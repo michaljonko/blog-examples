@@ -34,20 +34,20 @@ import com.google.common.base.StandardSystemProperty;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
-import pl.coffeepower.blog.messagebus.Configuration;
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
 import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.driver.MediaDriver;
+import uk.co.real_logic.agrona.concurrent.BusySpinIdleStrategy;
+import uk.co.real_logic.agrona.concurrent.IdleStrategy;
 
 import java.io.File;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import lombok.NonNull;
-import lombok.extern.java.Log;
-
-@Log
+@Log4j2
 public final class AeronModule extends AbstractModule {
 
     protected void configure() {
@@ -57,7 +57,7 @@ public final class AeronModule extends AbstractModule {
     @Provides
     @Singleton
     @Inject
-    public MediaDriver createMediaDriver(@NonNull Configuration configuration) {
+    private MediaDriver createMediaDriver() {
         MediaDriver.Context context = new MediaDriver.Context()
                 .dirsDeleteOnStart(true);
         context.aeronDirectoryName(StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron");
@@ -67,17 +67,22 @@ public final class AeronModule extends AbstractModule {
     @Provides
     @Singleton
     @Inject
-    public Aeron.Context createAeronContext(@NonNull MediaDriver mediaDriver) {
+    private Aeron.Context createAeronContext(@NonNull MediaDriver mediaDriver) {
         Aeron.Context context = new Aeron.Context();
         context.aeronDirectoryName(mediaDriver.aeronDirectoryName());
-        context.errorHandler(throwable -> log.severe(throwable.getMessage()));
+        context.errorHandler(throwable -> log.catching(throwable));
         return context;
     }
 
     @Provides
     @Singleton
     @Inject
-    public Aeron createAeron(@NonNull Aeron.Context context) {
+    private Aeron createAeron(@NonNull Aeron.Context context) {
         return Aeron.connect(context);
+    }
+
+    @Provides
+    private IdleStrategy createIdleStrategy() {
+        return new BusySpinIdleStrategy();
     }
 }

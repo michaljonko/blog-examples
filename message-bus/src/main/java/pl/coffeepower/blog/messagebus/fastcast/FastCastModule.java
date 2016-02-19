@@ -39,6 +39,10 @@ import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
+
+import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
 import org.nustaq.fastcast.config.SubscriberConf;
@@ -56,10 +60,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import lombok.NonNull;
-import lombok.extern.java.Log;
-
-@Log
+@Log4j2
 public final class FastCastModule extends AbstractModule {
 
     private final Properties properties = new Properties();
@@ -80,11 +81,16 @@ public final class FastCastModule extends AbstractModule {
     }
 
     @Provides
+    private FastCast getFastCast() {
+        return FastCast.getFastCast();
+    }
+
+    @Provides
     @Singleton
     @Inject
     private PhysicalTransportConf createPhysicalTransportConf(@NonNull Configuration configuration) {
-        log.info("Creating PhysicalTransportConf with Configuration: " + configuration);
-        return new PhysicalTransportConf(configuration.getChannelId())
+        log.info("Creating PhysicalTransportConf with Configuration: {}", configuration);
+        return new PhysicalTransportConf(String.valueOf(configuration.getChannelId()))
                 .loopBack(InetAddresses.forString(configuration.getBindAddress())
                         .isLoopbackAddress())
                 .interfaceAdr(configuration.getBindAddress())

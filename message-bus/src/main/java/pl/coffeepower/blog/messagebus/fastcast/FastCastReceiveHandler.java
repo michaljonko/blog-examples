@@ -26,11 +26,11 @@ package pl.coffeepower.blog.messagebus.fastcast;
 
 import com.google.common.base.Charsets;
 
+import lombok.extern.log4j.Log4j2;
+
 import pl.coffeepower.blog.messagebus.Subscriber;
 
-import lombok.extern.java.Log;
-
-@Log
+@Log4j2
 final class FastCastReceiveHandler implements Subscriber.Handler {
 
     @Override

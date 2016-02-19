@@ -29,6 +29,9 @@ import com.google.common.base.Preconditions;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
+
 import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.api.util.ByteArraySubscriber;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
@@ -44,23 +47,21 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import lombok.NonNull;
-import lombok.extern.java.Log;
-
 @Singleton
-@Log
+@Log4j2
 final class FastCastSubscriber implements Subscriber {
 
     private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final FastCast fastCast = FastCast.getFastCast();
+    private final FastCast fastCast;
     private final Disruptor<BytesEvent> disruptor;
     private final RingBuffer<BytesEvent> ringBuffer;
+    private final String physicalTransportName;
     @Inject
     private Handler handler;
-    private final String physicalTransportName;
 
     @Inject
-    private FastCastSubscriber(@NonNull @Named(Const.SUBSCRIBER_NAME_KEY) String nodeId,
+    private FastCastSubscriber(@NonNull FastCast fastCast,
+                               @NonNull @Named(Const.SUBSCRIBER_NAME_KEY) String nodeId,
                                @NonNull PhysicalTransportConf physicalTransportConf,
                                @NonNull SubscriberConf subscriberConf,
                                @NonNull Disruptor<BytesEvent> disruptor) {
@@ -70,10 +71,11 @@ final class FastCastSubscriber implements Subscriber {
             handler.received(event.getBuffer());
         });
         this.ringBuffer = this.disruptor.start();
-        fastCast.setNodeId(nodeId);
-        fastCast.addTransport(physicalTransportConf);
+        this.fastCast = fastCast;
+        this.fastCast.setNodeId(nodeId);
+        this.fastCast.addTransport(physicalTransportConf);
         this.physicalTransportName = physicalTransportConf.getName();
-        fastCast.onTransport(physicalTransportName).subscribe(
+        this.fastCast.onTransport(physicalTransportName).subscribe(
                 subscriberConf, new ByteArraySubscriber(false) {
                     @Override
                     protected void messageReceived(String sender, long sequence, byte[] msg, int off, int len) {

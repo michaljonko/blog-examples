@@ -24,34 +24,67 @@
 
 package pl.coffeepower.blog.messagebus.aeron;
 
+import com.google.common.base.Preconditions;
+
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
+
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Publisher;
 
 import uk.co.real_logic.aeron.Aeron;
-import uk.co.real_logic.aeron.driver.MediaDriver;
+import uk.co.real_logic.aeron.Publication;
+import uk.co.real_logic.agrona.DirectBuffer;
+import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
-import lombok.NonNull;
-
+@Singleton
+@Log4j2
 final class AeronPublisher implements Publisher {
 
-    private final MediaDriver mediaDriver;
+    private final AtomicBoolean lock = new AtomicBoolean(false);
+    private final AtomicBoolean opened = new AtomicBoolean(false);
+    private final DirectBuffer buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(AeronConst.BUFFER_SIZE));
     private final Aeron aeron;
+    private final Publication publication;
 
     @Inject
-    public AeronPublisher(@NonNull MediaDriver mediaDriver, @NonNull Aeron.Context context, @NonNull Configuration configuration) {
-        this.mediaDriver = mediaDriver;
-        this.aeron = Aeron.connect(context);
+    private AeronPublisher(@NonNull Aeron aeron, @NonNull Configuration configuration) {
+        String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
+        this.aeron = aeron;
+        this.publication = this.aeron.addPublication(channel, configuration.getChannelId());
+        opened.set(true);
     }
 
     @Override
-    public boolean send(byte[] data) {
-        return false;
+    public boolean send(@NonNull byte[] data) {
+        try {
+            lock();
+            Preconditions.checkState(opened.get(), "Already closed");
+            return publication.offer(buffer, 0, data.length) >= 0;
+        } finally {
+            unlock();
+        }
     }
 
     @Override
     public void close() throws Exception {
-        mediaDriver.close();
+        Preconditions.checkState(opened.get(), "Already closed");
+        publication.close();
+        aeron.close();
+        opened.set(false);
+    }
+
+    private void lock() {
+        while (!lock.compareAndSet(false, true)) ;
+    }
+
+    private void unlock() {
+        lock.set(false);
     }
 }
