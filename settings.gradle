@@ -2,4 +2,5 @@ rootProject.name = 'blog-examples'
 include 'words-frequency-counter',
         'lambda-exp-on-java7',
 //        'chronicle-storage',
-        'message-bus'
+        'message-bus',
+        'stream-vs-guava'
