@@ -22,19 +22,20 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus.fastcast;
+package pl.coffeepower.blog.messagebus.util;
 
 import com.google.common.base.Charsets;
 
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 import pl.coffeepower.blog.messagebus.Subscriber;
 
 @Log4j2
-final class FastCastReceiveHandler implements Subscriber.Handler {
+public final class LoggerReceiveHandler implements Subscriber.Handler {
 
     @Override
-    public void received(byte[] data) {
-        log.info(new String(data, Charsets.UTF_8));
+    public void received(@NonNull byte[] data, int length) {
+        log.info("Received message: {}", new String(data, 0, length, Charsets.UTF_8));
     }
 }

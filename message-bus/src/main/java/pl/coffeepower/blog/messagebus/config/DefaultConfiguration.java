@@ -51,9 +51,9 @@ final class DefaultConfiguration implements Configuration {
     private String bindAddress;
 
     public DefaultConfiguration() {
-        this.channelId = Integer.parseInt(System.getProperty(Const.CHANNEL_ID_KEY, "555"));
+        this.channelId = Integer.parseInt(System.getProperty(Const.CHANNEL_ID_KEY, "1"));
         Preconditions.checkArgument(
-                InetAddresses.isInetAddress(this.multicastAddress = System.getProperty(Const.MULTICAST_ADDRESS_KEY, "225.0.0.10")),
+                InetAddresses.isInetAddress(this.multicastAddress = System.getProperty(Const.MULTICAST_ADDRESS_KEY, "225.0.0.11")),
                 "multicastAddress is not a valid IP");
         Preconditions.checkArgument(
                 InetAddresses.forString(this.multicastAddress).isMulticastAddress(),

@@ -27,16 +27,21 @@ package pl.coffeepower.blog.messagebus.aeron;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.dsl.Disruptor;
+
 import lombok.NonNull;
-import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Subscriber;
+import pl.coffeepower.blog.messagebus.util.BytesEventFactory;
 
 import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.Subscription;
 import uk.co.real_logic.agrona.concurrent.IdleStrategy;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,8 +49,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-@Log
 @Singleton
+@Log4j2
 final class AeronSubscriber implements Subscriber {
 
     private final AtomicBoolean opened = new AtomicBoolean(false);
@@ -53,18 +58,37 @@ final class AeronSubscriber implements Subscriber {
     private final Subscription subscription;
     private final ExecutorService executor;
     private final IdleStrategy idleStrategy;
+    private final Disruptor<BytesEventFactory.BytesEvent> disruptor;
+    private final RingBuffer<BytesEventFactory.BytesEvent> ringBuffer;
+    @Inject
+    private Handler handler;
 
     @Inject
-    private AeronSubscriber(@NonNull Aeron aeron, @NonNull IdleStrategy _idleStrategy, @NonNull Configuration configuration) {
-        String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
+    private AeronSubscriber(@NonNull Aeron aeron,
+                            @NonNull IdleStrategy idleStrategy,
+                            @NonNull Configuration configuration,
+                            @NonNull Disruptor<BytesEventFactory.BytesEvent> disruptor) {
+        this.disruptor = disruptor;
+        this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
+            Preconditions.checkNotNull(handler);
+            handler.received(Arrays.copyOf(event.getBuffer(), event.getCurrentLength()));
+        });
+        this.ringBuffer = this.disruptor.start();
         this.aeron = aeron;
-        this.idleStrategy = _idleStrategy;
-        this.subscription = this.aeron.addSubscription(channel, configuration.getChannelId());
+        this.idleStrategy = idleStrategy;
+        this.subscription = this.aeron.addSubscription(
+                "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort()
+                        + "|interface=" + configuration.getBindAddress(), configuration.getChannelId());
         opened.set(true);
         this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("subscriber-thread").build());
         this.executor.execute(() -> {
             while (opened.get()) {
-//idleStrategy.idle(subscription.poll());
+                this.idleStrategy.idle(subscription.poll((buffer, offset, length, header) -> {
+                    Preconditions.checkState(opened.get(), "Already closed");
+                    byte[] b = new byte[length];
+                    buffer.getBytes(offset, b);
+                    ringBuffer.publishEvent((event, sequence) -> event.copyToBuffer(b));
+                }, 1));
             }
         });
         this.executor.shutdown();
@@ -73,14 +97,16 @@ final class AeronSubscriber implements Subscriber {
     @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
-        opened.set(false);
+        disruptor.shutdown();
         executor.shutdownNow();
         subscription.close();
         aeron.close();
+        handler = null;
+        opened.set(false);
     }
 
     @Override
     public void register(@NonNull Handler handler) {
-
+        this.handler = handler;
     }
 }

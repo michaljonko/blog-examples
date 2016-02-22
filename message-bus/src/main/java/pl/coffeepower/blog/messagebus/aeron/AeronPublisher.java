@@ -25,6 +25,7 @@
 package pl.coffeepower.blog.messagebus.aeron;
 
 import com.google.common.base.Preconditions;
+import com.google.common.net.InetAddresses;
 
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -55,6 +56,7 @@ final class AeronPublisher implements Publisher {
 
     @Inject
     private AeronPublisher(@NonNull Aeron aeron, @NonNull Configuration configuration) {
+        Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
         String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
         this.aeron = aeron;
         this.publication = this.aeron.addPublication(channel, configuration.getChannelId());
@@ -66,6 +68,7 @@ final class AeronPublisher implements Publisher {
         try {
             lock();
             Preconditions.checkState(opened.get(), "Already closed");
+            buffer.wrap(data);
             return publication.offer(buffer, 0, data.length) >= 0;
         } finally {
             unlock();

@@ -31,6 +31,7 @@
 package pl.coffeepower.blog.messagebus.fastcast;
 
 import com.google.common.net.InetAddresses;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
@@ -53,9 +54,10 @@ import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.BytesEventFactory;
+import pl.coffeepower.blog.messagebus.util.BytesEventFactory.BytesEvent;
+import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
 
 import java.util.Properties;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -66,7 +68,11 @@ public final class FastCastModule extends AbstractModule {
     private final Properties properties = new Properties();
 
     public FastCastModule() {
-        FCLog.get().setLogLevel(FCLog.SEVER);
+        if (log.isDebugEnabled()) {
+            FCLog.get().setLogLevel(FCLog.DEBUG);
+        } else {
+            FCLog.get().setLogLevel(FCLog.SEVER);
+        }
         properties.setProperty(Const.PUBLISHER_NAME_KEY,
                 System.getProperty(Const.PUBLISHER_NAME_KEY, "PUB"));
         properties.setProperty(Const.SUBSCRIBER_NAME_KEY,
@@ -76,7 +82,7 @@ public final class FastCastModule extends AbstractModule {
     protected void configure() {
         bind(Publisher.class).to(FastCastPublisher.class);
         bind(Subscriber.class).to(FastCastSubscriber.class);
-        bind(Subscriber.Handler.class).to(FastCastReceiveHandler.class);
+        bind(Subscriber.Handler.class).to(LoggerReceiveHandler.class);
         Names.bindProperties(binder(), properties);
     }
 
@@ -90,7 +96,7 @@ public final class FastCastModule extends AbstractModule {
     @Inject
     private PhysicalTransportConf createPhysicalTransportConf(@NonNull Configuration configuration) {
         log.info("Creating PhysicalTransportConf with Configuration: {}", configuration);
-        return new PhysicalTransportConf(String.valueOf(configuration.getChannelId()))
+        return new PhysicalTransportConf(FastCastConst.STREAM_NAME)
                 .loopBack(InetAddresses.forString(configuration.getBindAddress())
                         .isLoopbackAddress())
                 .interfaceAdr(configuration.getBindAddress())
@@ -103,8 +109,9 @@ public final class FastCastModule extends AbstractModule {
 
     @Provides
     @Singleton
-    private PublisherConf createPublisherConf() {
-        return new PublisherConf(FastCastConst.TOPIC_ID)
+    @Inject
+    private PublisherConf createPublisherConf(@NonNull Configuration configuration) {
+        return new PublisherConf(configuration.getChannelId())
                 .numPacketHistory(FastCastConst.PUBLISHER_PACKET_HISTORY)
                 .pps(FastCastConst.PUBLISHER_PPS)
                 .heartbeatInterval(FastCastConst.PUBLISHER_HEARTBEAT_INTERVAL);
@@ -112,8 +119,9 @@ public final class FastCastModule extends AbstractModule {
 
     @Provides
     @Singleton
-    private SubscriberConf createSubscriberConf() {
-        return new SubscriberConf(FastCastConst.TOPIC_ID)
+    @Inject
+    private SubscriberConf createSubscriberConf(@NonNull Configuration configuration) {
+        return new SubscriberConf(configuration.getChannelId())
                 .receiveBufferPackets(FastCastConst.SUBSCRIBER_BUFFER_PACKETS)
                 .maxDelayRetransMS(FastCastConst.SUBSCRIBER_MAX_DELAY_RETRANS_MS)
                 .maxDelayNextRetransMS(FastCastConst.SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS)
@@ -121,8 +129,10 @@ public final class FastCastModule extends AbstractModule {
     }
 
     @Provides
-    private Disruptor<BytesEventFactory.BytesEvent> createDisruptor() {
+    private Disruptor<BytesEvent> createDisruptor() {
         return new Disruptor<>(
-                new BytesEventFactory(), FastCastConst.DISRUPTOR_SIZE, Executors.newCachedThreadPool(), ProducerType.SINGLE, new BlockingWaitStrategy());
+                new BytesEventFactory(), FastCastConst.DISRUPTOR_SIZE,
+                new ThreadFactoryBuilder().setNameFormat("fast-cast-disruptor-%d").setDaemon(true).build(),
+                ProducerType.SINGLE, new BlockingWaitStrategy());
     }
 }

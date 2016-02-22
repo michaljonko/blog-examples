@@ -28,7 +28,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class FastCastConst {
+final class FastCastConst {
 
     public static final int DATAGRAM_SIZE = 800;
     public static final int IDLE_PARK_MICROS = 1;
@@ -40,6 +40,6 @@ public final class FastCastConst {
     public static final int SUBSCRIBER_MAX_DELAY_RETRANS_MS = 1;
     public static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 4;
     public static final boolean SUBSCRIBER_UNRELIABLE = false;
-    public static final int TOPIC_ID = 1;
     public static final int DISRUPTOR_SIZE = 16;
+    public static final String STREAM_NAME = "coffeepower";
 }

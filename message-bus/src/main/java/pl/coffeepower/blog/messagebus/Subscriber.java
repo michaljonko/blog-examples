@@ -33,6 +33,6 @@ public interface Subscriber extends AutoCloseable {
     @FunctionalInterface
     interface Handler extends Serializable {
 
-        void received(byte[] data);
+        void received(byte[] data, int length);
     }
 }

@@ -37,12 +37,13 @@ import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 @Log4j2
 public final class PublisherApplication extends AbstractExecutionThreadService {
 
-    public static final long MESSAGES_COUNT = 1_000_000L;
+    public static final long MESSAGES_COUNT = 100_000L;
     private final Publisher publisher;
 
     PublisherApplication(Engine engine) {
@@ -73,6 +74,7 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
                         log.info("Sent {} messages in {}", value, stopwatch.toString());
                     }
                 });
+        TimeUnit.SECONDS.sleep(10L);
     }
 
     @Override

@@ -68,7 +68,7 @@ final class FastCastSubscriber implements Subscriber {
         this.disruptor = disruptor;
         this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
             Preconditions.checkNotNull(handler);
-            handler.received(event.getBuffer());
+            handler.received(event.getBuffer(), event.getCurrentLength());
         });
         this.ringBuffer = this.disruptor.start();
         this.fastCast = fastCast;
