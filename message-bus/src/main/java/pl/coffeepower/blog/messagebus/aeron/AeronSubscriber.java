@@ -30,9 +30,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
-
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.BytesEventFactory;
@@ -41,13 +38,15 @@ import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.Subscription;
 import uk.co.real_logic.agrona.concurrent.IdleStrategy;
 
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
 @Singleton
 @Log4j2
@@ -71,7 +70,7 @@ final class AeronSubscriber implements Subscriber {
         this.disruptor = disruptor;
         this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
             Preconditions.checkNotNull(handler);
-            handler.received(Arrays.copyOf(event.getBuffer(), event.getCurrentLength()));
+            handler.received(event.getBuffer(), event.getCurrentLength());
         });
         this.ringBuffer = this.disruptor.start();
         this.aeron = aeron;
@@ -85,9 +84,7 @@ final class AeronSubscriber implements Subscriber {
             while (opened.get()) {
                 this.idleStrategy.idle(subscription.poll((buffer, offset, length, header) -> {
                     Preconditions.checkState(opened.get(), "Already closed");
-                    byte[] b = new byte[length];
-                    buffer.getBytes(offset, b);
-                    ringBuffer.publishEvent((event, sequence) -> event.copyToBuffer(b));
+//                    ringBuffer.publishEvent((event, sequence) -> event.copyToBuffer(bytes));
                 }, 1));
             }
         });

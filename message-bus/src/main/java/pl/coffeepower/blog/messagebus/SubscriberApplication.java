@@ -28,13 +28,13 @@ import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.inject.Guice;
 
-import lombok.extern.log4j.Log4j2;
-
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class SubscriberApplication extends AbstractIdleService {
@@ -44,7 +44,7 @@ public final class SubscriberApplication extends AbstractIdleService {
 
     SubscriberApplication(Engine engine) {
         subscriber = Guice.createInjector(new ConfigModule(), engine.getModule()).getInstance(Subscriber.class);
-        subscriber.register(data -> {
+        subscriber.register((data, length) -> {
             long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
             long lastReceivedValue = lastReceived.get();
             if (lastReceivedValue != (prevReceivedValue + 1)) {

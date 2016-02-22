@@ -22,12 +22,6 @@
  * SOFTWARE.
  */
 
-/*
- * Created by IntelliJ IDEA.
- * User: yogurt
- * Date: 21.12.15
- * Time: 00:02
- */
 package pl.coffeepower.blog.messagebus.aeron;
 
 import com.google.common.base.StandardSystemProperty;

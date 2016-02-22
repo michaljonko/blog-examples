@@ -35,7 +35,7 @@ import lombok.NonNull;
 
 public final class BytesEventFactory implements EventFactory<BytesEventFactory.BytesEvent> {
 
-    public static final int BUFFER_SIZE = 4096;
+    public static final int BUFFER_SIZE = 1024;
 
     @Override
     public BytesEvent newInstance() {
