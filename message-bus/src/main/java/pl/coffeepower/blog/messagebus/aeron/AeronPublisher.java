@@ -35,7 +35,6 @@ import pl.coffeepower.blog.messagebus.Publisher;
 
 import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.Publication;
-import uk.co.real_logic.agrona.DirectBuffer;
 import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 
 import java.nio.ByteBuffer;
@@ -50,7 +49,7 @@ final class AeronPublisher implements Publisher {
 
     private final AtomicBoolean lock = new AtomicBoolean(false);
     private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final DirectBuffer buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(AeronConst.BUFFER_SIZE));
+    private final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(AeronConst.BUFFER_SIZE));
     private final Aeron aeron;
     private final Publication publication;
 
@@ -60,7 +59,8 @@ final class AeronPublisher implements Publisher {
         String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
         this.aeron = aeron;
         this.publication = this.aeron.addPublication(channel, configuration.getChannelId());
-        opened.set(true);
+        this.opened.set(true);
+        log.info("Created Publisher: channel={}, streamId={}", channel, configuration.getChannelId());
     }
 
     @Override
@@ -68,7 +68,7 @@ final class AeronPublisher implements Publisher {
         try {
             lock();
             Preconditions.checkState(opened.get(), "Already closed");
-            buffer.wrap(data);
+            buffer.putBytes(0, data);
             return publication.offer(buffer, 0, data.length) >= 0;
         } finally {
             unlock();

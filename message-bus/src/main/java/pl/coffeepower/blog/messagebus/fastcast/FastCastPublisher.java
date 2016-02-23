@@ -63,7 +63,8 @@ final class FastCastPublisher implements Publisher {
         this.fastCast.addTransport(physicalTransportConf);
         this.physicalTransportName = physicalTransportConf.getName();
         this.publisher = this.fastCast.onTransport(physicalTransportName).publish(publisherConf);
-        opened.set(true);
+        this.opened.set(true);
+        log.info("Created Publisher: nodeId={}, physicalTransportName={}", nodeId, this.physicalTransportName);
     }
 
     @Override

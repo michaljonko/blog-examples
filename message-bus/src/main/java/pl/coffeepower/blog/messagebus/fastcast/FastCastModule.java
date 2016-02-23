@@ -31,14 +31,9 @@
 package pl.coffeepower.blog.messagebus.fastcast;
 
 import com.google.common.net.InetAddresses;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
-
-import com.lmax.disruptor.BlockingWaitStrategy;
-import com.lmax.disruptor.dsl.Disruptor;
-import com.lmax.disruptor.dsl.ProducerType;
 
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -53,8 +48,6 @@ import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.Subscriber;
-import pl.coffeepower.blog.messagebus.util.BytesEventFactory;
-import pl.coffeepower.blog.messagebus.util.BytesEventFactory.BytesEvent;
 import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
 
 import java.util.Properties;
@@ -126,13 +119,5 @@ public final class FastCastModule extends AbstractModule {
                 .maxDelayRetransMS(FastCastConst.SUBSCRIBER_MAX_DELAY_RETRANS_MS)
                 .maxDelayNextRetransMS(FastCastConst.SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS)
                 .unreliable(FastCastConst.SUBSCRIBER_UNRELIABLE);
-    }
-
-    @Provides
-    private Disruptor<BytesEvent> createDisruptor() {
-        return new Disruptor<>(
-                new BytesEventFactory(), FastCastConst.DISRUPTOR_SIZE,
-                new ThreadFactoryBuilder().setNameFormat("fast-cast-disruptor-%d").setDaemon(true).build(),
-                ProducerType.SINGLE, new BlockingWaitStrategy());
     }
 }

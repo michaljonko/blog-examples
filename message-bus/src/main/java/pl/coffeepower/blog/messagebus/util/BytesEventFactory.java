@@ -55,8 +55,13 @@ public final class BytesEventFactory implements EventFactory<BytesEventFactory.B
         }
 
         public void copyToBuffer(@NonNull byte[] data) {
-            Preconditions.checkArgument(data.length <= buffer.length, "Data to copy has length greater than buffer");
-            System.arraycopy(data, 0, buffer, 0, currentLength = data.length);
+            copyToBuffer(data, data.length);
+        }
+
+        public void copyToBuffer(@NonNull byte[] data, int length) {
+            Preconditions.checkArgument(length <= buffer.length, "Data to copy has length greater than buffer");
+            Preconditions.checkArgument(length >= 0, "Length argument is less then zero");
+            System.arraycopy(data, 0, buffer, 0, currentLength = length);
         }
 
         @Override

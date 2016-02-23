@@ -25,27 +25,24 @@
 package pl.coffeepower.blog.messagebus.aeron;
 
 import com.google.common.base.StandardSystemProperty;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-
-import com.lmax.disruptor.BlockingWaitStrategy;
-import com.lmax.disruptor.dsl.Disruptor;
-import com.lmax.disruptor.dsl.ProducerType;
 
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.Subscriber;
-import pl.coffeepower.blog.messagebus.util.BytesEventFactory;
-import pl.coffeepower.blog.messagebus.util.BytesEventFactory.BytesEvent;
 import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
 
 import uk.co.real_logic.aeron.Aeron;
+import uk.co.real_logic.aeron.Subscription;
 import uk.co.real_logic.aeron.driver.MediaDriver;
+import uk.co.real_logic.aeron.driver.ThreadingMode;
+import uk.co.real_logic.agrona.concurrent.BackoffIdleStrategy;
+import uk.co.real_logic.agrona.concurrent.BusySpinIdleStrategy;
 import uk.co.real_logic.agrona.concurrent.IdleStrategy;
-import uk.co.real_logic.agrona.concurrent.SleepingIdleStrategy;
+import uk.co.real_logic.agrona.concurrent.NoOpIdleStrategy;
 
 import java.io.File;
 import java.util.UUID;
@@ -66,24 +63,36 @@ public final class AeronModule extends AbstractModule {
     @Singleton
     @Inject
     private MediaDriver createMediaDriver() {
-        MediaDriver.Context context = new MediaDriver.Context();
+        MediaDriver.Context context = new MediaDriver.Context()
+                .threadingMode(ThreadingMode.DEDICATED)
+                .conductorIdleStrategy(new BackoffIdleStrategy(1, 1, 1, 1))
+                .receiverIdleStrategy(new NoOpIdleStrategy())
+                .senderIdleStrategy(new NoOpIdleStrategy());
         context.aeronDirectoryName(StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString());
         context.dirsDeleteOnStart();
         return MediaDriver.launch(context);
     }
 
     @Provides
-    @Singleton
     @Inject
     private Aeron.Context createAeronContext(@NonNull MediaDriver mediaDriver) {
         Aeron.Context context = new Aeron.Context();
         context.aeronDirectoryName(mediaDriver.aeronDirectoryName());
         context.errorHandler(throwable -> log.catching(throwable));
+        if (log.isDebugEnabled()) {
+            context.availableImageHandler(image -> {
+                Subscription subscription = image.subscription();
+                log.debug("Image is available: streamId={}, channel={}, sessionId={}, identity={}", subscription.channel(), subscription.streamId(), image.sessionId(), image.sourceIdentity());
+            });
+            context.unavailableImageHandler(image -> {
+                Subscription subscription = image.subscription();
+                log.debug("Image is unavailable: streamId={}, channel={}, sessionId={}", subscription.channel(), subscription.streamId(), image.sessionId());
+            });
+        }
         return context;
     }
 
     @Provides
-    @Singleton
     @Inject
     private Aeron createAeron(@NonNull Aeron.Context context) {
         return Aeron.connect(context);
@@ -91,14 +100,6 @@ public final class AeronModule extends AbstractModule {
 
     @Provides
     private IdleStrategy createIdleStrategy() {
-        return new SleepingIdleStrategy(5L);
-    }
-
-    @Provides
-    private Disruptor<BytesEvent> createDisruptor() {
-        return new Disruptor<>(
-                new BytesEventFactory(), AeronConst.DISRUPTOR_SIZE,
-                new ThreadFactoryBuilder().setNameFormat("aeron-disruptor-%d").setDaemon(true).build(),
-                ProducerType.SINGLE, new BlockingWaitStrategy());
+        return new BusySpinIdleStrategy();
     }
 }

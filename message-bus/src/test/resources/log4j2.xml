@@ -31,7 +31,7 @@
     </Appenders>
     <Loggers>
         <Root level="INFO">
-            <AppenderRef ref="Console" level="DEBUG"/>
+            <AppenderRef ref="Console" level="INFO"/>
         </Root>
     </Loggers>
 </Configuration>
