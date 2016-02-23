@@ -29,8 +29,6 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
 
-import lombok.Value;
-
 import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViProps;
@@ -39,16 +37,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.util.BytesEventModule;
 
 import java.io.Serializable;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
+
+import lombok.Value;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -61,8 +64,11 @@ public class MessageBusTest {
     public void setUp() throws Exception {
         cloud = CloudFactory.createCloud();
         ViProps.at(cloud.node("**")).setLocalType();
-        JvmProps.at(cloud.node("**")).addJvmArg("-Xms128m").addJvmArg("-Xmx256m");
-        cloud.nodes("pub", "sub").touch();
+        JvmProps.at(cloud.node("**")).addJvmArgs("-Xms64m", "-Xmx128m");
+        cloud.node("sub-1").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-1");
+        cloud.node("sub-2").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-2");
+        cloud.node("sub-3").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-3");
+        cloud.nodes("pub", "sub-1", "sub-2", "sub-3").touch();
     }
 
     @After
@@ -71,18 +77,40 @@ public class MessageBusTest {
     }
 
     @Test
-    public void shouldRetrieveAllMessagesWithFastCast() throws Exception {
-        Future<Boolean> subTask = createSubscriberFuture(Engine.FAST_CAST);
-        Future<Boolean> pubTask = createPublisherFuture(Engine.FAST_CAST);
-        assertThat(subTask.get(2L, TimeUnit.MINUTES), is(true));
-        assertThat(pubTask.get(), is(true));
+    public void shouldRetrieveAllMessagesWithFastCastSISO() throws Exception {
+        sisoTest(Engine.FAST_CAST);
     }
 
     @Test
-    public void shouldRetrieveAllMessagesWithAeron() throws Exception {
-        Future<Boolean> subTask = createSubscriberFuture(Engine.AERON);
-        Future<Boolean> pubTask = createPublisherFuture(Engine.AERON);
-        assertThat(subTask.get(2L, TimeUnit.MINUTES), is(true));
+    public void shouldRetrieveAllMessagesWithFastCastMISO() throws Exception {
+        misoTest(Engine.FAST_CAST);
+    }
+
+    @Test
+    public void shouldRetrieveAllMessagesWithAeronSISO() throws Exception {
+        sisoTest(Engine.AERON);
+    }
+
+    @Test
+    public void shouldRetrieveAllMessagesWithAeronMISO() throws Exception {
+        misoTest(Engine.AERON);
+    }
+
+    private void sisoTest(final Engine engine) throws InterruptedException, ExecutionException, TimeoutException {
+        Future<Boolean> subTask = createSubscriberFuture(engine);
+        Future<Boolean> pubTask = createPublisherFuture(engine);
+        assertThat(subTask.get(5L, TimeUnit.MINUTES), is(true));
+        assertThat(pubTask.get(), is(true));
+    }
+
+    private void misoTest(final Engine engine) throws InterruptedException, ExecutionException, TimeoutException {
+        Future<Boolean> subTask1 = createSubscriberFuture("sub-1", engine);
+        Future<Boolean> subTask2 = createSubscriberFuture("sub-2", engine);
+        Future<Boolean> subTask3 = createSubscriberFuture("sub-3", engine);
+        Future<Boolean> pubTask = createPublisherFuture(engine);
+        assertThat(subTask1.get(5L, TimeUnit.MINUTES), is(true));
+        assertThat(subTask2.get(5L, TimeUnit.MINUTES), is(true));
+        assertThat(subTask3.get(5L, TimeUnit.MINUTES), is(true));
         assertThat(pubTask.get(), is(true));
     }
 
@@ -104,7 +132,11 @@ public class MessageBusTest {
     }
 
     private Future<Boolean> createSubscriberFuture(final Engine engine) {
-        return cloud.node("sub").submit((Callable<Boolean> & Serializable) () -> {
+        return createSubscriberFuture("sub-1", engine);
+    }
+
+    private Future<Boolean> createSubscriberFuture(final String cloudNode, final Engine engine) {
+        return cloud.node(cloudNode).submit((Callable<Boolean> & Serializable) () -> {
             Fixtures fixtures = new Fixtures();
             AtomicBoolean state = new AtomicBoolean(true);
             AtomicLong lastReceived = new AtomicLong();
@@ -138,7 +170,7 @@ public class MessageBusTest {
     @Value
     private static final class Fixtures implements Serializable {
         long firstMessageId = 1L;
-        long numberOfMessages = 1_000_000L;
+        long numberOfMessages = 100_000L;
         byte[] additionalData = "9876543210123456789qazxswedcvfrtgbnhyujm".getBytes();
         int additionalDataLength = additionalData.length;
         byte lastAdditionalDataByte = additionalData[additionalDataLength - 1];

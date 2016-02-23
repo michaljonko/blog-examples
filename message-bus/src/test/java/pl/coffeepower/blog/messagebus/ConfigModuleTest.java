@@ -41,7 +41,7 @@ public class ConfigModuleTest {
         Configuration configuration = Guice.createInjector(new ConfigModule())
                 .getInstance(Configuration.class);
         assertThat(configuration, notNullValue());
-        assertThat(configuration.getMulticastAddress(), is("225.0.0.10"));
+        assertThat(configuration.getMulticastAddress(), is("225.0.0.11"));
         assertThat(configuration.getMulticastPort(), is(12345));
     }
 }

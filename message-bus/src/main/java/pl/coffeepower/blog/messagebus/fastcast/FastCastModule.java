@@ -35,9 +35,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
-
 import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
@@ -54,6 +51,9 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class FastCastModule extends AbstractModule {

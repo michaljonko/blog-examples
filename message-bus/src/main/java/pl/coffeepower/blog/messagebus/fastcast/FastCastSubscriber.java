@@ -29,9 +29,6 @@ import com.google.common.base.Preconditions;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
-
 import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.api.util.ByteArraySubscriber;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
@@ -46,6 +43,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
 @Singleton
 @Log4j2
@@ -76,7 +76,7 @@ final class FastCastSubscriber implements Subscriber {
         this.fastCast.addTransport(physicalTransportConf);
         this.physicalTransportName = physicalTransportConf.getName();
         this.fastCast.onTransport(physicalTransportName).subscribe(
-                subscriberConf, new ByteArraySubscriber(false) {
+                subscriberConf, new ByteArraySubscriber(true) {
                     @Override
                     protected void messageReceived(String sender, long sequence, byte[] msg, int off, int len) {
                         Preconditions.checkState(opened.get(), "Already closed");
