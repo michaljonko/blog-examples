@@ -28,6 +28,9 @@ import com.google.common.base.StandardSystemProperty;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
+
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
@@ -36,18 +39,16 @@ import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.Subscription;
 import uk.co.real_logic.aeron.driver.MediaDriver;
 import uk.co.real_logic.aeron.driver.ThreadingMode;
+import uk.co.real_logic.agrona.concurrent.BackoffIdleStrategy;
 import uk.co.real_logic.agrona.concurrent.BusySpinIdleStrategy;
 import uk.co.real_logic.agrona.concurrent.IdleStrategy;
-import uk.co.real_logic.agrona.concurrent.NoOpIdleStrategy;
 
 import java.io.File;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class AeronModule extends AbstractModule {
@@ -64,15 +65,16 @@ public final class AeronModule extends AbstractModule {
     private MediaDriver createMediaDriver() {
         MediaDriver.Context context = new MediaDriver.Context()
                 .threadingMode(ThreadingMode.DEDICATED)
-//                .conductorIdleStrategy(new BackoffIdleStrategy(1, 1, 1, 1))
-                .receiverIdleStrategy(new NoOpIdleStrategy())
-                .senderIdleStrategy(new NoOpIdleStrategy());
+                .conductorIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
+                .receiverIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
+                .senderIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
+                .dirsDeleteOnStart(true);
         context.aeronDirectoryName(StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString());
-        context.dirsDeleteOnStart();
         return MediaDriver.launch(context);
     }
 
     @Provides
+    @Singleton
     @Inject
     private Aeron.Context createAeronContext(@NonNull MediaDriver mediaDriver) {
         Aeron.Context context = new Aeron.Context();
@@ -92,6 +94,7 @@ public final class AeronModule extends AbstractModule {
     }
 
     @Provides
+    @Singleton
     @Inject
     private Aeron createAeron(@NonNull Aeron.Context context) {
         return Aeron.connect(context);

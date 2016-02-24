@@ -41,9 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
-@Singleton
 @Log4j2
 final class FastCastPublisher implements Publisher {
 
@@ -62,7 +60,7 @@ final class FastCastPublisher implements Publisher {
         this.fastCast.setNodeId(nodeId);
         this.fastCast.addTransport(physicalTransportConf);
         this.physicalTransportName = physicalTransportConf.getName();
-        this.publisher = this.fastCast.onTransport(physicalTransportName).publish(publisherConf);
+        this.publisher = this.fastCast.onTransport(physicalTransportName).publish(publisherConf).batchOnLimit(true);
         this.opened.set(true);
         log.info("Created Publisher: nodeId={}, physicalTransportName={}", nodeId, this.physicalTransportName);
     }

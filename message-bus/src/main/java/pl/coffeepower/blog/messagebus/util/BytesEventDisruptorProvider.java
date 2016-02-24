@@ -17,11 +17,10 @@ import pl.coffeepower.blog.messagebus.util.BytesEventFactory.BytesEvent;
 
 final class BytesEventDisruptorProvider implements Provider<Disruptor<BytesEvent>> {
 
-    public static final int DISRUPTOR_SIZE = 16;
+    public static final int DISRUPTOR_SIZE = 32;
 
     public Disruptor<BytesEvent> get() {
-        return new Disruptor<>(
-                new BytesEventFactory(), DISRUPTOR_SIZE,
+        return new Disruptor<>(new BytesEventFactory(), DISRUPTOR_SIZE,
                 new ThreadFactoryBuilder().setNameFormat("bytes-event-disruptor-%d").setDaemon(true).build(),
                 ProducerType.SINGLE, new LiteBlockingWaitStrategy());
     }

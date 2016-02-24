@@ -26,14 +26,16 @@ package pl.coffeepower.blog.messagebus;
 
 import com.google.inject.Module;
 
+import lombok.Getter;
+
 import pl.coffeepower.blog.messagebus.aeron.AeronModule;
 import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
-
-import lombok.Getter;
+import pl.coffeepower.blog.messagebus.raw.RawModule;
 
 public enum Engine {
     FAST_CAST(new FastCastModule()),
-    AERON(new AeronModule());
+    AERON(new AeronModule()),
+    RAW(new RawModule());
 
     @Getter
     private final Module module;

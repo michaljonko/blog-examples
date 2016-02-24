@@ -29,6 +29,8 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
 
+import lombok.Value;
+
 import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViProps;
@@ -41,6 +43,9 @@ import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.util.BytesEventModule;
 
+import uk.co.real_logic.agrona.concurrent.IdleStrategy;
+import uk.co.real_logic.agrona.concurrent.SleepingIdleStrategy;
+
 import java.io.Serializable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -50,8 +55,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
-
-import lombok.Value;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -64,7 +67,7 @@ public class MessageBusTest {
     public void setUp() throws Exception {
         cloud = CloudFactory.createCloud();
         ViProps.at(cloud.node("**")).setLocalType();
-        JvmProps.at(cloud.node("**")).addJvmArgs("-Xms64m", "-Xmx128m");
+        JvmProps.at(cloud.node("**")).addJvmArgs("-Xms128m", "-Xmx256m");
         cloud.node("sub-1").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-1");
         cloud.node("sub-2").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-2");
         cloud.node("sub-3").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-3");
@@ -97,20 +100,22 @@ public class MessageBusTest {
     }
 
     private void sisoTest(final Engine engine) throws InterruptedException, ExecutionException, TimeoutException {
+        long timeout = 5L;
         Future<Boolean> subTask = createSubscriberFuture(engine);
         Future<Boolean> pubTask = createPublisherFuture(engine);
-        assertThat(subTask.get(5L, TimeUnit.MINUTES), is(true));
+        assertThat(subTask.get(timeout, TimeUnit.MINUTES), is(true));
         assertThat(pubTask.get(), is(true));
     }
 
     private void misoTest(final Engine engine) throws InterruptedException, ExecutionException, TimeoutException {
+        long timeout = 5L;
         Future<Boolean> subTask1 = createSubscriberFuture("sub-1", engine);
         Future<Boolean> subTask2 = createSubscriberFuture("sub-2", engine);
         Future<Boolean> subTask3 = createSubscriberFuture("sub-3", engine);
         Future<Boolean> pubTask = createPublisherFuture(engine);
-        assertThat(subTask1.get(5L, TimeUnit.MINUTES), is(true));
-        assertThat(subTask2.get(5L, TimeUnit.MINUTES), is(true));
-        assertThat(subTask3.get(5L, TimeUnit.MINUTES), is(true));
+        assertThat(subTask1.get(timeout, TimeUnit.MINUTES), is(true));
+        assertThat(subTask2.get(timeout, TimeUnit.MINUTES), is(true));
+        assertThat(subTask3.get(timeout, TimeUnit.MINUTES), is(true));
         assertThat(pubTask.get(), is(true));
     }
 
@@ -122,8 +127,9 @@ public class MessageBusTest {
             LongStream.rangeClosed(fixtures.getFirstMessageId(), fixtures.getNumberOfMessages())
                     .onClose(() -> stopwatch.stop())
                     .forEach(value -> {
+                        IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(1L));
                         while (!publisher.send(Bytes.concat(Longs.toByteArray(value), fixtures.getAdditionalData()))) {
-                            Thread.yield();
+                            idleStrategy.idle();
                         }
                     });
             System.out.println("Sent all messages in " + stopwatch);
@@ -153,8 +159,9 @@ public class MessageBusTest {
                     }
                 }
             });
+            IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(100L));
             while (state.get() && lastReceived.get() < fixtures.getNumberOfMessages()) {
-                Thread.yield();
+                idleStrategy.idle();
             }
             subscriber.close();
             if (!state.get()) {

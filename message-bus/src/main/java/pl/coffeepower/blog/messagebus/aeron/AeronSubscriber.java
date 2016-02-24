@@ -47,9 +47,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
 @Log4j2
 final class AeronSubscriber implements Subscriber {
 

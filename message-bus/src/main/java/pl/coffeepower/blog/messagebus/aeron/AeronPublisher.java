@@ -41,9 +41,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
 @Log4j2
 final class AeronPublisher implements Publisher {
 
