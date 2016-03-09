@@ -34,6 +34,8 @@ import java.io.Serializable;
 @ToString
 public final class Dish implements Serializable {
 
+    private static final long serialVersionUID = -7494325349883513295L;
+
     private final String name;
     private final int calories;
     private final boolean withMeat;
