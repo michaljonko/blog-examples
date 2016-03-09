@@ -33,8 +33,9 @@ import java.util.Random;
 import java8.util.stream.Collectors;
 import java8.util.stream.StreamSupport;
 import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 
-@Log
+@Log4j2
 public final class StreamsExample {
 
     private final List<Integer> numbers;

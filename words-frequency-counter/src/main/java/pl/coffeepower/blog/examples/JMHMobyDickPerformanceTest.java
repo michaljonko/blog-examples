@@ -28,6 +28,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
+import lombok.extern.log4j.Log4j2;
+
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
@@ -55,9 +57,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import lombok.extern.java.Log;
-
-@Log
 @State(Scope.Benchmark)
 @Warmup(iterations = 10)
 @Measurement(iterations = 10)
@@ -66,6 +65,7 @@ import lombok.extern.java.Log;
 public class JMHMobyDickPerformanceTest {
 
     private static final boolean FAIL_ON_ERROR = true;
+    private static final org.apache.logging.log4j.Logger log = org.apache.logging.log4j.LogManager.getLogger(JMHMobyDickPerformanceTest.class);
 
     private final List<String> words = Lists.newLinkedList();
 
@@ -81,7 +81,7 @@ public class JMHMobyDickPerformanceTest {
             Resources.readLines(Resources.getResource("mobydick.txt"), Charsets.UTF_8)
                     .forEach(line -> words.addAll(Arrays.asList(tokenizer.tokenize(line))));
         } catch (IOException e) {
-            log.severe(e.toString());
+            log.error("Exception while init", e);
             System.exit(-1);
         }
     }

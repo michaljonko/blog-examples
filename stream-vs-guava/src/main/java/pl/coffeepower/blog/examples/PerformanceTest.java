@@ -26,6 +26,8 @@ package pl.coffeepower.blog.examples;
 
 import com.google.common.io.Resources;
 
+import lombok.Cleanup;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -44,8 +46,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
-
-import lombok.Cleanup;
 
 @State(Scope.Benchmark)
 @Warmup(iterations = 10)

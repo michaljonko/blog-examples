@@ -24,34 +24,32 @@
 
 package pl.coffeepower.blog.examples.counters;
 
-import com.google.common.collect.Maps;
+import lombok.EqualsAndHashCode;
 
-import lombok.NoArgsConstructor;
+//TODO Some problems with Lombok annotations - @AllArgumentsConstructor, @Getter
+@EqualsAndHashCode
+public final class Frequency {
 
-import pl.coffeepower.blog.examples.WordsFrequencyCounter;
+    private int value;
 
-import java.util.Map;
-import java.util.stream.Collectors;
+    public Frequency(int value) {
+        this.value = value;
+    }
 
-@NoArgsConstructor
-public final class ClassWordsFrequencyCounter implements WordsFrequencyCounter {
+    public final int getValue() {
+        return value;
+    }
 
-    private final Map<String, Frequency> map = Maps.newConcurrentMap();
+    public final void inc() {
+        value++;
+    }
 
-    @Override
-    public final void increase(String word) {
-        Frequency counter = map.get(word);
-        if (counter == null) {
-            map.put(word, new Frequency(1));
-        } else {
-            counter.inc();
-        }
+    public final void dec() {
+        value--;
     }
 
     @Override
-    public final Map<String, Integer> wordsFrequency() {
-        return map.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
+    public String toString() {
+        return String.valueOf(value);
     }
 }

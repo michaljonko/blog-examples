@@ -24,10 +24,10 @@
 
 package pl.coffeepower.blog.examples;
 
+import lombok.NonNull;
+
 import java.util.List;
 import java.util.stream.Collectors;
-
-import lombok.NonNull;
 
 public final class StreamsDishService implements DishService {
 

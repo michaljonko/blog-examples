@@ -29,9 +29,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
-import java.util.List;
-
 import lombok.NonNull;
+
+import java.util.List;
 
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;

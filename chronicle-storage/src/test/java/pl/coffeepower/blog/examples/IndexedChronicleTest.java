@@ -26,6 +26,9 @@ package pl.coffeepower.blog.examples;
 
 import com.google.common.primitives.Longs;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import net.openhft.chronicle.Chronicle;
 import net.openhft.chronicle.ChronicleQueueBuilder;
 import net.openhft.chronicle.ExcerptAppender;
@@ -42,10 +45,6 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.function.LongConsumer;
 import java.util.stream.LongStream;
-
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.extern.java.Log;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
