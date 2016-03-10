@@ -24,37 +24,16 @@
 
 package pl.coffeepower.blog.examples;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.Value;
 
 import java.io.Serializable;
 
-//TODO Some problems with Lombok annotations - @Value, @Builder
-@EqualsAndHashCode
-@ToString
+@Value
 public final class Dish implements Serializable {
 
     private static final long serialVersionUID = -7494325349883513295L;
 
-    private final String name;
-    private final int calories;
-    private final boolean withMeat;
-
-    public Dish(String name, int calories, boolean withMeat) {
-        this.name = name;
-        this.calories = calories;
-        this.withMeat = withMeat;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getCalories() {
-        return calories;
-    }
-
-    public boolean isWithMeat() {
-        return withMeat;
-    }
+    String name;
+    int calories;
+    boolean withMeat;
 }

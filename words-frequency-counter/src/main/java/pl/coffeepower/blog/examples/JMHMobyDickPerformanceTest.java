@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+@Log4j2
 @State(Scope.Benchmark)
 @Warmup(iterations = 10)
 @Measurement(iterations = 10)
@@ -65,7 +66,6 @@ import java.util.List;
 public class JMHMobyDickPerformanceTest {
 
     private static final boolean FAIL_ON_ERROR = true;
-    private static final org.apache.logging.log4j.Logger log = org.apache.logging.log4j.LogManager.getLogger(JMHMobyDickPerformanceTest.class);
 
     private final List<String> words = Lists.newLinkedList();
 

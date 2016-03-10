@@ -26,6 +26,10 @@ package pl.coffeepower.blog.examples.counters;
 
 import com.google.common.collect.Maps;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import pl.coffeepower.blog.examples.WordsFrequencyCounter;
@@ -53,5 +57,26 @@ public final class ClassWordsFrequencyCounter implements WordsFrequencyCounter {
         return map.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @EqualsAndHashCode
+    private static final class Frequency {
+
+        @Getter
+        private int value;
+
+        public final void inc() {
+            value++;
+        }
+
+        public final void dec() {
+            value--;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
     }
 }
