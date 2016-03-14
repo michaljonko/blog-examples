@@ -26,6 +26,8 @@ package pl.coffeepower.blog.examples;
 
 import com.google.common.io.Resources;
 
+import lombok.extern.log4j.Log4j2;
+
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
@@ -35,6 +37,7 @@ import pl.coffeepower.blog.examples.counters.SimpleWordsFrequencyCounter;
 import java.io.IOException;
 import java.util.Map;
 
+@Log4j2
 public final class LicenseWordsAnalyzer {
 
     public static final String TOKEN_MODEL = "en-token.bin";
@@ -68,7 +71,7 @@ public final class LicenseWordsAnalyzer {
                 .stream()
                 .sorted((entry1, entry2) -> entry2.getValue() - entry1.getValue())
                 .limit(TOP_WORDS_LIMIT)
-                .forEach(entry -> System.out.println(String.format("%10s : %2d", entry.getKey(), entry.getValue())));
+                .forEach(entry -> log.info("{} : {}", entry.getKey(), entry.getValue()));
     }
 
     public final Map<String, Integer> calculateWordsFrequency() {
