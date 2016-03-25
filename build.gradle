@@ -47,8 +47,6 @@ allprojects {
                 it.isDirectory() ? it : zipTree(it)
             }
         }
+        with jar
     }
-
-    fatJar.dependsOn clean
-    fatJar.dependsOn jar
 }
