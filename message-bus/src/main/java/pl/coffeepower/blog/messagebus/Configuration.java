@@ -35,11 +35,11 @@ public interface Configuration {
 
     String getBindAddress();
 
-    int getChannelId();
+    int getTopicId();
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     final class Const {
-        public static final String CHANNEL_ID_KEY = "channel.id";
+        public static final String TOPIC_ID_KEY = "topic.id";
         public static final String MULTICAST_ADDRESS_KEY = "multicast.address";
         public static final String MULTICAST_PORT_KEY = "multicast.port";
         public static final String BIND_ADDRESS_KEY = "bind.address";

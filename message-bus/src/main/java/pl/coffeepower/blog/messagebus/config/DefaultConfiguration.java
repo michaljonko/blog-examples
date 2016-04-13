@@ -32,7 +32,6 @@ package pl.coffeepower.blog.messagebus.config;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
 
 import lombok.Value;
@@ -45,13 +44,13 @@ import javax.inject.Singleton;
 @Value
 final class DefaultConfiguration implements Configuration {
 
-    private int channelId;
+    private int topicId;
     private String multicastAddress;
     private int multicastPort;
     private String bindAddress;
 
     public DefaultConfiguration() {
-        this.channelId = Integer.parseInt(System.getProperty(Const.CHANNEL_ID_KEY, "1"));
+        this.topicId = Integer.parseInt(System.getProperty(Const.TOPIC_ID_KEY, "1"));
         Preconditions.checkArgument(
                 InetAddresses.isInetAddress(this.multicastAddress = System.getProperty(Const.MULTICAST_ADDRESS_KEY, "225.0.0.11")),
                 "multicastAddress is not a valid IP");
@@ -70,7 +69,7 @@ final class DefaultConfiguration implements Configuration {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("channelId", channelId)
+                .add("topicId", topicId)
                 .add("multicastAddress", multicastAddress)
                 .add("multicastPort", multicastPort)
                 .add("bindAddress", bindAddress)

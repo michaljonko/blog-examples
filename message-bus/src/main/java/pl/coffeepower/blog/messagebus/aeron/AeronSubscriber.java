@@ -69,7 +69,7 @@ final class AeronSubscriber implements Subscriber {
         Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
         String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
         this.aeron = aeron;
-        this.subscription = this.aeron.addSubscription(channel, configuration.getChannelId());
+        this.subscription = this.aeron.addSubscription(channel, configuration.getTopicId());
         this.idleStrategy = idleStrategy;
         this.disruptor = disruptor;
         this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
@@ -90,7 +90,7 @@ final class AeronSubscriber implements Subscriber {
             }
         });
         this.executor.shutdown();
-        log.info("Created Subscriber: channel={}, streamId={}", channel, configuration.getChannelId());
+        log.info("Created Subscriber: channel={}, streamId={}", channel, configuration.getTopicId());
     }
 
     @Override

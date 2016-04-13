@@ -56,9 +56,9 @@ final class AeronPublisher implements Publisher {
         Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
         String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
         this.aeron = aeron;
-        this.publication = this.aeron.addPublication(channel, configuration.getChannelId());
+        this.publication = this.aeron.addPublication(channel, configuration.getTopicId());
         this.opened.set(true);
-        log.info("Created Publisher: channel={}, streamId={}", channel, configuration.getChannelId());
+        log.info("Created Publisher: channel={}, streamId={}", channel, configuration.getTopicId());
     }
 
     @Override

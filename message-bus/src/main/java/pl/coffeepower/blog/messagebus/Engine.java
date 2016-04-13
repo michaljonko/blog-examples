@@ -26,21 +26,30 @@ package pl.coffeepower.blog.messagebus;
 
 import com.google.inject.Module;
 
-import lombok.Getter;
-
 import pl.coffeepower.blog.messagebus.aeron.AeronModule;
 import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
 import pl.coffeepower.blog.messagebus.raw.RawModule;
 
 public enum Engine {
-    FAST_CAST(new FastCastModule()),
-    AERON(new AeronModule()),
-    RAW(new RawModule());
+    FAST_CAST(FastCastModule.class),
+    AERON(AeronModule.class),
+    RAW(RawModule.class);
 
-    @Getter
-    private final Module module;
+    private final Class<? extends Module> moduleClass;
+    private Module module;
 
-    Engine(Module module) {
-        this.module = module;
+    Engine(Class<? extends Module> moduleClass) {
+        this.moduleClass = moduleClass;
+    }
+
+    public synchronized final Module getModule() {
+        if (module == null) {
+            try {
+                module = moduleClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new InternalError(e);
+            }
+        }
+        return module;
     }
 }

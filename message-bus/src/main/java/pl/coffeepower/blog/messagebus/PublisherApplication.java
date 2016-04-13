@@ -34,6 +34,7 @@ import com.google.inject.Guice;
 import lombok.extern.log4j.Log4j2;
 
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
+import pl.coffeepower.blog.messagebus.util.BytesEventModule;
 import pl.coffeepower.blog.messagebus.util.DefaultBasicService;
 
 import java.util.concurrent.Executors;
@@ -47,7 +48,7 @@ public final class PublisherApplication extends AbstractExecutionThreadService {
     private final Publisher publisher;
 
     PublisherApplication(Engine engine) {
-        this.publisher = Guice.createInjector(new ConfigModule(), engine.getModule())
+        this.publisher = Guice.createInjector(new ConfigModule(), new BytesEventModule(), engine.getModule())
                 .getInstance(Publisher.class);
     }
 

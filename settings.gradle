@@ -1,6 +1,7 @@
 rootProject.name = 'blog-examples'
-include 'words-frequency-counter',
-        'lambda-exp-on-java7',
-//        'chronicle-storage',
-        'message-bus',
-        'stream-vs-guava'
+include ':words-frequency-counter',
+        ':lambda-exp-on-java7',
+        ':message-bus',
+        ':stream-vs-guava',
+        ':epam-tech-talk'
+
