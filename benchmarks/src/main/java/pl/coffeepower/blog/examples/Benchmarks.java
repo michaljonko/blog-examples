@@ -44,9 +44,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
-@Warmup(iterations = 10)
+@Warmup(iterations = 20)
 @Measurement(iterations = 50)
-@Threads(value = 1)
+@Threads(value = 2)
 @Fork(value = 1)
 @OutputTimeUnit(value = TimeUnit.NANOSECONDS)
 public class Benchmarks {
@@ -67,30 +67,14 @@ public class Benchmarks {
     }
 
     @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureMul(Blackhole blackhole) {
-        float number = randomNumber;
-        number *= 0.01f;
-        blackhole.consume(number);
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureDiv(Blackhole blackhole) {
-        float number = randomNumber;
-        number /= 100.0f;
-        blackhole.consume(number);
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.All)
+    @BenchmarkMode(value = {Mode.Throughput, Mode.AverageTime, Mode.SingleShotTime})
     public void measureMathOpsMul(Blackhole blackhole) {
-        blackhole.consume(MathOperations.mul(randomNumber, 0.01f));
+        blackhole.consume(FloatMathOperations.mul(randomNumber, 0.01f));
     }
 
     @Benchmark
-    @BenchmarkMode(Mode.All)
+    @BenchmarkMode(value = {Mode.Throughput, Mode.AverageTime, Mode.SingleShotTime})
     public void measureMathOpsDiv(Blackhole blackhole) {
-        blackhole.consume(MathOperations.div(randomNumber, 100.0f));
+        blackhole.consume(FloatMathOperations.div(randomNumber, 100.0f));
     }
 }
