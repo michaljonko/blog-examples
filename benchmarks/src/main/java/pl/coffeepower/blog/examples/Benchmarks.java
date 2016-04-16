@@ -67,13 +67,13 @@ public class Benchmarks {
     }
 
     @Benchmark
-    @BenchmarkMode(value = {Mode.Throughput, Mode.AverageTime, Mode.SingleShotTime})
+    @BenchmarkMode(value = Mode.All)
     public void measureMathOpsMul(Blackhole blackhole) {
         blackhole.consume(FloatMathOperations.mul(randomNumber, 0.01f));
     }
 
     @Benchmark
-    @BenchmarkMode(value = {Mode.Throughput, Mode.AverageTime, Mode.SingleShotTime})
+    @BenchmarkMode(value = Mode.All)
     public void measureMathOpsDiv(Blackhole blackhole) {
         blackhole.consume(FloatMathOperations.div(randomNumber, 100.0f));
     }
