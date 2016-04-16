@@ -37,7 +37,7 @@ public class Benchmarks {
         ).run();
     }
 
-    @Setup(value = Level.Invocation)
+    @Setup(value = Level.Iteration)
     public void setup() {
         randomNumber = (float) Math.random();
     }
