@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @Warmup(iterations = 20)
 @Measurement(iterations = 50)
-@Threads(value = 2)
+@Threads(value = 1)
 @Fork(value = 1)
 @OutputTimeUnit(value = TimeUnit.NANOSECONDS)
 public class Benchmarks {
@@ -69,12 +69,14 @@ public class Benchmarks {
     @Benchmark
     @BenchmarkMode(value = Mode.All)
     public void measureMathOpsMul(Blackhole blackhole) {
-        blackhole.consume(FloatMathOperations.mul(randomNumber, 0.01f));
+        float result = FloatMathOperations.mul(randomNumber, 0.01f);
+        blackhole.consume(result);
     }
 
     @Benchmark
     @BenchmarkMode(value = Mode.All)
     public void measureMathOpsDiv(Blackhole blackhole) {
-        blackhole.consume(FloatMathOperations.div(randomNumber, 100.0f));
+        float result = FloatMathOperations.div(randomNumber, 100.0f);
+        blackhole.consume(result);
     }
 }
