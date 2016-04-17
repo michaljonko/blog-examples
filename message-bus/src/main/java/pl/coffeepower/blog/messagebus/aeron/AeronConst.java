@@ -30,5 +30,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class AeronConst {
 
-    public static final int BUFFER_SIZE = 1024;
+    public static final int BUFFER_SIZE = 512;
 }
