@@ -29,8 +29,6 @@ import com.google.common.primitives.Longs;
 
 import com.beust.jcommander.JCommander;
 
-import lombok.extern.log4j.Log4j2;
-
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.util.BytesEventModule;
 
@@ -39,6 +37,8 @@ import uk.co.real_logic.agrona.concurrent.SleepingIdleStrategy;
 
 import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
+
+import lombok.extern.log4j.Log4j2;
 
 import static com.google.inject.Guice.createInjector;
 
@@ -63,7 +63,7 @@ public final class TechTalkPublisher {
             }
         });
         log.info("Sent all packets in " + stopwatch.stop());
-        TimeUnit.SECONDS.sleep(5L);
+        TimeUnit.SECONDS.sleep(10L);
         publisher.close();
     }
 

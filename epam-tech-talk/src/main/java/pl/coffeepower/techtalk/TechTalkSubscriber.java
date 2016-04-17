@@ -28,13 +28,13 @@ import com.google.common.primitives.Longs;
 
 import com.beust.jcommander.JCommander;
 
-import lombok.extern.log4j.Log4j2;
-
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.BytesEventModule;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import lombok.extern.log4j.Log4j2;
 
 import static com.google.inject.Guice.createInjector;
 
@@ -53,7 +53,7 @@ public final class TechTalkSubscriber {
     private void receive() {
         subscriber.register((data, length) -> {
             long number = Longs.fromByteArray(data);
-            if (number % 1_000 == 0)
+            if (number % 10_000 == 0)
                 log.info("Got " + number + " message");
             if (number >= packets) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();

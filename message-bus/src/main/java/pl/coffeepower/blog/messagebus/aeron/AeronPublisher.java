@@ -27,20 +27,23 @@ package pl.coffeepower.blog.messagebus.aeron;
 import com.google.common.base.Preconditions;
 import com.google.common.net.InetAddresses;
 
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
-
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Publisher;
 
 import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.Publication;
+import uk.co.real_logic.agrona.concurrent.IdleStrategy;
+import uk.co.real_logic.agrona.concurrent.SleepingIdleStrategy;
 import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
+
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 final class AeronPublisher implements Publisher {
@@ -76,6 +79,10 @@ final class AeronPublisher implements Publisher {
     @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
+        IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MILLISECONDS.toNanos(1L));
+        while (publication.hasBeenConnected()) {
+            idleStrategy.idle();
+        }
         publication.close();
         aeron.close();
         opened.set(false);
