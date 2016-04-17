@@ -28,9 +28,6 @@ import com.google.common.base.StandardSystemProperty;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
-
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
@@ -49,6 +46,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class AeronModule extends AbstractModule {
@@ -69,7 +69,8 @@ public final class AeronModule extends AbstractModule {
                 .receiverIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
                 .senderIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
                 .dirsDeleteOnStart(true);
-        //context.aeronDirectoryName(StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString());
+        context.aeronDirectoryName(
+                System.getProperty("aeron.dir", StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString()));
         return MediaDriver.launch(context);
     }
 

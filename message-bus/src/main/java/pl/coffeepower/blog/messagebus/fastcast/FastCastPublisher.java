@@ -26,9 +26,6 @@ package pl.coffeepower.blog.messagebus.fastcast;
 
 import com.google.common.base.Preconditions;
 
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
-
 import org.nustaq.fastcast.api.FCPublisher;
 import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
@@ -46,6 +43,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 final class FastCastPublisher implements Publisher {
@@ -75,7 +75,7 @@ final class FastCastPublisher implements Publisher {
         try {
             lock();
             Preconditions.checkState(opened.get(), "Already closed");
-            return publisher.offer(null, data, 0, data.length, true);
+            return publisher.offer(null, data, 0, data.length, false);
         } finally {
             unlock();
         }
