@@ -69,7 +69,7 @@ public final class AeronModule extends AbstractModule {
                 .receiverIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
                 .senderIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
                 .dirsDeleteOnStart(true);
-        context.aeronDirectoryName(StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString());
+        //context.aeronDirectoryName(StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString());
         return MediaDriver.launch(context);
     }
 

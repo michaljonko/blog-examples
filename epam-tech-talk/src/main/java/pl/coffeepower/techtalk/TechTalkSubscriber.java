@@ -53,7 +53,7 @@ public final class TechTalkSubscriber {
     private void receive() {
         subscriber.register((data, length) -> {
             long number = Longs.fromByteArray(data);
-            if (number % 100_000 == 0)
+            if (number % 1_000 == 0)
                 log.info("Got " + number + " message");
             if (number >= packets) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();

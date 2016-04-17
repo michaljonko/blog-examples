@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class FastCastConst {
 
-    public static final int DATAGRAM_SIZE = 512;
+    public static final int DATAGRAM_SIZE = 800;
     public static final int IDLE_PARK_MICROS = 1;
     public static final int SPIN_LOOP_MICROS = 1;
     public static final int PUBLISHER_PPS = 50_000;
