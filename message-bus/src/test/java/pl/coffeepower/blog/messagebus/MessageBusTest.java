@@ -67,7 +67,7 @@ public class MessageBusTest {
     public void setUp() throws Exception {
         cloud = CloudFactory.createCloud();
         ViProps.at(cloud.node("**")).setLocalType();
-        JvmProps.at(cloud.node("**")).addJvmArgs("-Xms128m", "-Xmx256m");
+        JvmProps.at(cloud.node("**")).addJvmArgs("-Xms96m", "-Xmx192m");
         cloud.node("sub-1").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-1");
         cloud.node("sub-2").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-2");
         cloud.node("sub-3").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-3");
@@ -100,7 +100,7 @@ public class MessageBusTest {
     }
 
     private void sisoTest(final Engine engine) throws InterruptedException, ExecutionException, TimeoutException {
-        long timeout = 5L;
+        long timeout = 1L;
         Future<Boolean> subTask = createSubscriberFuture(engine);
         Future<Boolean> pubTask = createPublisherFuture(engine);
         assertThat(subTask.get(timeout, TimeUnit.MINUTES), is(true));
@@ -108,7 +108,7 @@ public class MessageBusTest {
     }
 
     private void misoTest(final Engine engine) throws InterruptedException, ExecutionException, TimeoutException {
-        long timeout = 5L;
+        long timeout = 1L;
         Future<Boolean> subTask1 = createSubscriberFuture("sub-1", engine);
         Future<Boolean> subTask2 = createSubscriberFuture("sub-2", engine);
         Future<Boolean> subTask3 = createSubscriberFuture("sub-3", engine);
@@ -119,20 +119,19 @@ public class MessageBusTest {
         assertThat(pubTask.get(), is(true));
     }
 
-    private Future<Boolean> createPublisherFuture(final Engine engine) {
+    private Future<Boolean> createPublisherFuture(Engine engine) {
         return cloud.node("pub").submit((Callable<Boolean> & Serializable) () -> {
             Fixtures fixtures = new Fixtures();
             Publisher publisher = Guice.createInjector(new ConfigModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
             Stopwatch stopwatch = Stopwatch.createStarted();
             LongStream.rangeClosed(fixtures.getFirstMessageId(), fixtures.getNumberOfMessages())
-                    .onClose(() -> stopwatch.stop())
                     .forEach(value -> {
                         IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(1L));
                         while (!publisher.send(Bytes.concat(Longs.toByteArray(value), fixtures.getAdditionalData()))) {
                             idleStrategy.idle();
                         }
                     });
-            System.out.println("Sent all messages in " + stopwatch);
+            System.out.println("Sent all messages in " + stopwatch.stop());
             return Boolean.TRUE;
         });
     }
@@ -166,9 +165,9 @@ public class MessageBusTest {
             subscriber.close();
             if (!state.get()) {
                 System.out.println("Broken connection on messageId=" + lastReceived.get());
+                System.out.println("Last messageId=" + lastReceived);
             } else {
                 System.out.println("Received messages " + messagesCounter + " in " + stopwatch.stop());
-                System.out.println("Last messageId=" + lastReceived);
             }
             return state.get();
         });

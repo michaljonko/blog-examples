@@ -27,8 +27,14 @@ package pl.coffeepower.blog.messagebus.aeron;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.concurrent.TimeUnit;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class AeronConst {
 
     public static final int BUFFER_SIZE = 800;
+    public static final long BACKOFF_IDLE_STRATEGY_MAX_SPINS = 5L;
+    public static final long BACKOFF_IDLE_STRATEGY_MAX_YEALDS = 10L;
+    public static final long BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS = TimeUnit.MICROSECONDS.toNanos(2L);
+    public static final long BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS = TimeUnit.MICROSECONDS.toNanos(2L);
 }

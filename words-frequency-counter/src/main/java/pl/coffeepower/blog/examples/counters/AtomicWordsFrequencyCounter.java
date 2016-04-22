@@ -26,13 +26,13 @@ package pl.coffeepower.blog.examples.counters;
 
 import com.google.common.collect.Maps;
 
+import lombok.NoArgsConstructor;
+
 import pl.coffeepower.blog.examples.WordsFrequencyCounter;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public final class AtomicWordsFrequencyCounter implements WordsFrequencyCounter {

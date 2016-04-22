@@ -22,18 +22,15 @@
  * SOFTWARE.
  */
 
-/*
- * Created by IntelliJ IDEA.
- * User: yogurt
- * Date: 24.11.15
- * Time: 23:04
- */
 package pl.coffeepower.blog.messagebus.fastcast;
 
 import com.google.common.net.InetAddresses;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
+
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
 import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
@@ -51,9 +48,6 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class FastCastModule extends AbstractModule {

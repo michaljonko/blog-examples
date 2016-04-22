@@ -26,10 +26,10 @@ package pl.coffeepower.blog.examples;
 
 import com.google.common.collect.Collections2;
 
-import java.util.Collection;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import java.util.Collection;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NumberUtils {

@@ -22,12 +22,6 @@
  * SOFTWARE.
  */
 
-/*
- * Created by IntelliJ IDEA.
- * User: yogurt
- * Date: 24.11.15
- * Time: 23:07
- */
 package pl.coffeepower.blog.messagebus.config;
 
 import com.google.inject.AbstractModule;

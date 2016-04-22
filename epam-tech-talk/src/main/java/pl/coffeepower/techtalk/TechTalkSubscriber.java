@@ -28,13 +28,13 @@ import com.google.common.primitives.Longs;
 
 import com.beust.jcommander.JCommander;
 
+import lombok.extern.log4j.Log4j2;
+
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.BytesEventModule;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import lombok.extern.log4j.Log4j2;
 
 import static com.google.inject.Guice.createInjector;
 
@@ -48,6 +48,12 @@ public final class TechTalkSubscriber {
         subscriber = createInjector(new TechTalkConfigModule(configuration), new BytesEventModule(), configuration.getEngine().getModule())
                 .getInstance(Subscriber.class);
         packets = configuration.getPackets();
+    }
+
+    public static void main(String[] args) {
+        TechTalkConfiguration configuration = new TechTalkConfiguration();
+        new JCommander(configuration, args).usage();
+        new TechTalkSubscriber(configuration).receive();
     }
 
     private void receive() {
@@ -68,11 +74,5 @@ public final class TechTalkSubscriber {
                 executorService.shutdown();
             }
         });
-    }
-
-    public static void main(String[] args) {
-        TechTalkConfiguration configuration = new TechTalkConfiguration();
-        new JCommander(configuration, args).usage();
-        new TechTalkSubscriber(configuration).receive();
     }
 }

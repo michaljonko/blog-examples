@@ -28,6 +28,9 @@ import com.google.common.base.StandardSystemProperty;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
+
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
@@ -42,13 +45,9 @@ import uk.co.real_logic.agrona.concurrent.IdleStrategy;
 
 import java.io.File;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class AeronModule extends AbstractModule {
@@ -61,13 +60,15 @@ public final class AeronModule extends AbstractModule {
 
     @Provides
     @Singleton
-    @Inject
     private MediaDriver createMediaDriver() {
         MediaDriver.Context context = new MediaDriver.Context()
-                .threadingMode(ThreadingMode.DEDICATED)
-                .conductorIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
-                .receiverIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
-                .senderIdleStrategy(new BackoffIdleStrategy(5, 10, TimeUnit.MICROSECONDS.toNanos(1L), TimeUnit.MICROSECONDS.toNanos(1L)))
+                .threadingMode(ThreadingMode.SHARED_NETWORK)
+                .conductorIdleStrategy(
+                        new BackoffIdleStrategy(AeronConst.BACKOFF_IDLE_STRATEGY_MAX_SPINS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_YEALDS, AeronConst.BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS))
+                .receiverIdleStrategy(
+                        new BackoffIdleStrategy(AeronConst.BACKOFF_IDLE_STRATEGY_MAX_SPINS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_YEALDS, AeronConst.BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS))
+                .senderIdleStrategy(
+                        new BackoffIdleStrategy(AeronConst.BACKOFF_IDLE_STRATEGY_MAX_SPINS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_YEALDS, AeronConst.BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS))
                 .dirsDeleteOnStart(true);
         context.aeronDirectoryName(
                 System.getProperty("aeron.dir", StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString()));
@@ -98,6 +99,9 @@ public final class AeronModule extends AbstractModule {
     @Singleton
     @Inject
     private Aeron createAeron(@NonNull Aeron.Context context) {
+        if (log.isDebugEnabled()) {
+            log.info("aeronDirectoryName={}", context.aeronDirectoryName());
+        }
         return Aeron.connect(context);
     }
 

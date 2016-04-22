@@ -27,13 +27,13 @@ package pl.coffeepower.blog.examples;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
+import lombok.extern.log4j.Log4j2;
+
 import java.util.List;
 import java.util.Random;
 
 import java8.util.stream.Collectors;
 import java8.util.stream.StreamSupport;
-import lombok.extern.java.Log;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public final class StreamsExample {

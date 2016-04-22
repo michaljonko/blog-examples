@@ -26,14 +26,14 @@ package pl.coffeepower.techtalk;
 
 import com.beust.jcommander.Parameter;
 
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Engine;
 
 import java.net.InetAddress;
-
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)

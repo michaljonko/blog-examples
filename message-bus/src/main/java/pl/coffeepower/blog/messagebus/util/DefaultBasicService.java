@@ -28,9 +28,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 
-import java.util.Collections;
-
 import lombok.NonNull;
+
+import java.util.Collections;
 
 public final class DefaultBasicService implements BasicService {
 

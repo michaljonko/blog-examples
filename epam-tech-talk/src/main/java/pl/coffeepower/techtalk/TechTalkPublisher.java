@@ -29,6 +29,8 @@ import com.google.common.primitives.Longs;
 
 import com.beust.jcommander.JCommander;
 
+import lombok.extern.log4j.Log4j2;
+
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.util.BytesEventModule;
 
@@ -37,8 +39,6 @@ import uk.co.real_logic.agrona.concurrent.SleepingIdleStrategy;
 
 import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
-
-import lombok.extern.log4j.Log4j2;
 
 import static com.google.inject.Guice.createInjector;
 
@@ -54,6 +54,12 @@ public final class TechTalkPublisher {
         packets = configuration.getPackets();
     }
 
+    public static void main(String[] args) throws Exception {
+        TechTalkConfiguration configuration = new TechTalkConfiguration();
+        new JCommander(configuration, args).usage();
+        new TechTalkPublisher(configuration).publish();
+    }
+
     private void publish() throws Exception {
         IdleStrategy idleStrategy = new SleepingIdleStrategy(1L);
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -65,11 +71,5 @@ public final class TechTalkPublisher {
         log.info("Sent all packets in " + stopwatch.stop());
         TimeUnit.SECONDS.sleep(10L);
         publisher.close();
-    }
-
-    public static void main(String[] args) throws Exception {
-        TechTalkConfiguration configuration = new TechTalkConfiguration();
-        new JCommander(configuration, args).usage();
-        new TechTalkPublisher(configuration).publish();
     }
 }
