@@ -30,15 +30,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class FastCastConst {
 
-    public static final int DATAGRAM_SIZE = 804;
-    public static final int IDLE_PARK_MICROS = 1;
-    public static final int SPIN_LOOP_MICROS = 10;
-    public static final int PUBLISHER_PPS = 50_000;
-    public static final int PUBLISHER_PACKET_HISTORY = 4 * PUBLISHER_PPS;
-    public static final int PUBLISHER_HEARTBEAT_INTERVAL = 500;
-    public static final int SUBSCRIBER_BUFFER_PACKETS = 2 * PUBLISHER_PPS;
-    public static final int SUBSCRIBER_MAX_DELAY_RETRANS_MS = 2;
-    public static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 5;
-    public static final boolean SUBSCRIBER_UNRELIABLE = false;
-    public static final String STREAM_NAME = "coffeepower";
+    static final int DATAGRAM_SIZE = 804;
+    static final int IDLE_PARK_MICROS = 1;
+    static final int SPIN_LOOP_MICROS = 5;
+    static final int PUBLISHER_PPS = 20_000;
+    static final int PUBLISHER_PACKET_HISTORY = 4 * PUBLISHER_PPS;
+    static final int PUBLISHER_HEARTBEAT_INTERVAL = 500;
+    static final int SUBSCRIBER_BUFFER_PACKETS = 2 * PUBLISHER_PPS;
+    static final int SUBSCRIBER_MAX_DELAY_RETRANS_MS = 2;
+    static final int SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS = 5;
+    static final boolean SUBSCRIBER_UNRELIABLE = false;
+    static final String STREAM_NAME = "coffeepower";
 }

@@ -33,15 +33,10 @@ import org.nustaq.fastcast.api.FCPublisher;
 import org.nustaq.fastcast.api.FastCast;
 import org.nustaq.fastcast.config.PhysicalTransportConf;
 import org.nustaq.fastcast.config.PublisherConf;
-import org.nustaq.fastcast.impl.TransportDriver;
 
 import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.Publisher;
 
-import uk.co.real_logic.agrona.concurrent.IdleStrategy;
-import uk.co.real_logic.agrona.concurrent.SleepingIdleStrategy;
-
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -85,12 +80,7 @@ final class FastCastPublisher implements Publisher {
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
         publisher.flush();
-        IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MILLISECONDS.toNanos(1L));
-        TransportDriver transportDriver = fastCast.onTransport(physicalTransportName);
-        while (transportDriver.hasReceiver(publisher.getTopicId())) {
-            idleStrategy.idle();
-        }
-        transportDriver.terminate();
+        fastCast.onTransport(physicalTransportName).terminate();
         unlock();
         opened.set(false);
     }

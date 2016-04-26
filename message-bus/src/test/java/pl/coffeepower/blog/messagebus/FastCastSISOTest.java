@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Michał Jonko
+ * Copyright (c) 2016 Michał Jonko
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,29 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus.aeron;
+package pl.coffeepower.blog.messagebus;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import com.google.common.base.Stopwatch;
 
+import org.junit.Test;
+
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class AeronConst {
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
-    static final int BUFFER_SIZE = 800;
-    static final long BACKOFF_IDLE_STRATEGY_MAX_SPINS = 2L;
-    static final long BACKOFF_IDLE_STRATEGY_MAX_YEALDS = 10L;
-    static final long BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS = TimeUnit.MICROSECONDS.toNanos(3L);
-    static final long BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS = TimeUnit.MICROSECONDS.toNanos(3L);
+public class FastCastSISOTest extends MessageBusTestHelper {
+
+    @Test
+    public void shouldRetrieveAllMessages() throws Exception {
+        long timeout = 30L;
+        Future<Boolean> subTask = createSubscriberFuture(Engine.FAST_CAST);
+        TimeUnit.SECONDS.sleep(3L);
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Publisher publisher = executePublisher(Engine.FAST_CAST);
+        assertThat(subTask.get(timeout, TimeUnit.SECONDS), is(true));
+        System.out.println("All messages received in " + stopwatch.stop());
+        publisher.close();
+    }
 }

@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.2.+'
+        classpath 'me.tatarka:gradle-retrolambda:3.2.5'
     }
 }
 
@@ -22,7 +22,7 @@ jar {
 
 
 dependencies {
-    compile 'net.sourceforge.streamsupport:streamsupport:1.4.+'
+    compile 'net.sourceforge.streamsupport:streamsupport:1.4.2'
 }
 
 retrolambda {

@@ -29,6 +29,7 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
 
+import lombok.Getter;
 import lombok.Value;
 
 import org.gridkit.nanocloud.Cloud;
@@ -37,7 +38,6 @@ import org.gridkit.vicluster.ViProps;
 import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
@@ -48,30 +48,33 @@ import uk.co.real_logic.agrona.concurrent.SleepingIdleStrategy;
 
 import java.io.Serializable;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+public abstract class MessageBusTestHelper implements Serializable {
 
-public class MessageBusTest {
-
+    static final String NODE_SUBSCRIBER_1 = "sub-1";
+    static final String NODE_SUBSCRIBER_2 = "sub-2";
+    static final String NODE_SUBSCRIBER_3 = "sub-3";
+    static final String NODE_PUBLISHER = "pub";
+    private static final long serialVersionUID = -5525765906174658715L;
+    @Getter
     private Cloud cloud;
 
     @Before
     public void setUp() throws Exception {
         cloud = CloudFactory.createCloud();
         ViProps.at(cloud.node("**")).setLocalType();
-        JvmProps.at(cloud.node("**")).addJvmArgs("-Xms96m", "-Xmx192m");
-        cloud.node("sub-1").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-1");
-        cloud.node("sub-2").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-2");
-        cloud.node("sub-3").setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-3");
-        cloud.nodes("pub", "sub-1", "sub-2", "sub-3").touch();
+        JvmProps.at(cloud.node("**")).addJvmArgs("-Xms128m", "-Xmx128m");
+        cloud.node(NODE_SUBSCRIBER_1).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-1");
+        cloud.node(NODE_SUBSCRIBER_2).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-2");
+        cloud.node(NODE_SUBSCRIBER_3).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-3");
+        cloud.nodes(NODE_PUBLISHER, NODE_SUBSCRIBER_1, NODE_SUBSCRIBER_2, NODE_SUBSCRIBER_3).touch();
     }
 
     @After
@@ -79,50 +82,11 @@ public class MessageBusTest {
         cloud.shutdown();
     }
 
-    @Test
-    public void shouldRetrieveAllMessagesWithFastCastSISO() throws Exception {
-        sisoTest(Engine.FAST_CAST);
-    }
-
-    @Test
-    public void shouldRetrieveAllMessagesWithFastCastMISO() throws Exception {
-        misoTest(Engine.FAST_CAST);
-    }
-
-    @Test
-    public void shouldRetrieveAllMessagesWithAeronSISO() throws Exception {
-        sisoTest(Engine.AERON);
-    }
-
-    @Test
-    public void shouldRetrieveAllMessagesWithAeronMISO() throws Exception {
-        misoTest(Engine.AERON);
-    }
-
-    private void sisoTest(final Engine engine) throws InterruptedException, ExecutionException, TimeoutException {
-        long timeout = 1L;
-        Future<Boolean> subTask = createSubscriberFuture(engine);
-        Future<Boolean> pubTask = createPublisherFuture(engine);
-        assertThat(subTask.get(timeout, TimeUnit.MINUTES), is(true));
-        assertThat(pubTask.get(), is(true));
-    }
-
-    private void misoTest(final Engine engine) throws InterruptedException, ExecutionException, TimeoutException {
-        long timeout = 1L;
-        Future<Boolean> subTask1 = createSubscriberFuture("sub-1", engine);
-        Future<Boolean> subTask2 = createSubscriberFuture("sub-2", engine);
-        Future<Boolean> subTask3 = createSubscriberFuture("sub-3", engine);
-        Future<Boolean> pubTask = createPublisherFuture(engine);
-        assertThat(subTask1.get(timeout, TimeUnit.MINUTES), is(true));
-        assertThat(subTask2.get(timeout, TimeUnit.MINUTES), is(true));
-        assertThat(subTask3.get(timeout, TimeUnit.MINUTES), is(true));
-        assertThat(pubTask.get(), is(true));
-    }
-
-    private Future<Boolean> createPublisherFuture(Engine engine) {
-        return cloud.node("pub").submit((Callable<Boolean> & Serializable) () -> {
+    Publisher executePublisher(final Engine engine) throws InterruptedException {
+        Publisher publisher = Guice.createInjector(new ConfigModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
             Fixtures fixtures = new Fixtures();
-            Publisher publisher = Guice.createInjector(new ConfigModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
             Stopwatch stopwatch = Stopwatch.createStarted();
             LongStream.rangeClosed(fixtures.getFirstMessageId(), fixtures.getNumberOfMessages())
                     .forEach(value -> {
@@ -132,42 +96,41 @@ public class MessageBusTest {
                         }
                     });
             System.out.println("Sent all messages in " + stopwatch.stop());
-            return Boolean.TRUE;
         });
+        executorService.shutdown();
+        executorService.awaitTermination(1L, TimeUnit.MINUTES);
+        return publisher;
     }
 
-    private Future<Boolean> createSubscriberFuture(final Engine engine) {
-        return createSubscriberFuture("sub-1", engine);
+    Future<Boolean> createSubscriberFuture(final Engine engine) {
+        return createSubscriberFuture(NODE_SUBSCRIBER_1, engine);
     }
 
-    private Future<Boolean> createSubscriberFuture(final String cloudNode, final Engine engine) {
+    Future<Boolean> createSubscriberFuture(final String cloudNode, final Engine engine) {
         return cloud.node(cloudNode).submit((Callable<Boolean> & Serializable) () -> {
-            Fixtures fixtures = new Fixtures();
+            Fixtures _fixtures = new Fixtures();
             AtomicBoolean state = new AtomicBoolean(true);
             AtomicLong lastReceived = new AtomicLong();
             AtomicLong messagesCounter = new AtomicLong();
             Subscriber subscriber = Guice.createInjector(new ConfigModule(), new BytesEventModule(), engine.getModule()).getInstance(Subscriber.class);
-            Stopwatch stopwatch = Stopwatch.createStarted();
             subscriber.register((data, length) -> {
                 messagesCounter.incrementAndGet();
                 if (state.get()) {
                     long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
                     long lastReceivedValue = lastReceived.get();
-                    if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != fixtures.getLastAdditionalDataByte()) {
+                    if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != _fixtures.getLastAdditionalDataByte()) {
                         state.set(false);
                     }
                 }
             });
             IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(100L));
-            while (state.get() && lastReceived.get() < fixtures.getNumberOfMessages()) {
+            while (state.get() && lastReceived.get() < _fixtures.getNumberOfMessages()) {
                 idleStrategy.idle();
             }
             subscriber.close();
             if (!state.get()) {
                 System.out.println("Broken connection on messageId=" + lastReceived.get());
                 System.out.println("Last messageId=" + lastReceived);
-            } else {
-                System.out.println("Received messages " + messagesCounter + " in " + stopwatch.stop());
             }
             return state.get();
         });

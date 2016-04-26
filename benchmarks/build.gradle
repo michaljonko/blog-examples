@@ -3,7 +3,6 @@ apply plugin: 'application'
 mainClassName = 'pl.coffeepower.blog.examples.Benchmarks'
 
 dependencies {
-    compile 'org.projectlombok:lombok:1.16.+'
-    compile 'org.openjdk.jmh:jmh-core:1.11.+';
-    compile 'org.openjdk.jmh:jmh-generator-annprocess:1.11.+';
+    compile 'org.openjdk.jmh:jmh-core:1.11.3';
+    compile 'org.openjdk.jmh:jmh-generator-annprocess:1.11.3';
 }
