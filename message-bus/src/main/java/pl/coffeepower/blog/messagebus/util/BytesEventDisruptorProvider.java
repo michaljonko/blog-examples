@@ -17,7 +17,7 @@ import pl.coffeepower.blog.messagebus.util.BytesEventFactory.BytesEvent;
 
 final class BytesEventDisruptorProvider implements Provider<Disruptor<BytesEvent>> {
 
-    public static final int DISRUPTOR_SIZE = 32;
+    public static final int DISRUPTOR_SIZE = 64;
 
     public Disruptor<BytesEvent> get() {
         return new Disruptor<>(new BytesEventFactory(), DISRUPTOR_SIZE,

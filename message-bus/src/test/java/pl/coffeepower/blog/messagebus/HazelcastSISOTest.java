@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Michał Jonko
+ * Copyright (c) 2016 Michał Jonko
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,34 +24,27 @@
 
 package pl.coffeepower.blog.messagebus;
 
-import com.google.inject.Module;
+import com.google.common.base.Stopwatch;
 
-import pl.coffeepower.blog.messagebus.aeron.AeronModule;
-import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
-import pl.coffeepower.blog.messagebus.hazelcast.HazelcastModule;
-import pl.coffeepower.blog.messagebus.raw.RawModule;
+import org.junit.Test;
 
-public enum Engine {
-    FAST_CAST(FastCastModule.class),
-    AERON(AeronModule.class),
-    HAZELCAST(HazelcastModule.class),
-    RAW(RawModule.class);
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
-    private final Class<? extends Module> moduleClass;
-    private Module module;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
-    Engine(Class<? extends Module> moduleClass) {
-        this.moduleClass = moduleClass;
-    }
+public class HazelcastSISOTest extends MessageBusTestHelper {
 
-    public synchronized final Module getModule() {
-        if (module == null) {
-            try {
-                module = moduleClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new InternalError(e);
-            }
-        }
-        return module;
+    @Test
+    public void shouldRetrieveAllMessages() throws Exception {
+        long timeout = 30L;
+        Future<Boolean> subTask = createSubscriberFuture(Engine.HAZELCAST);
+        TimeUnit.SECONDS.sleep(3L);
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Publisher publisher = executePublisher(Engine.HAZELCAST);
+        assertThat(subTask.get(timeout, TimeUnit.SECONDS), is(true));
+        System.out.println("All messages received in " + stopwatch.stop());
+        publisher.close();
     }
 }

@@ -86,16 +86,16 @@ final class FastCastSubscriber implements Subscriber {
     }
 
     @Override
+    public void register(@NonNull Handler handler) {
+        this.handler = handler;
+    }
+
+    @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
         fastCast.onTransport(physicalTransportName).terminate();
         disruptor.shutdown();
         handler = null;
         opened.set(false);
-    }
-
-    @Override
-    public void register(@NonNull Handler handler) {
-        this.handler = handler;
     }
 }

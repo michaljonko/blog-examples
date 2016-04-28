@@ -22,66 +22,55 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus.fastcast;
+package pl.coffeepower.blog.messagebus.hazelcast;
 
 import com.google.common.base.Preconditions;
+
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ITopic;
+import com.hazelcast.topic.TopicOverloadException;
 
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
-import org.nustaq.fastcast.api.FCPublisher;
-import org.nustaq.fastcast.api.FastCast;
-import org.nustaq.fastcast.config.PhysicalTransportConf;
-import org.nustaq.fastcast.config.PublisherConf;
-
-import pl.coffeepower.blog.messagebus.Configuration.Const;
+import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Publisher;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 @Log4j2
-final class FastCastPublisher implements Publisher {
+final class HazelcastPublisher implements Publisher {
 
     private final AtomicBoolean opened = new AtomicBoolean(false);
     private final AtomicBoolean lock = new AtomicBoolean(false);
-    private final FastCast fastCast;
-    private final FCPublisher publisher;
-    private final String physicalTransportName;
+    private final ITopic<byte[]> topic;
 
     @Inject
-    private FastCastPublisher(@NonNull FastCast fastCast,
-                              @NonNull @Named(Const.PUBLISHER_NAME_KEY) String nodeId,
-                              @NonNull PhysicalTransportConf physicalTransportConf,
-                              @NonNull PublisherConf publisherConf) {
-        this.fastCast = fastCast;
-        this.fastCast.setNodeId(nodeId);
-        this.fastCast.addTransport(physicalTransportConf);
-        this.physicalTransportName = physicalTransportConf.getName();
-        this.publisher = this.fastCast.onTransport(physicalTransportName).publish(publisherConf).batchOnLimit(true);
-        this.opened.set(true);
-        log.info("Created Publisher: nodeId={}, physicalTransportName={}", nodeId, this.physicalTransportName);
+    private HazelcastPublisher(@NonNull HazelcastInstance hazelcastInstance, @NonNull Configuration configuration) {
+        topic = hazelcastInstance.getTopic(String.valueOf(configuration.getTopicId()));
+        opened.set(true);
+        log.info("Created Publisher: topicId={}", configuration.getTopicId());
     }
 
     @Override
     public boolean send(@NonNull byte[] data) {
         try {
             lock();
-            Preconditions.checkState(opened.get(), "Already closed");
-            return publisher.offer(null, data, 0, data.length, false);
+            topic.publish(data);
+        } catch (TopicOverloadException e) {
+            return false;
         } finally {
             unlock();
         }
+        return true;
     }
 
     @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
-        publisher.flush();
-        fastCast.onTransport(physicalTransportName).terminate();
-        opened.set(false);
+        topic.destroy();
     }
 
     private void lock() {

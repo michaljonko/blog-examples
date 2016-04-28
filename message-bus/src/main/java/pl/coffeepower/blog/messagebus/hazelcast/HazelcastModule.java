@@ -22,36 +22,37 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus;
+package pl.coffeepower.blog.messagebus.hazelcast;
 
-import com.google.inject.Module;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 
-import pl.coffeepower.blog.messagebus.aeron.AeronModule;
-import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
-import pl.coffeepower.blog.messagebus.hazelcast.HazelcastModule;
-import pl.coffeepower.blog.messagebus.raw.RawModule;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 
-public enum Engine {
-    FAST_CAST(FastCastModule.class),
-    AERON(AeronModule.class),
-    HAZELCAST(HazelcastModule.class),
-    RAW(RawModule.class);
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 
-    private final Class<? extends Module> moduleClass;
-    private Module module;
+import pl.coffeepower.blog.messagebus.Configuration;
+import pl.coffeepower.blog.messagebus.Publisher;
+import pl.coffeepower.blog.messagebus.Subscriber;
+import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
 
-    Engine(Class<? extends Module> moduleClass) {
-        this.moduleClass = moduleClass;
+import javax.inject.Inject;
+
+@Log4j2
+public final class HazelcastModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+        bind(Publisher.class).to(HazelcastPublisher.class);
+        bind(Subscriber.class).to(HazelcastSubscriber.class);
+        bind(Subscriber.Handler.class).to(LoggerReceiveHandler.class);
     }
 
-    public synchronized final Module getModule() {
-        if (module == null) {
-            try {
-                module = moduleClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new InternalError(e);
-            }
-        }
-        return module;
+    @Provides
+    @Inject
+    private HazelcastInstance getHazelcastInstance(@NonNull Configuration configuration) {
+        return Hazelcast.newHazelcastInstance();
     }
 }

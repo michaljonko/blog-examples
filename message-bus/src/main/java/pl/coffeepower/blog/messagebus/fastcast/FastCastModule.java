@@ -101,6 +101,7 @@ public final class FastCastModule extends AbstractModule {
         return new PublisherConf(configuration.getTopicId())
                 .numPacketHistory(FastCastConst.PUBLISHER_PACKET_HISTORY)
                 .pps(FastCastConst.PUBLISHER_PPS)
+                .ppsWindow(FastCastConst.PUBLISHER_PPS_WINDOW)
                 .heartbeatInterval(FastCastConst.PUBLISHER_HEARTBEAT_INTERVAL);
     }
 

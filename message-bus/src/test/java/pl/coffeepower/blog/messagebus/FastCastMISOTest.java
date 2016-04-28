@@ -26,7 +26,6 @@ package pl.coffeepower.blog.messagebus;
 
 import com.google.common.base.Stopwatch;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.Future;
@@ -35,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-@Ignore
 public class FastCastMISOTest extends MessageBusTestHelper {
 
     @Test
@@ -45,13 +43,10 @@ public class FastCastMISOTest extends MessageBusTestHelper {
         TimeUnit.SECONDS.sleep(5L);
         Future<Boolean> subTask2 = createSubscriberFuture(NODE_SUBSCRIBER_2, Engine.FAST_CAST);
         TimeUnit.SECONDS.sleep(5L);
-        Future<Boolean> subTask3 = createSubscriberFuture(NODE_SUBSCRIBER_3, Engine.FAST_CAST);
-        TimeUnit.SECONDS.sleep(5L);
         Stopwatch stopwatch = Stopwatch.createStarted();
         Publisher publisher = executePublisher(Engine.FAST_CAST);
         assertThat(subTask1.get(timeout, TimeUnit.SECONDS), is(true));
         assertThat(subTask2.get(timeout, TimeUnit.SECONDS), is(true));
-        assertThat(subTask3.get(timeout, TimeUnit.SECONDS), is(true));
         System.out.println("All messages received in " + stopwatch.stop());
         publisher.close();
     }

@@ -24,9 +24,11 @@
 
 package pl.coffeepower.blog.messagebus;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 
 import lombok.Getter;
@@ -40,7 +42,6 @@ import org.junit.After;
 import org.junit.Before;
 
 import pl.coffeepower.blog.messagebus.Configuration.Const;
-import pl.coffeepower.blog.messagebus.config.ConfigModule;
 import pl.coffeepower.blog.messagebus.util.BytesEventModule;
 
 import uk.co.real_logic.agrona.concurrent.IdleStrategy;
@@ -83,7 +84,7 @@ public abstract class MessageBusTestHelper implements Serializable {
     }
 
     Publisher executePublisher(final Engine engine) throws InterruptedException {
-        Publisher publisher = Guice.createInjector(new ConfigModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
+        Publisher publisher = Guice.createInjector(new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
             Fixtures fixtures = new Fixtures();
@@ -112,7 +113,7 @@ public abstract class MessageBusTestHelper implements Serializable {
             AtomicBoolean state = new AtomicBoolean(true);
             AtomicLong lastReceived = new AtomicLong();
             AtomicLong messagesCounter = new AtomicLong();
-            Subscriber subscriber = Guice.createInjector(new ConfigModule(), new BytesEventModule(), engine.getModule()).getInstance(Subscriber.class);
+            Subscriber subscriber = Guice.createInjector(new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Subscriber.class);
             subscriber.register((data, length) -> {
                 messagesCounter.incrementAndGet();
                 if (state.get()) {
@@ -120,6 +121,9 @@ public abstract class MessageBusTestHelper implements Serializable {
                     long lastReceivedValue = lastReceived.get();
                     if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != _fixtures.getLastAdditionalDataByte()) {
                         state.set(false);
+                    }
+                    if (lastReceivedValue % 1_000 == 0) {
+                        System.out.println("got " + lastReceivedValue);
                     }
                 }
             });
@@ -134,6 +138,47 @@ public abstract class MessageBusTestHelper implements Serializable {
             }
             return state.get();
         });
+    }
+
+    private static final class TestConfigurationModule extends AbstractModule {
+
+        @Override
+        protected void configure() {
+            bind(Configuration.class).to(TestConfiguration.class).asEagerSingleton();
+        }
+    }
+
+    private static final class TestConfiguration implements Configuration {
+
+        @Override
+        public String getMulticastAddress() {
+            return "225.0.0.11";
+        }
+
+        @Override
+        public int getMulticastPort() {
+            return 12345;
+        }
+
+        @Override
+        public String getBindAddress() {
+            return "127.0.0.1";
+        }
+
+        @Override
+        public int getTopicId() {
+            return 1;
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("multicastAddress", getMulticastAddress())
+                    .add("multicastPort", getMulticastPort())
+                    .add("bindAddress", getBindAddress())
+                    .add("topicId", getTopicId())
+                    .toString();
+        }
     }
 
     @Value

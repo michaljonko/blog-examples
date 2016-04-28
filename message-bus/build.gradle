@@ -1,8 +1,19 @@
 dependencies {
     compile 'de.ruedigermoeller:fast-cast:3.10'
     compile 'uk.co.real-logic:aeron-all:0.9.4'
+    compile 'com.hazelcast:hazelcast:3.6.2'
     compile 'com.lmax:disruptor:3.3.4'
     compile 'com.google.inject:guice:4.0'
 
     testCompile 'org.gridkit.lab:nanocloud:0.8.11'
 }
+
+test {
+    exclude '**/*MISOTest*'
+}
+
+task longTest(type: Test) {
+    exclude '**/SISOTest*'
+    include '**/*MISOTest*'
+}
+
