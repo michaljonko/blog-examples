@@ -27,14 +27,8 @@ package pl.coffeepower.blog.messagebus.aeron;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.concurrent.TimeUnit;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class AeronConst {
 
-    static final int BUFFER_SIZE = 800;
-    static final long BACKOFF_IDLE_STRATEGY_MAX_SPINS = 2L;
-    static final long BACKOFF_IDLE_STRATEGY_MAX_YEALDS = 10L;
-    static final long BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS = TimeUnit.MICROSECONDS.toNanos(3L);
-    static final long BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS = TimeUnit.MICROSECONDS.toNanos(3L);
+    static final int BUFFER_SIZE = 3 * 1400 - 200; //default datagram size in FastCast
 }

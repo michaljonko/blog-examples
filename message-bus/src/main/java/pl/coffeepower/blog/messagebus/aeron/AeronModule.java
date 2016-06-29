@@ -39,7 +39,6 @@ import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.Subscription;
 import uk.co.real_logic.aeron.driver.MediaDriver;
 import uk.co.real_logic.aeron.driver.ThreadingMode;
-import uk.co.real_logic.agrona.concurrent.BackoffIdleStrategy;
 import uk.co.real_logic.agrona.concurrent.BusySpinIdleStrategy;
 import uk.co.real_logic.agrona.concurrent.IdleStrategy;
 
@@ -63,15 +62,10 @@ public final class AeronModule extends AbstractModule {
     private MediaDriver createMediaDriver() {
         MediaDriver.Context context = new MediaDriver.Context()
                 .threadingMode(ThreadingMode.SHARED_NETWORK)
-                .conductorIdleStrategy(
-                        new BackoffIdleStrategy(AeronConst.BACKOFF_IDLE_STRATEGY_MAX_SPINS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_YEALDS, AeronConst.BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS))
-                .receiverIdleStrategy(
-                        new BackoffIdleStrategy(AeronConst.BACKOFF_IDLE_STRATEGY_MAX_SPINS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_YEALDS, AeronConst.BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS))
-                .senderIdleStrategy(
-                        new BackoffIdleStrategy(AeronConst.BACKOFF_IDLE_STRATEGY_MAX_SPINS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_YEALDS, AeronConst.BACKOFF_IDLE_STRATEGY_MIN_PARK_PERIOD_NS, AeronConst.BACKOFF_IDLE_STRATEGY_MAX_PARK_PERIOD_NS))
                 .dirsDeleteOnStart(true);
         context.aeronDirectoryName(
-                System.getProperty("aeron.dir", StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString()));
+                System.getProperty("aeron.dir",
+                        StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString()));
         return MediaDriver.launch(context);
     }
 

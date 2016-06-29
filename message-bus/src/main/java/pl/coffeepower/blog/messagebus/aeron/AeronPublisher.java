@@ -75,10 +75,15 @@ final class AeronPublisher implements Publisher {
 
     @Override
     public void close() throws Exception {
-        Preconditions.checkState(opened.get(), "Already closed");
-        publication.close();
-        aeron.close();
-        opened.set(false);
+        try {
+            lock();
+            Preconditions.checkState(opened.get(), "Already closed");
+            publication.close();
+            aeron.close();
+            opened.set(false);
+        } finally {
+            unlock();
+        }
     }
 
     private void lock() {

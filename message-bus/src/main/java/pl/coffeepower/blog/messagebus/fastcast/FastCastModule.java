@@ -88,31 +88,20 @@ public final class FastCastModule extends AbstractModule {
                         .isLoopbackAddress())
                 .interfaceAdr(configuration.getBindAddress())
                 .mulitcastAdr(configuration.getMulticastAddress())
-                .port(configuration.getMulticastPort())
-                .setDgramsize(FastCastConst.DATAGRAM_SIZE)
-                .idleParkMicros(FastCastConst.IDLE_PARK_MICROS)
-                .spinLoopMicros(FastCastConst.SPIN_LOOP_MICROS);
+                .port(configuration.getMulticastPort());
     }
 
     @Provides
     @Singleton
     @Inject
     private PublisherConf createPublisherConf(@NonNull Configuration configuration) {
-        return new PublisherConf(configuration.getTopicId())
-                .numPacketHistory(FastCastConst.PUBLISHER_PACKET_HISTORY)
-                .pps(FastCastConst.PUBLISHER_PPS)
-                .ppsWindow(FastCastConst.PUBLISHER_PPS_WINDOW)
-                .heartbeatInterval(FastCastConst.PUBLISHER_HEARTBEAT_INTERVAL);
+        return new PublisherConf(configuration.getTopicId());
     }
 
     @Provides
     @Singleton
     @Inject
     private SubscriberConf createSubscriberConf(@NonNull Configuration configuration) {
-        return new SubscriberConf(configuration.getTopicId())
-                .receiveBufferPackets(FastCastConst.SUBSCRIBER_BUFFER_PACKETS)
-                .maxDelayRetransMS(FastCastConst.SUBSCRIBER_MAX_DELAY_RETRANS_MS)
-                .maxDelayNextRetransMS(FastCastConst.SUBSCRIBER_MAX_DELAY_NEXT_RETRANS_MS)
-                .unreliable(FastCastConst.SUBSCRIBER_UNRELIABLE);
+        return new SubscriberConf(configuration.getTopicId());
     }
 }

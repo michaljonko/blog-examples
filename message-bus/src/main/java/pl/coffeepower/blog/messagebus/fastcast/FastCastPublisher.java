@@ -78,10 +78,15 @@ final class FastCastPublisher implements Publisher {
 
     @Override
     public void close() throws Exception {
-        Preconditions.checkState(opened.get(), "Already closed");
-        publisher.flush();
-        fastCast.onTransport(physicalTransportName).terminate();
-        opened.set(false);
+        try {
+            lock();
+            Preconditions.checkState(opened.get(), "Already closed");
+            publisher.flush();
+            fastCast.onTransport(physicalTransportName).terminate();
+            opened.set(false);
+        } finally {
+            unlock();
+        }
     }
 
     private void lock() {

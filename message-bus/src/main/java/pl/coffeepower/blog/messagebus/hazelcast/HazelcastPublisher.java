@@ -59,12 +59,12 @@ final class HazelcastPublisher implements Publisher {
         try {
             lock();
             topic.publish(data);
+            return true;
         } catch (TopicOverloadException e) {
             return false;
         } finally {
             unlock();
         }
-        return true;
     }
 
     @Override

@@ -122,7 +122,7 @@ public abstract class MessageBusTestHelper implements Serializable {
                     if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != _fixtures.getLastAdditionalDataByte()) {
                         state.set(false);
                     }
-                    if (lastReceivedValue % 1_000 == 0) {
+                    if (lastReceivedValue % 10_000 == 0) {
                         System.out.println("got " + lastReceivedValue);
                     }
                 }
