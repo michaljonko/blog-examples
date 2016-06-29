@@ -30,6 +30,7 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Stage;
 
 import lombok.Getter;
 import lombok.Value;
@@ -84,7 +85,7 @@ public abstract class MessageBusTestHelper implements Serializable {
     }
 
     Publisher executePublisher(final Engine engine) throws InterruptedException {
-        Publisher publisher = Guice.createInjector(new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
+        Publisher publisher = Guice.createInjector(Stage.PRODUCTION, new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
             Fixtures fixtures = new Fixtures();
@@ -109,17 +110,17 @@ public abstract class MessageBusTestHelper implements Serializable {
 
     Future<Boolean> createSubscriberFuture(final String cloudNode, final Engine engine) {
         return cloud.node(cloudNode).submit((Callable<Boolean> & Serializable) () -> {
-            Fixtures _fixtures = new Fixtures();
+            Fixtures fixtures = new Fixtures();
             AtomicBoolean state = new AtomicBoolean(true);
             AtomicLong lastReceived = new AtomicLong();
             AtomicLong messagesCounter = new AtomicLong();
-            Subscriber subscriber = Guice.createInjector(new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Subscriber.class);
+            Subscriber subscriber = Guice.createInjector(Stage.PRODUCTION, new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Subscriber.class);
             subscriber.register((data, length) -> {
                 messagesCounter.incrementAndGet();
                 if (state.get()) {
                     long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
                     long lastReceivedValue = lastReceived.get();
-                    if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != _fixtures.getLastAdditionalDataByte()) {
+                    if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != fixtures.getLastAdditionalDataByte()) {
                         state.set(false);
                     }
                     if (lastReceivedValue % 10_000 == 0) {
@@ -127,11 +128,13 @@ public abstract class MessageBusTestHelper implements Serializable {
                     }
                 }
             });
-            IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(100L));
-            while (state.get() && lastReceived.get() < _fixtures.getNumberOfMessages()) {
+            IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(1L));
+            while (state.get() && lastReceived.get() < fixtures.getNumberOfMessages()) {
                 idleStrategy.idle();
             }
-            subscriber.close();
+            if (subscriber.isOpened()) {
+                subscriber.close();
+            }
             if (!state.get()) {
                 System.out.println("Broken connection on messageId=" + lastReceived.get());
                 System.out.println("Last messageId=" + lastReceived);
@@ -184,7 +187,7 @@ public abstract class MessageBusTestHelper implements Serializable {
     @Value
     private static final class Fixtures implements Serializable {
         long firstMessageId = 1L;
-        long numberOfMessages = 100_000L;
+        long numberOfMessages = 1_000_000L;
         byte[] additionalData = "9876543210123456789qazxswedcvfrtgbnhyujm".getBytes();
         int additionalDataLength = additionalData.length;
         byte lastAdditionalDataByte = additionalData[additionalDataLength - 1];

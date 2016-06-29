@@ -66,6 +66,11 @@ final class HazelcastPublisher implements Publisher {
     }
 
     @Override
+    public boolean isOpened() {
+        return opened.get();
+    }
+
+    @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
         topic.destroy();

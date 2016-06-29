@@ -77,6 +77,11 @@ final class FastCastPublisher implements Publisher {
     }
 
     @Override
+    public boolean isOpened() {
+        return opened.get();
+    }
+
+    @Override
     public void close() throws Exception {
         try {
             lock();

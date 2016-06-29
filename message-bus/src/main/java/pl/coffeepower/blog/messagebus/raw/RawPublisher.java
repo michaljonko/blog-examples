@@ -17,6 +17,11 @@ final class RawPublisher implements Publisher {
     }
 
     @Override
+    public boolean isOpened() {
+        return false;
+    }
+
+    @Override
     public void close() throws Exception {
 
     }

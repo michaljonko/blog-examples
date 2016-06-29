@@ -48,6 +48,11 @@ final class RawSubscriber implements Subscriber {
     }
 
     @Override
+    public boolean isOpened() {
+        return opened.get();
+    }
+
+    @Override
     public void close() throws Exception {
 //        if (this.multicastSocket != null) {
 //            this.multicastSocket.close();

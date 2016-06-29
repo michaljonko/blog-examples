@@ -39,14 +39,14 @@ public class AeronMISOTest extends MessageBusTestHelper {
     @Test
     public void shouldRetrieveAllMessages() throws Exception {
         long timeout = 60L;
-        Future<Boolean> subTask1 = createSubscriberFuture(NODE_SUBSCRIBER_1, Engine.AERON);
+        Future<Boolean> subscriberFuture1 = createSubscriberFuture(NODE_SUBSCRIBER_1, Engine.AERON);
         TimeUnit.SECONDS.sleep(5L);
-        Future<Boolean> subTask2 = createSubscriberFuture(NODE_SUBSCRIBER_2, Engine.AERON);
+        Future<Boolean> subscriberFuture2 = createSubscriberFuture(NODE_SUBSCRIBER_2, Engine.AERON);
         TimeUnit.SECONDS.sleep(5L);
         Stopwatch stopwatch = Stopwatch.createStarted();
         Publisher publisher = executePublisher(Engine.AERON);
-        assertThat(subTask1.get(timeout, TimeUnit.SECONDS), is(true));
-        assertThat(subTask2.get(timeout, TimeUnit.SECONDS), is(true));
+        assertThat(subscriberFuture1.get(timeout, TimeUnit.SECONDS), is(true));
+        assertThat(subscriberFuture2.get(timeout, TimeUnit.SECONDS), is(true));
         System.out.println("All messages received in " + stopwatch.stop());
         publisher.close();
     }

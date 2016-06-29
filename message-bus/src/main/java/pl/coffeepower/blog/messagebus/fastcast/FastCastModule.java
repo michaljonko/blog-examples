@@ -94,7 +94,8 @@ public final class FastCastModule extends AbstractModule {
     @Singleton
     @Inject
     private PublisherConf createPublisherConf(@NonNull Configuration configuration) {
-        return new PublisherConf(configuration.getTopicId());
+        return new PublisherConf(configuration.getTopicId())
+                .numPacketHistory(25_000);
     }
 
     @Provides

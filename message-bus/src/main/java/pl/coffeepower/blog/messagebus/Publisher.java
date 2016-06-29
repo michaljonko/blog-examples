@@ -27,4 +27,6 @@ package pl.coffeepower.blog.messagebus;
 public interface Publisher extends AutoCloseable {
 
     boolean send(byte[] data);
+
+    boolean isOpened();
 }

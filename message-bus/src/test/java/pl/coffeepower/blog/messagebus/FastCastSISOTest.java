@@ -39,11 +39,11 @@ public class FastCastSISOTest extends MessageBusTestHelper {
     @Test
     public void shouldRetrieveAllMessages() throws Exception {
         long timeout = 30L;
-        Future<Boolean> subTask = createSubscriberFuture(Engine.FAST_CAST);
-        TimeUnit.SECONDS.sleep(3L);
+        Future<Boolean> subscriberFuture = createSubscriberFuture(Engine.FAST_CAST);
+        TimeUnit.SECONDS.sleep(10L);
         Stopwatch stopwatch = Stopwatch.createStarted();
         Publisher publisher = executePublisher(Engine.FAST_CAST);
-        assertThat(subTask.get(timeout, TimeUnit.SECONDS), is(true));
+        assertThat(subscriberFuture.get(timeout, TimeUnit.SECONDS), is(true));
         System.out.println("All messages received in " + stopwatch.stop());
         publisher.close();
     }
