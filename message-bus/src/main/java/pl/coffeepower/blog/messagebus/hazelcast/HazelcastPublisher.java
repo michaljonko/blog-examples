@@ -26,14 +26,12 @@ package pl.coffeepower.blog.messagebus.hazelcast;
 
 import com.google.common.base.Preconditions;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.topic.TopicOverloadException;
 
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
-import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Publisher;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,10 +46,10 @@ final class HazelcastPublisher implements Publisher {
     private final ITopic<byte[]> topic;
 
     @Inject
-    private HazelcastPublisher(@NonNull HazelcastInstance hazelcastInstance, @NonNull Configuration configuration) {
-        topic = hazelcastInstance.getTopic(String.valueOf(configuration.getTopicId()));
+    private HazelcastPublisher(@NonNull ITopic<byte[]> iTopic) {
+        topic = iTopic;
         opened.set(true);
-        log.info("Created Publisher: topicId={}", configuration.getTopicId());
+        log.info("Created Publisher: topicId={}", topic.getName());
     }
 
     @Override

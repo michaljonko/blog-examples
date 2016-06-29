@@ -26,13 +26,11 @@ package pl.coffeepower.blog.messagebus.hazelcast;
 
 import com.google.common.base.Preconditions;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
-import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Subscriber;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,8 +46,8 @@ final class HazelcastSubscriber implements Subscriber {
     private Handler handler;
 
     @Inject
-    private HazelcastSubscriber(@NonNull HazelcastInstance hazelcastInstance, @NonNull Configuration configuration) {
-        topic = hazelcastInstance.getTopic(String.valueOf(configuration.getTopicId()));
+    private HazelcastSubscriber(@NonNull ITopic<byte[]> iTopic) {
+        topic = iTopic;
         topic.addMessageListener(message -> {
             Preconditions.checkNotNull(handler);
             Preconditions.checkState(opened.get(), "Already closed");
@@ -57,7 +55,7 @@ final class HazelcastSubscriber implements Subscriber {
             handler.received(data, data.length);
         });
         opened.set(true);
-        log.info("Created Subscriber: topicId={}", configuration.getTopicId());
+        log.info("Created Subscriber: topicId={}", iTopic.getName());
     }
 
     @Override

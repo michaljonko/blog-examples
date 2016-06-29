@@ -84,8 +84,7 @@ public final class FastCastModule extends AbstractModule {
     private PhysicalTransportConf createPhysicalTransportConf(@NonNull Configuration configuration) {
         log.info("Creating PhysicalTransportConf with Configuration: {}", configuration);
         return new PhysicalTransportConf(FastCastConst.STREAM_NAME)
-                .loopBack(InetAddresses.forString(configuration.getBindAddress())
-                        .isLoopbackAddress())
+                .loopBack(InetAddresses.forString(configuration.getBindAddress()).isLoopbackAddress())
                 .interfaceAdr(configuration.getBindAddress())
                 .mulitcastAdr(configuration.getMulticastAddress())
                 .port(configuration.getMulticastPort());

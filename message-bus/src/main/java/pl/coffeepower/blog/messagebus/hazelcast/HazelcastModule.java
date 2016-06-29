@@ -27,8 +27,11 @@ package pl.coffeepower.blog.messagebus.hazelcast;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
+import com.hazelcast.config.Config;
+import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ITopic;
 
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -39,6 +42,7 @@ import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 @Log4j2
 public final class HazelcastModule extends AbstractModule {
@@ -52,7 +56,25 @@ public final class HazelcastModule extends AbstractModule {
 
     @Provides
     @Inject
-    private HazelcastInstance getHazelcastInstance(@NonNull Configuration configuration) {
-        return Hazelcast.newHazelcastInstance();
+    private HazelcastInstance getHazelcastInstance(@NonNull Config config) {
+        return Hazelcast.newHazelcastInstance(config);
+    }
+
+    @Provides
+    @Inject
+    private ITopic<byte[]> createTopic(@NonNull HazelcastInstance hazelcastInstance, @NonNull Configuration configuration) {
+        return hazelcastInstance.getTopic(String.valueOf(configuration.getTopicId()));
+    }
+
+    @Provides
+    @Singleton
+    private Config createConfig(@NonNull Configuration configuration) {
+        Config config = new Config();
+        NetworkConfig networkConfig = config.getNetworkConfig()
+                .setPublicAddress(configuration.getBindAddress())
+                .setPort(configuration.getMulticastPort())
+                .setReuseAddress(true);
+        configuration.getMulticastAddress();
+        return config;
     }
 }
