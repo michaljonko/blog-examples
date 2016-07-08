@@ -4,5 +4,6 @@ include ':words-frequency-counter',
         ':message-bus',
         ':stream-vs-guava',
         ':epam-tech-talk',
-        ':benchmarks'
+        ':benchmarks',
+        ':design-patterns'
 
