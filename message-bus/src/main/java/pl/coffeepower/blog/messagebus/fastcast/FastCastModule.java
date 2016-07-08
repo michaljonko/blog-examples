@@ -57,8 +57,14 @@ public final class FastCastModule extends AbstractModule {
     public FastCastModule() {
         if (log.isDebugEnabled()) {
             FCLog.get().setLogLevel(FCLog.DEBUG);
-        } else {
+        } else if (log.isFatalEnabled()) {
+            FCLog.get().setLogLevel(FCLog.FATAL);
+        } else if (log.isInfoEnabled()) {
+            FCLog.get().setLogLevel(FCLog.INFO);
+        } else if (log.isErrorEnabled()) {
             FCLog.get().setLogLevel(FCLog.SEVER);
+        } else {
+            FCLog.get().setLogLevel(FCLog.WARN);
         }
         properties.setProperty(Const.PUBLISHER_NAME_KEY,
                 System.getProperty(Const.PUBLISHER_NAME_KEY, "PUB"));

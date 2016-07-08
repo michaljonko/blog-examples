@@ -99,11 +99,6 @@ final class AeronSubscriber implements Subscriber {
     }
 
     @Override
-    public boolean isOpened() {
-        return opened.get();
-    }
-
-    @Override
     public void close() throws Exception {
         Preconditions.checkState(opened.get(), "Already closed");
         disruptor.shutdown();

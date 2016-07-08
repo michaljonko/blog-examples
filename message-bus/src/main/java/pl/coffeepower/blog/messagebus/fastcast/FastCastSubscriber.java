@@ -73,6 +73,7 @@ final class FastCastSubscriber implements Subscriber {
         this.fastCast.setNodeId(nodeId);
         this.fastCast.addTransport(physicalTransportConf);
         this.physicalTransportName = physicalTransportConf.getName();
+        this.opened.set(true);
         this.fastCast.onTransport(physicalTransportName).subscribe(
                 subscriberConf, new ByteArraySubscriber(false) {
                     @Override
@@ -81,18 +82,12 @@ final class FastCastSubscriber implements Subscriber {
                         ringBuffer.publishEvent((event, seq) -> event.copyToBuffer(msg, len));
                     }
                 });
-        this.opened.set(true);
         log.info("Created Subscriber: nodeId={}, physicalTransportName={}", nodeId, this.physicalTransportName);
     }
 
     @Override
     public void register(@NonNull Handler handler) {
         this.handler = handler;
-    }
-
-    @Override
-    public boolean isOpened() {
-        return opened.get();
     }
 
     @Override

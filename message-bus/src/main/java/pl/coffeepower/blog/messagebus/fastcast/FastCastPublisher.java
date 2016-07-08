@@ -36,6 +36,7 @@ import org.nustaq.fastcast.config.PublisherConf;
 
 import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.Publisher;
+import pl.coffeepower.blog.messagebus.util.CASLock;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,7 +47,7 @@ import javax.inject.Named;
 final class FastCastPublisher implements Publisher {
 
     private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final AtomicBoolean lock = new AtomicBoolean(false);
+    private final CASLock lock = new CASLock();
     private final FastCast fastCast;
     private final FCPublisher publisher;
     private final String physicalTransportName;
@@ -68,37 +69,24 @@ final class FastCastPublisher implements Publisher {
     @Override
     public boolean send(@NonNull byte[] data) {
         try {
-            lock();
+            lock.lock();
             Preconditions.checkState(opened.get(), "Already closed");
             return publisher.offer(null, data, 0, data.length, false);
         } finally {
-            unlock();
+            lock.unlock();
         }
-    }
-
-    @Override
-    public boolean isOpened() {
-        return opened.get();
     }
 
     @Override
     public void close() throws Exception {
         try {
-            lock();
+            lock.lock();
             Preconditions.checkState(opened.get(), "Already closed");
             publisher.flush();
             fastCast.onTransport(physicalTransportName).terminate();
             opened.set(false);
         } finally {
-            unlock();
+            lock.unlock();
         }
-    }
-
-    private void lock() {
-        while (!lock.compareAndSet(false, true)) ;
-    }
-
-    private void unlock() {
-        lock.set(false);
     }
 }

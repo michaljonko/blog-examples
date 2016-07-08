@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
-public abstract class MessageBusTestHelper implements Serializable {
+abstract class MessageBusTestHelper implements Serializable {
 
     static final String NODE_SUBSCRIBER_1 = "sub-1";
     static final String NODE_SUBSCRIBER_2 = "sub-2";
@@ -123,18 +123,13 @@ public abstract class MessageBusTestHelper implements Serializable {
                     if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != fixtures.getLastAdditionalDataByte()) {
                         state.set(false);
                     }
-                    if (lastReceivedValue % 10_000 == 0) {
-                        System.out.println("got " + lastReceivedValue);
-                    }
                 }
             });
             IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(1L));
             while (state.get() && lastReceived.get() < fixtures.getNumberOfMessages()) {
                 idleStrategy.idle();
             }
-            if (subscriber.isOpened()) {
-                subscriber.close();
-            }
+            subscriber.close();
             if (!state.get()) {
                 System.out.println("Broken connection on messageId=" + lastReceived.get());
                 System.out.println("Last messageId=" + lastReceived);
@@ -187,7 +182,7 @@ public abstract class MessageBusTestHelper implements Serializable {
     @Value
     private static final class Fixtures implements Serializable {
         long firstMessageId = 1L;
-        long numberOfMessages = 1_000_000L;
+        long numberOfMessages = 100_000L;
         byte[] additionalData = "9876543210123456789qazxswedcvfrtgbnhyujm".getBytes();
         int additionalDataLength = additionalData.length;
         byte lastAdditionalDataByte = additionalData[additionalDataLength - 1];

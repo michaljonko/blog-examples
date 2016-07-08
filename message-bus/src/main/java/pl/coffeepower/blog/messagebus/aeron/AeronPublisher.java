@@ -32,6 +32,7 @@ import lombok.extern.log4j.Log4j2;
 
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Publisher;
+import pl.coffeepower.blog.messagebus.util.CASLock;
 
 import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.Publication;
@@ -45,7 +46,7 @@ import javax.inject.Inject;
 @Log4j2
 final class AeronPublisher implements Publisher {
 
-    private final AtomicBoolean lock = new AtomicBoolean(false);
+    private final CASLock lock = new CASLock();
     private final AtomicBoolean opened = new AtomicBoolean(false);
     private final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(AeronConst.BUFFER_SIZE));
     private final Aeron aeron;
@@ -64,38 +65,25 @@ final class AeronPublisher implements Publisher {
     @Override
     public boolean send(@NonNull byte[] data) {
         try {
-            lock();
+            lock.lock();
             Preconditions.checkState(opened.get(), "Already closed");
             buffer.putBytes(0, data);
             return publication.offer(buffer, 0, data.length) >= 0;
         } finally {
-            unlock();
+            lock.unlock();
         }
-    }
-
-    @Override
-    public boolean isOpened() {
-        return opened.get();
     }
 
     @Override
     public void close() throws Exception {
         try {
-            lock();
+            lock.lock();
             Preconditions.checkState(opened.get(), "Already closed");
             publication.close();
             aeron.close();
             opened.set(false);
         } finally {
-            unlock();
+            lock.unlock();
         }
-    }
-
-    private void lock() {
-        while (!lock.compareAndSet(false, true)) ;
-    }
-
-    private void unlock() {
-        lock.set(false);
     }
 }

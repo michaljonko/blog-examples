@@ -30,8 +30,6 @@ public interface Subscriber extends AutoCloseable {
 
     void register(Handler handler);
 
-    boolean isOpened();
-
     @FunctionalInterface
     interface Handler extends Serializable {
 

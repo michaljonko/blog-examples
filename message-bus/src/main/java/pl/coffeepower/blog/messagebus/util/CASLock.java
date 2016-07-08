@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Michał Jonko
+ * Copyright (c) 2016 Michał Jonko
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,34 +22,19 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.messagebus;
+package pl.coffeepower.blog.messagebus.util;
 
-import com.google.inject.Module;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import pl.coffeepower.blog.messagebus.aeron.AeronModule;
-import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
-import pl.coffeepower.blog.messagebus.hazelcast.HazelcastModule;
+public final class CASLock {
 
-public enum Engine {
-    FAST_CAST(FastCastModule.class),
-    AERON(AeronModule.class),
-    HAZELCAST(HazelcastModule.class);
+    private final AtomicBoolean lock = new AtomicBoolean(false);
 
-    private final Class<? extends Module> moduleClass;
-    private Module module;
-
-    Engine(Class<? extends Module> moduleClass) {
-        this.moduleClass = moduleClass;
+    public final void lock() {
+        while (!lock.compareAndSet(false, true)) ;
     }
 
-    public synchronized final Module getModule() {
-        if (module == null) {
-            try {
-                module = moduleClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new InternalError(e);
-            }
-        }
-        return module;
+    public final void unlock() {
+        lock.set(false);
     }
 }

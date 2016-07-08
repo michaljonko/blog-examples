@@ -33,6 +33,7 @@ import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 import pl.coffeepower.blog.messagebus.Publisher;
+import pl.coffeepower.blog.messagebus.util.CASLock;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -42,7 +43,7 @@ import javax.inject.Inject;
 final class HazelcastPublisher implements Publisher {
 
     private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final AtomicBoolean lock = new AtomicBoolean(false);
+    private final CASLock lock = new CASLock();
     private final ITopic<byte[]> topic;
 
     @Inject
@@ -55,32 +56,24 @@ final class HazelcastPublisher implements Publisher {
     @Override
     public boolean send(@NonNull byte[] data) {
         try {
-            lock();
+            lock.lock();
             topic.publish(data);
             return true;
         } catch (TopicOverloadException e) {
             return false;
         } finally {
-            unlock();
+            lock.unlock();
         }
     }
 
     @Override
-    public boolean isOpened() {
-        return opened.get();
-    }
-
-    @Override
     public void close() throws Exception {
-        Preconditions.checkState(opened.get(), "Already closed");
-        topic.destroy();
-    }
-
-    private void lock() {
-        while (!lock.compareAndSet(false, true)) ;
-    }
-
-    private void unlock() {
-        lock.set(false);
+        try {
+            lock.lock();
+            Preconditions.checkState(opened.get(), "Already closed");
+            topic.destroy();
+        } finally {
+            lock.unlock();
+        }
     }
 }
