@@ -1,3 +1,0 @@
-dependencies {
-    compile 'net.openhft:chronicle:3.5.3'
-}
