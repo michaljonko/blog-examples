@@ -3,7 +3,6 @@ include ':words-frequency-counter',
         ':lambda-exp-on-java7',
         ':message-bus',
         ':stream-vs-guava',
-        ':epam-tech-talk',
         ':benchmarks',
         ':design-patterns'
 
