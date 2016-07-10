@@ -39,7 +39,7 @@ public final class PizzaBuilder {
     private Set<String> components = Sets.newHashSet();
     private BigInteger price = BigInteger.ZERO;
 
-    public Pizza build() {
+    public IPizza build() {
         return new Pizza(name, components, price);
     }
 

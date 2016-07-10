@@ -24,18 +24,46 @@
 
 package pl.coffeepower.blog.dp.creational;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import com.google.common.collect.Sets;
 
 import java.math.BigInteger;
 import java.util.Set;
 
-@Value
-@RequiredArgsConstructor(access = AccessLevel.MODULE)
-public final class Pizza implements IPizza {
+public class PizzaAbstractFactory {
 
-    String name;
-    Set<String> components;
-    BigInteger price;
+    public static final class VegePizza implements IPizza {
+
+        @Override
+        public String getName() {
+            return "vege";
+        }
+
+        @Override
+        public Set<String> getComponents() {
+            return Sets.newHashSet("tomatoes", "cheese", "beans");
+        }
+
+        @Override
+        public BigInteger getPrice() {
+            return BigInteger.TEN;
+        }
+    }
+
+    public static final class FamilyPizza implements IPizza {
+
+        @Override
+        public String getName() {
+            return "family";
+        }
+
+        @Override
+        public Set<String> getComponents() {
+            return Sets.newHashSet("tomatoes", "cheese", "meat");
+        }
+
+        @Override
+        public BigInteger getPrice() {
+            return BigInteger.TEN.add(BigInteger.ONE);
+        }
+    }
 }

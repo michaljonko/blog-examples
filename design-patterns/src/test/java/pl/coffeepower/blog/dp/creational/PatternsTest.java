@@ -43,7 +43,7 @@ public class PatternsTest {
 
     @Test
     public void shouldCreatePizzaWithBuilder() throws Exception {
-        Pizza pizza;
+        IPizza pizza;
         PizzaBuilder pizzaBuilder = PizzaBuilder.aPizza();
 
         pizza = pizzaBuilder.withName(fixtures.getPizzaName())
@@ -60,7 +60,7 @@ public class PatternsTest {
     private static final class Fixtures {
         String pizzaName = "vegetariana";
         BigInteger pizzaPrice = BigInteger.TEN;
-        Set<String> pizzaComponents = ImmutableSet.of("tomatos", "onion", "beans");
-        Pizza expectedPizza = new Pizza(pizzaName, pizzaComponents, pizzaPrice);
+        Set<String> pizzaComponents = ImmutableSet.of("tomatoes", "onion", "beans");
+        IPizza expectedPizza = new Pizza(pizzaName, pizzaComponents, pizzaPrice);
     }
 }

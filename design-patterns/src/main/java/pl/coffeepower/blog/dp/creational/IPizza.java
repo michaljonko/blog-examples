@@ -24,18 +24,14 @@
 
 package pl.coffeepower.blog.dp.creational;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-
 import java.math.BigInteger;
 import java.util.Set;
 
-@Value
-@RequiredArgsConstructor(access = AccessLevel.MODULE)
-public final class Pizza implements IPizza {
+interface IPizza {
 
-    String name;
-    Set<String> components;
-    BigInteger price;
+    String getName();
+
+    Set<String> getComponents();
+
+    BigInteger getPrice();
 }
