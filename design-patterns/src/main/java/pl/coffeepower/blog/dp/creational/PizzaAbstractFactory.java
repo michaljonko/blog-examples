@@ -24,46 +24,47 @@
 
 package pl.coffeepower.blog.dp.creational;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
+import lombok.NonNull;
+
 import java.math.BigInteger;
-import java.util.Set;
+import java.util.Map;
 
-public class PizzaAbstractFactory {
+public final class PizzaAbstractFactory {
 
-    public static final class VegePizza implements IPizza {
+    private final static Map<String, PizzaFactory> FACTORIES = ImmutableMap.of(
+            VegetarianaPizzaFactory.pizzaName, new VegetarianaPizzaFactory(),
+            FamilyPizzaFactory.pizzaName, new FamilyPizzaFactory()
+    );
+
+    public static PizzaFactory getFactory(@NonNull String pizzaName) {
+        return FACTORIES.get(pizzaName);
+    }
+
+    public interface PizzaFactory {
+
+        IPizza createPizza();
+    }
+
+    private static final class VegetarianaPizzaFactory implements PizzaFactory {
+
+        private static final String pizzaName = "vegetariana";
 
         @Override
-        public String getName() {
-            return "vege";
-        }
-
-        @Override
-        public Set<String> getComponents() {
-            return Sets.newHashSet("tomatoes", "cheese", "beans");
-        }
-
-        @Override
-        public BigInteger getPrice() {
-            return BigInteger.TEN;
+        public IPizza createPizza() {
+            return new Pizza(pizzaName, Sets.newHashSet("tomatoes", "onion", "beans"), BigInteger.TEN);
         }
     }
 
-    public static final class FamilyPizza implements IPizza {
+    private static final class FamilyPizzaFactory implements PizzaFactory {
+
+        private static final String pizzaName = "family";
 
         @Override
-        public String getName() {
-            return "family";
-        }
-
-        @Override
-        public Set<String> getComponents() {
-            return Sets.newHashSet("tomatoes", "cheese", "meat");
-        }
-
-        @Override
-        public BigInteger getPrice() {
-            return BigInteger.TEN.add(BigInteger.ONE);
+        public IPizza createPizza() {
+            return new Pizza(pizzaName, Sets.newHashSet("tomatoes", "cheese", "meat"), BigInteger.ONE);
         }
     }
 }

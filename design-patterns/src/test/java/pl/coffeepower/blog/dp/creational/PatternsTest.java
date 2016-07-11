@@ -30,6 +30,8 @@ import lombok.Value;
 
 import org.junit.Test;
 
+import pl.coffeepower.blog.dp.creational.PizzaAbstractFactory.PizzaFactory;
+
 import java.math.BigInteger;
 import java.util.Set;
 
@@ -54,6 +56,12 @@ public class PatternsTest {
 
         pizza = pizzaBuilder.withName("vege").build();
         assertThat(pizza, is(not(fixtures.getExpectedPizza())));
+    }
+
+    @Test
+    public void shouldCreatePizzaWithAbstractFactory() throws Exception {
+        PizzaFactory pizzaFactory = PizzaAbstractFactory.getFactory(fixtures.getPizzaName());
+        assertThat(pizzaFactory.createPizza(), is(fixtures.getExpectedPizza()));
     }
 
     @Value

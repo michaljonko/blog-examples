@@ -53,12 +53,13 @@ public final class PizzaBuilder {
         return this;
     }
 
-    public PizzaBuilder withComponent(String value) {
+    public PizzaBuilder addComponent(String value) {
         components.add(value);
         return this;
     }
 
     public PizzaBuilder withComponents(Collection<String> values) {
+        components.clear();
         components.addAll(values);
         return this;
     }
