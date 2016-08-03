@@ -35,6 +35,8 @@ import com.google.inject.Stage;
 import lombok.Getter;
 import lombok.Value;
 
+import org.agrona.concurrent.IdleStrategy;
+import org.agrona.concurrent.SleepingIdleStrategy;
 import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViProps;
@@ -44,9 +46,6 @@ import org.junit.Before;
 
 import pl.coffeepower.blog.messagebus.Configuration.Const;
 import pl.coffeepower.blog.messagebus.util.BytesEventModule;
-
-import uk.co.real_logic.agrona.concurrent.IdleStrategy;
-import uk.co.real_logic.agrona.concurrent.SleepingIdleStrategy;
 
 import java.io.Serializable;
 import java.util.concurrent.Callable;

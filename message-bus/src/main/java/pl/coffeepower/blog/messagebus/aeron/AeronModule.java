@@ -31,22 +31,23 @@ import com.google.inject.Provides;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
+import org.agrona.concurrent.BusySpinIdleStrategy;
+import org.agrona.concurrent.IdleStrategy;
+
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.LoggerReceiveHandler;
-
-import uk.co.real_logic.aeron.Aeron;
-import uk.co.real_logic.aeron.Subscription;
-import uk.co.real_logic.aeron.driver.MediaDriver;
-import uk.co.real_logic.aeron.driver.ThreadingMode;
-import uk.co.real_logic.agrona.concurrent.BusySpinIdleStrategy;
-import uk.co.real_logic.agrona.concurrent.IdleStrategy;
 
 import java.io.File;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import io.aeron.Aeron;
+import io.aeron.Subscription;
+import io.aeron.driver.MediaDriver;
+import io.aeron.driver.ThreadingMode;
 
 @Log4j2
 public final class AeronModule extends AbstractModule {

@@ -30,18 +30,19 @@ import com.google.common.net.InetAddresses;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
+import org.agrona.concurrent.UnsafeBuffer;
+
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Publisher;
 import pl.coffeepower.blog.messagebus.util.CASLock;
-
-import uk.co.real_logic.aeron.Aeron;
-import uk.co.real_logic.aeron.Publication;
-import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
+
+import io.aeron.Aeron;
+import io.aeron.Publication;
 
 @Log4j2
 final class AeronPublisher implements Publisher {
@@ -55,7 +56,7 @@ final class AeronPublisher implements Publisher {
     @Inject
     private AeronPublisher(@NonNull Aeron aeron, @NonNull Configuration configuration) {
         Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
-        String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
+        String channel = "aeron:udp?endpoint=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
         this.aeron = aeron;
         this.publication = this.aeron.addPublication(channel, configuration.getTopicId());
         this.opened.set(true);

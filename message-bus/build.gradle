@@ -1,6 +1,6 @@
 dependencies {
     compile 'de.ruedigermoeller:fast-cast:3.10'
-    compile 'uk.co.real-logic:aeron-all:0.9.4'
+    compile 'io.aeron:aeron-all:1.0'
     compile 'com.hazelcast:hazelcast:3.6.3'
     compile 'com.lmax:disruptor:3.3.4'
     compile 'com.google.inject:guice:4.0'

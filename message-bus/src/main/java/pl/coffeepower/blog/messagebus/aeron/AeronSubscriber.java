@@ -34,19 +34,20 @@ import com.lmax.disruptor.dsl.Disruptor;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
+import org.agrona.concurrent.IdleStrategy;
+
 import pl.coffeepower.blog.messagebus.Configuration;
 import pl.coffeepower.blog.messagebus.Subscriber;
 import pl.coffeepower.blog.messagebus.util.BytesEventFactory;
-
-import uk.co.real_logic.aeron.Aeron;
-import uk.co.real_logic.aeron.Subscription;
-import uk.co.real_logic.agrona.concurrent.IdleStrategy;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
+
+import io.aeron.Aeron;
+import io.aeron.Subscription;
 
 @Log4j2
 final class AeronSubscriber implements Subscriber {
@@ -67,7 +68,7 @@ final class AeronSubscriber implements Subscriber {
                             @NonNull Configuration configuration,
                             @NonNull Disruptor<BytesEventFactory.BytesEvent> disruptor) {
         Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
-        String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
+        String channel = "aeron:udp?endpoint=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
         this.aeron = aeron;
         this.subscription = this.aeron.addSubscription(channel, configuration.getTopicId());
         this.idleStrategy = idleStrategy;
