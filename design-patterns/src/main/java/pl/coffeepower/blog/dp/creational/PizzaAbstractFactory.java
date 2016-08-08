@@ -25,7 +25,7 @@
 package pl.coffeepower.blog.dp.creational;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 
 import lombok.NonNull;
 
@@ -54,7 +54,7 @@ public final class PizzaAbstractFactory {
 
         @Override
         public IPizza createPizza() {
-            return new Pizza(pizzaName, Sets.newHashSet("tomatoes", "onion", "beans"), BigInteger.TEN);
+            return new Pizza(pizzaName, ImmutableSet.of("tomatoes", "onion", "beans"), BigInteger.TEN);
         }
     }
 
@@ -64,7 +64,7 @@ public final class PizzaAbstractFactory {
 
         @Override
         public IPizza createPizza() {
-            return new Pizza(pizzaName, Sets.newHashSet("tomatoes", "cheese", "meat"), BigInteger.ONE);
+            return new Pizza(pizzaName, ImmutableSet.of("tomatoes", "cheese", "meat"), BigInteger.ONE);
         }
     }
 }

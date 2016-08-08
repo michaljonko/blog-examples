@@ -28,11 +28,17 @@ import com.google.common.collect.ImmutableSet;
 
 import java.math.BigInteger;
 
-interface IPizza {
+public final class PizzaPrototype {
 
-    String getName();
+    public static class PizzaProto extends Pizza implements ICloneablePizza {
 
-    ImmutableSet<String> getComponents();
+        PizzaProto(String name, ImmutableSet<String> components, BigInteger price) {
+            super(name, components, price);
+        }
 
-    BigInteger getPrice();
+        @Override
+        public IPizza clone() {
+            return new PizzaProto(getName(), getComponents(), getPrice());
+        }
+    }
 }

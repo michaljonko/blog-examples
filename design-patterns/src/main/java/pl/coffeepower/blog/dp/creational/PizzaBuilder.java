@@ -24,6 +24,7 @@
 
 package pl.coffeepower.blog.dp.creational;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import lombok.NoArgsConstructor;
@@ -40,7 +41,7 @@ public final class PizzaBuilder {
     private BigInteger price = BigInteger.ZERO;
 
     public IPizza build() {
-        return new Pizza(name, components, price);
+        return new Pizza(name, ImmutableSet.copyOf(components), price);
     }
 
     public PizzaBuilder withName(String value) {

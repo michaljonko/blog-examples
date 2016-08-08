@@ -33,29 +33,29 @@ import org.junit.Test;
 import pl.coffeepower.blog.dp.creational.PizzaAbstractFactory.PizzaFactory;
 
 import java.math.BigInteger;
-import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static pl.coffeepower.blog.dp.creational.PizzaPrototype.PizzaProto;
 
-public class PatternsTest {
+public class CreationalPatternsTest {
 
     private final Fixtures fixtures = new Fixtures();
 
     @Test
     public void shouldCreatePizzaWithBuilder() throws Exception {
-        IPizza pizza;
         PizzaBuilder pizzaBuilder = PizzaBuilder.aPizza();
-
-        pizza = pizzaBuilder.withName(fixtures.getPizzaName())
-                .withPrice(fixtures.getPizzaPrice())
-                .withComponents(fixtures.getPizzaComponents())
-                .build();
-        assertThat(pizza, is(fixtures.getExpectedPizza()));
-
-        pizza = pizzaBuilder.withName("vege").build();
-        assertThat(pizza, is(not(fixtures.getExpectedPizza())));
+        assertThat(pizzaBuilder
+                        .withName(fixtures.getPizzaName())
+                        .withPrice(fixtures.getPizzaPrice())
+                        .withComponents(fixtures.getPizzaComponents())
+                        .build(),
+                is(fixtures.getExpectedPizza()));
+        assertThat(pizzaBuilder
+                        .withName("vege").build(),
+                is(not(fixtures.getExpectedPizza())));
     }
 
     @Test
@@ -64,11 +64,21 @@ public class PatternsTest {
         assertThat(pizzaFactory.createPizza(), is(fixtures.getExpectedPizza()));
     }
 
+    @Test
+    public void shouldCreateCloneablePizzaWithPrototype() throws Exception {
+        PizzaProto pizzaPrototype = new PizzaProto(fixtures.getPizzaName(), fixtures.getPizzaComponents(), fixtures.getPizzaPrice());
+        IPizza pizzaClone = pizzaPrototype.clone();
+        assertThat(pizzaPrototype, is(fixtures.expectedPizza));
+        assertThat(pizzaClone, is(fixtures.expectedPizza));
+        assertThat(pizzaClone, not(sameInstance(pizzaPrototype)));
+        assertThat(pizzaClone, not(sameInstance(pizzaPrototype)));
+    }
+
     @Value
     private static final class Fixtures {
         String pizzaName = "vegetariana";
         BigInteger pizzaPrice = BigInteger.TEN;
-        Set<String> pizzaComponents = ImmutableSet.of("tomatoes", "onion", "beans");
+        ImmutableSet<String> pizzaComponents = ImmutableSet.of("tomatoes", "onion", "beans");
         IPizza expectedPizza = new Pizza(pizzaName, pizzaComponents, pizzaPrice);
     }
 }

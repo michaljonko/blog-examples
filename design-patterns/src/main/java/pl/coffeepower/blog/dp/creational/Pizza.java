@@ -24,18 +24,35 @@
 
 package pl.coffeepower.blog.dp.creational;
 
+import com.google.common.collect.ImmutableSet;
+
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 
 import java.math.BigInteger;
-import java.util.Set;
+import java.util.Objects;
 
-@Value
+@Getter
 @RequiredArgsConstructor(access = AccessLevel.MODULE)
-public final class Pizza implements IPizza {
+public class Pizza implements IPizza {
 
-    String name;
-    Set<String> components;
-    BigInteger price;
+    private final String name;
+    private final ImmutableSet<String> components;
+    private final BigInteger price;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof IPizza)) return false;
+        IPizza pizza = (IPizza) o;
+        return Objects.equals(getName(), pizza.getName()) &&
+                Objects.equals(getComponents(), pizza.getComponents()) &&
+                Objects.equals(getPrice(), pizza.getPrice());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getComponents(), getPrice());
+    }
 }
