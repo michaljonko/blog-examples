@@ -31,14 +31,17 @@ import lombok.Value;
 import org.junit.Test;
 
 import pl.coffeepower.blog.dp.creational.PizzaAbstractFactory.PizzaFactory;
+import pl.coffeepower.blog.dp.creational.vo.IPizza;
+import pl.coffeepower.blog.dp.creational.vo.Pizza;
+import pl.coffeepower.blog.dp.creational.vo.PizzaName;
 
 import java.math.BigInteger;
 
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
-import static pl.coffeepower.blog.dp.creational.PizzaPrototype.PizzaProto;
 
 public class CreationalPatternsTest {
 
@@ -54,7 +57,7 @@ public class CreationalPatternsTest {
                         .build(),
                 is(fixtures.getExpectedPizza()));
         assertThat(pizzaBuilder
-                        .withName("vege").build(),
+                        .withName(PizzaName.FAMILY).build(),
                 is(not(fixtures.getExpectedPizza())));
     }
 
@@ -66,19 +69,17 @@ public class CreationalPatternsTest {
 
     @Test
     public void shouldCreateCloneablePizzaWithPrototype() throws Exception {
-        PizzaProto pizzaPrototype = new PizzaProto(fixtures.getPizzaName(), fixtures.getPizzaComponents(), fixtures.getPizzaPrice());
-        IPizza pizzaClone = pizzaPrototype.clone();
+        PizzaPrototype pizzaPrototype = new PizzaPrototype(fixtures.getPizzaName().name(), fixtures.getPizzaComponents(), fixtures.getPizzaPrice());
+        PizzaPrototype pizzaClone = pizzaPrototype.clone();
         assertThat(pizzaPrototype, is(fixtures.expectedPizza));
-        assertThat(pizzaClone, is(fixtures.expectedPizza));
-        assertThat(pizzaClone, not(sameInstance(pizzaPrototype)));
-        assertThat(pizzaClone, not(sameInstance(pizzaPrototype)));
+        assertThat(pizzaClone, allOf(is(pizzaPrototype), not(sameInstance(pizzaPrototype)), not(sameInstance(pizzaClone.clone()))));
     }
 
     @Value
     private static final class Fixtures {
-        String pizzaName = "vegetariana";
+        PizzaName pizzaName = PizzaName.VEGETARIANA;
         BigInteger pizzaPrice = BigInteger.TEN;
         ImmutableSet<String> pizzaComponents = ImmutableSet.of("tomatoes", "onion", "beans");
-        IPizza expectedPizza = new Pizza(pizzaName, pizzaComponents, pizzaPrice);
+        IPizza expectedPizza = new Pizza(pizzaName.name(), pizzaComponents, pizzaPrice);
     }
 }

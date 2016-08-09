@@ -22,17 +22,10 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.dp.creational;
+package pl.coffeepower.blog.dp.creational.vo;
 
-import com.google.common.collect.ImmutableSet;
-
-import java.math.BigInteger;
-
-interface IPizza {
-
-    String getName();
-
-    ImmutableSet<String> getComponents();
-
-    BigInteger getPrice();
+public enum PizzaName {
+    VEGETARIANA,
+    FAMILY,
+    DELUX
 }

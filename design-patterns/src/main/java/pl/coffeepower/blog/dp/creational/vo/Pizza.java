@@ -22,46 +22,32 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.dp.creational;
+package pl.coffeepower.blog.dp.creational.vo;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-
-import pl.coffeepower.blog.dp.creational.vo.IPizza;
-import pl.coffeepower.blog.dp.creational.vo.Pizza;
-import pl.coffeepower.blog.dp.creational.vo.PizzaName;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.FieldDefaults;
 
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Set;
 
-@NoArgsConstructor(staticName = "aPizza")
-public final class PizzaBuilder {
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@Getter
+@EqualsAndHashCode
+@ToString
+@AllArgsConstructor
+public class Pizza implements IPizza, Cloneable {
 
-    private PizzaName pizzaName;
-    private Set<String> components = Sets.newHashSet();
-    private BigInteger price = BigInteger.ZERO;
+    String name;
+    ImmutableSet<String> components;
+    BigInteger price;
 
-    public IPizza build() {
-        return new Pizza(pizzaName.name(), ImmutableSet.copyOf(components), price);
-    }
-
-    public PizzaBuilder withName(@NonNull PizzaName value) {
-        pizzaName = value;
-        return this;
-    }
-
-    public PizzaBuilder withPrice(BigInteger value) {
-        price = value;
-        return this;
-    }
-
-    public PizzaBuilder withComponents(Collection<String> values) {
-        components.clear();
-        components.addAll(values);
-        return this;
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

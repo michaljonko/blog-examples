@@ -29,17 +29,21 @@ import com.google.common.collect.ImmutableSet;
 
 import lombok.NonNull;
 
+import pl.coffeepower.blog.dp.creational.vo.IPizza;
+import pl.coffeepower.blog.dp.creational.vo.Pizza;
+import pl.coffeepower.blog.dp.creational.vo.PizzaName;
+
 import java.math.BigInteger;
 import java.util.Map;
 
 public final class PizzaAbstractFactory {
 
-    private final static Map<String, PizzaFactory> FACTORIES = ImmutableMap.of(
-            VegetarianaPizzaFactory.pizzaName, new VegetarianaPizzaFactory(),
-            FamilyPizzaFactory.pizzaName, new FamilyPizzaFactory()
+    private final static Map<PizzaName, PizzaFactory> FACTORIES = ImmutableMap.of(
+            PizzaName.VEGETARIANA, new VegetarianaPizzaFactory(),
+            PizzaName.FAMILY, new FamilyPizzaFactory()
     );
 
-    public static PizzaFactory getFactory(@NonNull String pizzaName) {
+    public static PizzaFactory getFactory(@NonNull PizzaName pizzaName) {
         return FACTORIES.get(pizzaName);
     }
 
@@ -50,21 +54,17 @@ public final class PizzaAbstractFactory {
 
     private static final class VegetarianaPizzaFactory implements PizzaFactory {
 
-        private static final String pizzaName = "vegetariana";
-
         @Override
         public IPizza createPizza() {
-            return new Pizza(pizzaName, ImmutableSet.of("tomatoes", "onion", "beans"), BigInteger.TEN);
+            return new Pizza(PizzaName.VEGETARIANA.name(), ImmutableSet.of("tomatoes", "onion", "beans"), BigInteger.TEN);
         }
     }
 
     private static final class FamilyPizzaFactory implements PizzaFactory {
 
-        private static final String pizzaName = "family";
-
         @Override
         public IPizza createPizza() {
-            return new Pizza(pizzaName, ImmutableSet.of("tomatoes", "cheese", "meat"), BigInteger.ONE);
+            return new Pizza(PizzaName.FAMILY.name(), ImmutableSet.of("tomatoes", "cheese", "meat"), BigInteger.ONE);
         }
     }
 }
