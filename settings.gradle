@@ -3,5 +3,6 @@ include ':words-frequency-counter',
         ':lambda-exp-on-java7',
         ':message-bus',
         ':stream-vs-guava',
-        ':benchmarks'
+        ':benchmarks',
+        ':spring-vs-guice'
 
