@@ -9,11 +9,10 @@ dependencies {
 }
 
 test {
-    exclude '**/*MISOTest*'
+    exclude '**/*MISOTest*', '**/*SISOTest*'
 }
 
-task longTest(type: Test) {
-    exclude '**/SISOTest*'
-    include '**/*MISOTest*'
+task integrationTest(type: Test) {
+    include '**/*MISOTest*', '**/*SISOTest*'
 }
 
