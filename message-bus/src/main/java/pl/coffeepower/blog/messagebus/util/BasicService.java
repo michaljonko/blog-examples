@@ -26,7 +26,7 @@ package pl.coffeepower.blog.messagebus.util;
 
 public interface BasicService {
 
-    void start() throws Exception;
+  void start() throws Exception;
 
-    void stop() throws Exception;
+  void stop() throws Exception;
 }

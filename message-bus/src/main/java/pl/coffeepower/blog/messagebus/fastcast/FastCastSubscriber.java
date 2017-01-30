@@ -49,53 +49,53 @@ import javax.inject.Named;
 @Log4j2
 final class FastCastSubscriber implements Subscriber {
 
-    private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final FastCast fastCast;
-    private final Disruptor<BytesEvent> disruptor;
-    private final RingBuffer<BytesEvent> ringBuffer;
-    private final String physicalTransportName;
-    @Inject
-    private Handler handler;
+  private final AtomicBoolean opened = new AtomicBoolean(false);
+  private final FastCast fastCast;
+  private final Disruptor<BytesEvent> disruptor;
+  private final RingBuffer<BytesEvent> ringBuffer;
+  private final String physicalTransportName;
+  @Inject
+  private Handler handler;
 
-    @Inject
-    private FastCastSubscriber(@NonNull FastCast fastCast,
-                               @NonNull @Named(Const.SUBSCRIBER_NAME_KEY) String nodeId,
-                               @NonNull PhysicalTransportConf physicalTransportConf,
-                               @NonNull SubscriberConf subscriberConf,
-                               @NonNull Disruptor<BytesEvent> disruptor) {
-        this.disruptor = disruptor;
-        this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
-            Preconditions.checkNotNull(handler);
-            handler.received(event.getBuffer(), event.getCurrentLength());
+  @Inject
+  private FastCastSubscriber(@NonNull FastCast fastCast,
+                             @NonNull @Named(Const.SUBSCRIBER_NAME_KEY) String nodeId,
+                             @NonNull PhysicalTransportConf physicalTransportConf,
+                             @NonNull SubscriberConf subscriberConf,
+                             @NonNull Disruptor<BytesEvent> disruptor) {
+    this.disruptor = disruptor;
+    this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
+      Preconditions.checkNotNull(handler);
+      handler.received(event.getBuffer(), event.getCurrentLength());
+    });
+    this.ringBuffer = this.disruptor.start();
+    this.fastCast = fastCast;
+    this.fastCast.setNodeId(nodeId);
+    this.fastCast.addTransport(physicalTransportConf);
+    this.physicalTransportName = physicalTransportConf.getName();
+    this.opened.set(true);
+    this.fastCast.onTransport(physicalTransportName).subscribe(
+        subscriberConf, new ByteArraySubscriber(false) {
+          @Override
+          protected void messageReceived(String sender, long sequence, byte[] msg, int off, int len) {
+            Preconditions.checkState(opened.get(), "Already closed");
+            ringBuffer.publishEvent((event, seq) -> event.copyToBuffer(msg, len));
+          }
         });
-        this.ringBuffer = this.disruptor.start();
-        this.fastCast = fastCast;
-        this.fastCast.setNodeId(nodeId);
-        this.fastCast.addTransport(physicalTransportConf);
-        this.physicalTransportName = physicalTransportConf.getName();
-        this.opened.set(true);
-        this.fastCast.onTransport(physicalTransportName).subscribe(
-                subscriberConf, new ByteArraySubscriber(false) {
-                    @Override
-                    protected void messageReceived(String sender, long sequence, byte[] msg, int off, int len) {
-                        Preconditions.checkState(opened.get(), "Already closed");
-                        ringBuffer.publishEvent((event, seq) -> event.copyToBuffer(msg, len));
-                    }
-                });
-        log.info("Created Subscriber: nodeId={}, physicalTransportName={}", nodeId, this.physicalTransportName);
-    }
+    log.info("Created Subscriber: nodeId={}, physicalTransportName={}", nodeId, this.physicalTransportName);
+  }
 
-    @Override
-    public void register(@NonNull Handler handler) {
-        this.handler = handler;
-    }
+  @Override
+  public void register(@NonNull Handler handler) {
+    this.handler = handler;
+  }
 
-    @Override
-    public void close() throws Exception {
-        Preconditions.checkState(opened.get(), "Already closed");
-        fastCast.onTransport(physicalTransportName).terminate();
-        disruptor.shutdown();
-        handler = null;
-        opened.set(false);
-    }
+  @Override
+  public void close() throws Exception {
+    Preconditions.checkState(opened.get(), "Already closed");
+    fastCast.onTransport(physicalTransportName).terminate();
+    disruptor.shutdown();
+    handler = null;
+    opened.set(false);
+  }
 }

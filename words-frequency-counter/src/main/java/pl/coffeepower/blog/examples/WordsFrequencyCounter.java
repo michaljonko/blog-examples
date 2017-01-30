@@ -28,7 +28,7 @@ import java.util.Map;
 
 public interface WordsFrequencyCounter {
 
-    void increase(String word);
+  void increase(String word);
 
-    Map<String, Integer> wordsFrequency();
+  Map<String, Integer> wordsFrequency();
 }

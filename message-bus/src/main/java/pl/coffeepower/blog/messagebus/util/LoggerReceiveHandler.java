@@ -34,8 +34,8 @@ import pl.coffeepower.blog.messagebus.Subscriber;
 @Log4j2
 public final class LoggerReceiveHandler implements Subscriber.Handler {
 
-    @Override
-    public void received(@NonNull byte[] data, int length) {
-        log.info("Received message: {}", new String(data, 0, length, Charsets.UTF_8));
-    }
+  @Override
+  public void received(@NonNull byte[] data, int length) {
+    log.info("Received message: {}", new String(data, 0, length, Charsets.UTF_8));
+  }
 }

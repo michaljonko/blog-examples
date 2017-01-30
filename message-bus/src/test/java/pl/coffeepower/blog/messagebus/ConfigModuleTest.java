@@ -24,24 +24,24 @@
 
 package pl.coffeepower.blog.messagebus;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
 import com.google.inject.Guice;
 
 import org.junit.Test;
 
 import pl.coffeepower.blog.messagebus.config.ConfigModule;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 public class ConfigModuleTest {
 
-    @Test
-    public void shouldGetDefaultValues() throws Exception {
-        Configuration configuration = Guice.createInjector(new ConfigModule())
-                .getInstance(Configuration.class);
-        assertThat(configuration, notNullValue());
-        assertThat(configuration.getMulticastAddress(), is("225.0.0.11"));
-        assertThat(configuration.getMulticastPort(), is(12345));
-    }
+  @Test
+  public void shouldGetDefaultValues() throws Exception {
+    Configuration configuration = Guice.createInjector(new ConfigModule())
+        .getInstance(Configuration.class);
+    assertThat(configuration, notNullValue());
+    assertThat(configuration.getMulticastAddress(), is("225.0.0.11"));
+    assertThat(configuration.getMulticastPort(), is(12345));
+  }
 }

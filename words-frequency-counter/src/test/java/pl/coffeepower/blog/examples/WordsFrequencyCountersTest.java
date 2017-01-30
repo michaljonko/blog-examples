@@ -24,6 +24,9 @@
 
 package pl.coffeepower.blog.examples;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 
 import pl.coffeepower.blog.examples.counters.ArrayWordsFrequencyCounter;
@@ -31,46 +34,43 @@ import pl.coffeepower.blog.examples.counters.AtomicWordsFrequencyCounter;
 import pl.coffeepower.blog.examples.counters.ClassWordsFrequencyCounter;
 import pl.coffeepower.blog.examples.counters.SimpleWordsFrequencyCounter;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 public class WordsFrequencyCountersTest {
 
-    private final String word = "qwertyuiopasdfghjklzxcvbnm";
+  private final String word = "qwertyuiopasdfghjklzxcvbnm";
 
-    @Test
-    public void testIntegerWordsCounter() throws Exception {
-        WordsFrequencyCounter valuesMap = new SimpleWordsFrequencyCounter();
-        valuesMap.increase(word);
-        valuesMap.increase(word);
-        valuesMap.wordsFrequency().values()
-                .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
-    }
+  @Test
+  public void testIntegerWordsCounter() throws Exception {
+    WordsFrequencyCounter valuesMap = new SimpleWordsFrequencyCounter();
+    valuesMap.increase(word);
+    valuesMap.increase(word);
+    valuesMap.wordsFrequency().values()
+        .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
+  }
 
-    @Test
-    public void testAtomicIntWordsCounter() throws Exception {
-        WordsFrequencyCounter valuesMap = new AtomicWordsFrequencyCounter();
-        valuesMap.increase(word);
-        valuesMap.increase(word);
-        valuesMap.wordsFrequency().values()
-                .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
-    }
+  @Test
+  public void testAtomicIntWordsCounter() throws Exception {
+    WordsFrequencyCounter valuesMap = new AtomicWordsFrequencyCounter();
+    valuesMap.increase(word);
+    valuesMap.increase(word);
+    valuesMap.wordsFrequency().values()
+        .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
+  }
 
-    @Test
-    public void testArrayIntWordsCounter() throws Exception {
-        WordsFrequencyCounter valuesMap = new ArrayWordsFrequencyCounter();
-        valuesMap.increase(word);
-        valuesMap.increase(word);
-        valuesMap.wordsFrequency().values()
-                .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
-    }
+  @Test
+  public void testArrayIntWordsCounter() throws Exception {
+    WordsFrequencyCounter valuesMap = new ArrayWordsFrequencyCounter();
+    valuesMap.increase(word);
+    valuesMap.increase(word);
+    valuesMap.wordsFrequency().values()
+        .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
+  }
 
-    @Test
-    public void testClassWordsCounter() throws Exception {
-        WordsFrequencyCounter valuesMap = new ClassWordsFrequencyCounter();
-        valuesMap.increase(word);
-        valuesMap.increase(word);
-        valuesMap.wordsFrequency().values()
-                .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
-    }
+  @Test
+  public void testClassWordsCounter() throws Exception {
+    WordsFrequencyCounter valuesMap = new ClassWordsFrequencyCounter();
+    valuesMap.increase(word);
+    valuesMap.increase(word);
+    valuesMap.wordsFrequency().values()
+        .forEach(value -> assertThat("ASSERT!", value.intValue(), is(2)));
+  }
 }

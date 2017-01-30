@@ -42,38 +42,38 @@ import javax.inject.Inject;
 @Log4j2
 final class HazelcastPublisher implements Publisher {
 
-    private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final CASLock lock = new CASLock();
-    private final ITopic<byte[]> topic;
+  private final AtomicBoolean opened = new AtomicBoolean(false);
+  private final CASLock lock = new CASLock();
+  private final ITopic<byte[]> topic;
 
-    @Inject
-    private HazelcastPublisher(@NonNull ITopic<byte[]> iTopic) {
-        topic = iTopic;
-        opened.set(true);
-        log.info("Created Publisher: topicId={}", topic.getName());
-    }
+  @Inject
+  private HazelcastPublisher(@NonNull ITopic<byte[]> iTopic) {
+    topic = iTopic;
+    opened.set(true);
+    log.info("Created Publisher: topicId={}", topic.getName());
+  }
 
-    @Override
-    public boolean send(@NonNull byte[] data) {
-        try {
-            lock.lock();
-            topic.publish(data);
-            return true;
-        } catch (TopicOverloadException e) {
-            return false;
-        } finally {
-            lock.unlock();
-        }
+  @Override
+  public boolean send(@NonNull byte[] data) {
+    try {
+      lock.lock();
+      topic.publish(data);
+      return true;
+    } catch (TopicOverloadException e) {
+      return false;
+    } finally {
+      lock.unlock();
     }
+  }
 
-    @Override
-    public void close() throws Exception {
-        try {
-            lock.lock();
-            Preconditions.checkState(opened.get(), "Already closed");
-            topic.destroy();
-        } finally {
-            lock.unlock();
-        }
+  @Override
+  public void close() throws Exception {
+    try {
+      lock.lock();
+      Preconditions.checkState(opened.get(), "Already closed");
+      topic.destroy();
+    } finally {
+      lock.unlock();
     }
+  }
 }

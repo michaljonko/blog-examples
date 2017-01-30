@@ -28,13 +28,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class CASLock {
 
-    private final AtomicBoolean lock = new AtomicBoolean(false);
+  private final AtomicBoolean lock = new AtomicBoolean(false);
 
-    public final void lock() {
-        while (!lock.compareAndSet(false, true)) ;
+  public final void lock() {
+    while (!lock.compareAndSet(false, true)) {
+      ;
     }
+  }
 
-    public final void unlock() {
-        lock.set(false);
-    }
+  public final void unlock() {
+    lock.set(false);
+  }
 }

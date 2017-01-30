@@ -24,31 +24,31 @@
 
 package pl.coffeepower.blog.examples;
 
-import org.hamcrest.CustomMatcher;
-import org.junit.Test;
-
 import static org.hamcrest.Matchers.everyItem;
 import static org.junit.Assert.assertThat;
 
+import org.hamcrest.CustomMatcher;
+import org.junit.Test;
+
 public class StreamsExampleTest {
 
-    @Test
-    public void shouldGetCorrectResults() throws Exception {
-        StreamsExample example = new StreamsExample();
+  @Test
+  public void shouldGetCorrectResults() throws Exception {
+    StreamsExample example = new StreamsExample();
 
-        assertThat(example.getOddNumbers(), everyItem(
-                new CustomMatcher<Integer>("Odd matcher") {
-                    @Override
-                    public boolean matches(Object item) {
-                        return (item instanceof Integer) && NumberUtils.isOddNumber((Integer) item);
-                    }
-                }));
-        assertThat(example.changeOddToEvenNumbers(), everyItem(
-                new CustomMatcher<Integer>("Even matcher") {
-                    @Override
-                    public boolean matches(Object item) {
-                        return (item instanceof Integer) && NumberUtils.isEvenNumber((Integer) item);
-                    }
-                }));
-    }
+    assertThat(example.getOddNumbers(), everyItem(
+        new CustomMatcher<Integer>("Odd matcher") {
+          @Override
+          public boolean matches(Object item) {
+            return (item instanceof Integer) && NumberUtils.isOddNumber((Integer) item);
+          }
+        }));
+    assertThat(example.changeOddToEvenNumbers(), everyItem(
+        new CustomMatcher<Integer>("Even matcher") {
+          @Override
+          public boolean matches(Object item) {
+            return (item instanceof Integer) && NumberUtils.isEvenNumber((Integer) item);
+          }
+        }));
+  }
 }

@@ -51,56 +51,56 @@ import javax.inject.Singleton;
 @Log4j2
 public final class AeronModule extends AbstractModule {
 
-    protected void configure() {
-        bind(Publisher.class).to(AeronPublisher.class);
-        bind(Subscriber.class).to(AeronSubscriber.class);
-        bind(Subscriber.Handler.class).to(LoggerReceiveHandler.class);
-    }
+  protected void configure() {
+    bind(Publisher.class).to(AeronPublisher.class);
+    bind(Subscriber.class).to(AeronSubscriber.class);
+    bind(Subscriber.Handler.class).to(LoggerReceiveHandler.class);
+  }
 
-    @Provides
-    @Singleton
-    private MediaDriver createMediaDriver() {
-        MediaDriver.Context context = new MediaDriver.Context()
-                .threadingMode(ThreadingMode.SHARED_NETWORK)
-                .dirsDeleteOnStart(true);
-        context.aeronDirectoryName(
-                System.getProperty("aeron.dir",
-                        StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString()));
-        return MediaDriver.launch(context);
-    }
+  @Provides
+  @Singleton
+  private MediaDriver createMediaDriver() {
+    MediaDriver.Context context = new MediaDriver.Context()
+        .threadingMode(ThreadingMode.SHARED_NETWORK)
+        .dirsDeleteOnStart(true);
+    context.aeronDirectoryName(
+        System.getProperty("aeron.dir",
+            StandardSystemProperty.JAVA_IO_TMPDIR.value() + File.separator + "aeron" + File.separator + UUID.randomUUID().toString()));
+    return MediaDriver.launch(context);
+  }
 
-    @Provides
-    @Singleton
-    @Inject
-    private Aeron.Context createAeronContext(@NonNull MediaDriver mediaDriver) {
-        Aeron.Context context = new Aeron.Context();
-        context.aeronDirectoryName(mediaDriver.aeronDirectoryName());
-        context.errorHandler(throwable -> log.catching(throwable));
-        if (log.isDebugEnabled()) {
-            context.availableImageHandler(image -> {
-                Subscription subscription = image.subscription();
-                log.debug("Image is available: streamId={}, channel={}, sessionId={}, identity={}", subscription.channel(), subscription.streamId(), image.sessionId(), image.sourceIdentity());
-            });
-            context.unavailableImageHandler(image -> {
-                Subscription subscription = image.subscription();
-                log.debug("Image is unavailable: streamId={}, channel={}, sessionId={}", subscription.channel(), subscription.streamId(), image.sessionId());
-            });
-        }
-        return context;
+  @Provides
+  @Singleton
+  @Inject
+  private Aeron.Context createAeronContext(@NonNull MediaDriver mediaDriver) {
+    Aeron.Context context = new Aeron.Context();
+    context.aeronDirectoryName(mediaDriver.aeronDirectoryName());
+    context.errorHandler(throwable -> log.catching(throwable));
+    if (log.isDebugEnabled()) {
+      context.availableImageHandler(image -> {
+        Subscription subscription = image.subscription();
+        log.debug("Image is available: streamId={}, channel={}, sessionId={}, identity={}", subscription.channel(), subscription.streamId(), image.sessionId(), image.sourceIdentity());
+      });
+      context.unavailableImageHandler(image -> {
+        Subscription subscription = image.subscription();
+        log.debug("Image is unavailable: streamId={}, channel={}, sessionId={}", subscription.channel(), subscription.streamId(), image.sessionId());
+      });
     }
+    return context;
+  }
 
-    @Provides
-    @Singleton
-    @Inject
-    private Aeron createAeron(@NonNull Aeron.Context context) {
-        if (log.isDebugEnabled()) {
-            log.info("aeronDirectoryName={}", context.aeronDirectoryName());
-        }
-        return Aeron.connect(context);
+  @Provides
+  @Singleton
+  @Inject
+  private Aeron createAeron(@NonNull Aeron.Context context) {
+    if (log.isDebugEnabled()) {
+      log.info("aeronDirectoryName={}", context.aeronDirectoryName());
     }
+    return Aeron.connect(context);
+  }
 
-    @Provides
-    private IdleStrategy createIdleStrategy() {
-        return new BusySpinIdleStrategy();
-    }
+  @Provides
+  private IdleStrategy createIdleStrategy() {
+    return new BusySpinIdleStrategy();
+  }
 }

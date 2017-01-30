@@ -46,47 +46,47 @@ import javax.inject.Named;
 @Log4j2
 final class FastCastPublisher implements Publisher {
 
-    private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final CASLock lock = new CASLock();
-    private final FastCast fastCast;
-    private final FCPublisher publisher;
-    private final String physicalTransportName;
+  private final AtomicBoolean opened = new AtomicBoolean(false);
+  private final CASLock lock = new CASLock();
+  private final FastCast fastCast;
+  private final FCPublisher publisher;
+  private final String physicalTransportName;
 
-    @Inject
-    private FastCastPublisher(@NonNull FastCast fastCast,
-                              @NonNull @Named(Const.PUBLISHER_NAME_KEY) String nodeId,
-                              @NonNull PhysicalTransportConf physicalTransportConf,
-                              @NonNull PublisherConf publisherConf) {
-        this.fastCast = fastCast;
-        this.fastCast.setNodeId(nodeId);
-        this.fastCast.addTransport(physicalTransportConf);
-        this.physicalTransportName = physicalTransportConf.getName();
-        this.publisher = this.fastCast.onTransport(physicalTransportName).publish(publisherConf).batchOnLimit(true);
-        this.opened.set(true);
-        log.info("Created Publisher: nodeId={}, physicalTransportName={}", nodeId, this.physicalTransportName);
-    }
+  @Inject
+  private FastCastPublisher(@NonNull FastCast fastCast,
+                            @NonNull @Named(Const.PUBLISHER_NAME_KEY) String nodeId,
+                            @NonNull PhysicalTransportConf physicalTransportConf,
+                            @NonNull PublisherConf publisherConf) {
+    this.fastCast = fastCast;
+    this.fastCast.setNodeId(nodeId);
+    this.fastCast.addTransport(physicalTransportConf);
+    this.physicalTransportName = physicalTransportConf.getName();
+    this.publisher = this.fastCast.onTransport(physicalTransportName).publish(publisherConf).batchOnLimit(true);
+    this.opened.set(true);
+    log.info("Created Publisher: nodeId={}, physicalTransportName={}", nodeId, this.physicalTransportName);
+  }
 
-    @Override
-    public boolean send(@NonNull byte[] data) {
-        try {
-            lock.lock();
-            Preconditions.checkState(opened.get(), "Already closed");
-            return publisher.offer(null, data, 0, data.length, false);
-        } finally {
-            lock.unlock();
-        }
+  @Override
+  public boolean send(@NonNull byte[] data) {
+    try {
+      lock.lock();
+      Preconditions.checkState(opened.get(), "Already closed");
+      return publisher.offer(null, data, 0, data.length, false);
+    } finally {
+      lock.unlock();
     }
+  }
 
-    @Override
-    public void close() throws Exception {
-        try {
-            lock.lock();
-            Preconditions.checkState(opened.get(), "Already closed");
-            publisher.flush();
-            fastCast.onTransport(physicalTransportName).terminate();
-            opened.set(false);
-        } finally {
-            lock.unlock();
-        }
+  @Override
+  public void close() throws Exception {
+    try {
+      lock.lock();
+      Preconditions.checkState(opened.get(), "Already closed");
+      publisher.flush();
+      fastCast.onTransport(physicalTransportName).terminate();
+      opened.set(false);
+    } finally {
+      lock.unlock();
     }
+  }
 }

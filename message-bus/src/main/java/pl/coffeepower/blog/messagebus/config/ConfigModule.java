@@ -30,7 +30,7 @@ import pl.coffeepower.blog.messagebus.Configuration;
 
 public final class ConfigModule extends AbstractModule {
 
-    protected void configure() {
-        bind(Configuration.class).to(DefaultConfiguration.class).asEagerSingleton();
-    }
+  protected void configure() {
+    bind(Configuration.class).to(DefaultConfiguration.class).asEagerSingleton();
+  }
 }

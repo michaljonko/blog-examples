@@ -38,35 +38,35 @@ import java8.util.stream.StreamSupport;
 @Log4j2
 public final class StreamsExample {
 
-    private final List<Integer> numbers;
-    private final int numbersSize = 10;
+  private final List<Integer> numbers;
+  private final int numbersSize = 10;
 
-    StreamsExample() {
-        Random random = new Random();
-        ImmutableList.Builder<Integer> listBuilder = ImmutableList.builder();
-        for (int i = 0; i < numbersSize; i++) {
-            listBuilder.add(random.nextInt(numbersSize));
-        }
-        numbers = listBuilder.build();
+  StreamsExample() {
+    Random random = new Random();
+    ImmutableList.Builder<Integer> listBuilder = ImmutableList.builder();
+    for (int i = 0; i < numbersSize; i++) {
+      listBuilder.add(random.nextInt(numbersSize));
     }
+    numbers = listBuilder.build();
+  }
 
-    public static void main(String[] args) {
-        StreamsExample example = new StreamsExample();
-        log.info("odd numbers: " + Joiner.on(", ").join(example.getOddNumbers()));
-        example.changeOddToEvenNumbers()
-                .forEach(number -> log.info("odd value changed to even:" + number));
-    }
+  public static void main(String[] args) {
+    StreamsExample example = new StreamsExample();
+    log.info("odd numbers: " + Joiner.on(", ").join(example.getOddNumbers()));
+    example.changeOddToEvenNumbers()
+        .forEach(number -> log.info("odd value changed to even:" + number));
+  }
 
-    public final List<Integer> getOddNumbers() {
-        return StreamSupport.stream(numbers)
-                .filter(number -> NumberUtils.isOddNumber(number))
-                .collect(Collectors.toList());
-    }
+  public final List<Integer> getOddNumbers() {
+    return StreamSupport.stream(numbers)
+        .filter(number -> NumberUtils.isOddNumber(number))
+        .collect(Collectors.toList());
+  }
 
-    public final List<Integer> changeOddToEvenNumbers() {
-        return StreamSupport.stream(numbers)
-                .filter(number -> NumberUtils.isOddNumber(number))
-                .map(value -> value + 1)
-                .collect(Collectors.toList());
-    }
+  public final List<Integer> changeOddToEvenNumbers() {
+    return StreamSupport.stream(numbers)
+        .filter(number -> NumberUtils.isOddNumber(number))
+        .map(value -> value + 1)
+        .collect(Collectors.toList());
+  }
 }

@@ -54,34 +54,34 @@ import java.util.List;
 @Fork(value = 3)
 public class PerformanceTest {
 
-    private final GuavaDishService guavaDishService = new GuavaDishService();
-    private final StreamsDishService streamsDishService = new StreamsDishService();
-    private List<Dish> dishes;
+  private final GuavaDishService guavaDishService = new GuavaDishService();
+  private final StreamsDishService streamsDishService = new StreamsDishService();
+  private List<Dish> dishes;
 
-    public static void main(String[] args) throws RunnerException {
-        new Runner(new OptionsBuilder()
-                .include(PerformanceTest.class.getSimpleName())
-                .shouldFailOnError(true)
-                .build()
-        ).run();
-    }
+  public static void main(String[] args) throws RunnerException {
+    new Runner(new OptionsBuilder()
+        .include(PerformanceTest.class.getSimpleName())
+        .shouldFailOnError(true)
+        .build()
+    ).run();
+  }
 
-    @Setup(Level.Invocation)
-    public void setup() throws IOException, ClassNotFoundException {
-        @Cleanup
-        ObjectInputStream resourcesStream = new ObjectInputStream(Resources.getResource("dishes.bin").openStream());
-        dishes = (List<Dish>) resourcesStream.readObject();
-    }
+  @Setup(Level.Invocation)
+  public void setup() throws IOException, ClassNotFoundException {
+    @Cleanup
+    ObjectInputStream resourcesStream = new ObjectInputStream(Resources.getResource("dishes.bin").openStream());
+    dishes = (List<Dish>) resourcesStream.readObject();
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureGuava() {
-        guavaDishService.getSortedFitDishNamesWithMeat(dishes).size();
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureGuava() {
+    guavaDishService.getSortedFitDishNamesWithMeat(dishes).size();
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureStream() {
-        streamsDishService.getSortedFitDishNamesWithMeat(dishes).size();
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureStream() {
+    streamsDishService.getSortedFitDishNamesWithMeat(dishes).size();
+  }
 }

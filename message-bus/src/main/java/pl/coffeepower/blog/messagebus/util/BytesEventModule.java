@@ -31,8 +31,8 @@ import com.lmax.disruptor.dsl.Disruptor;
 
 public final class BytesEventModule extends AbstractModule {
 
-    protected void configure() {
-        bind(new TypeLiteral<Disruptor<BytesEventFactory.BytesEvent>>() {
-        }).toProvider(BytesEventDisruptorProvider.class);
-    }
+  protected void configure() {
+    bind(new TypeLiteral<Disruptor<BytesEventFactory.BytesEvent>>() {
+    }).toProvider(BytesEventDisruptorProvider.class);
+  }
 }

@@ -36,23 +36,23 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public final class ArrayWordsFrequencyCounter implements WordsFrequencyCounter {
 
-    private final Map<String, int[]> map = Maps.newConcurrentMap();
+  private final Map<String, int[]> map = Maps.newConcurrentMap();
 
-    @Override
-    public final void increase(String word) {
-        int[] counter = map.get(word);
-        if (counter == null) {
-            counter = new int[]{1};
-            map.put(word, counter);
-        } else {
-            counter[0]++;
-        }
+  @Override
+  public final void increase(String word) {
+    int[] counter = map.get(word);
+    if (counter == null) {
+      counter = new int[] {1};
+      map.put(word, counter);
+    } else {
+      counter[0]++;
     }
+  }
 
-    @Override
-    public final Map<String, Integer> wordsFrequency() {
-        return map.entrySet()
-                .stream()
-                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()[0]));
-    }
+  @Override
+  public final Map<String, Integer> wordsFrequency() {
+    return map.entrySet()
+        .stream()
+        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()[0]));
+  }
 }

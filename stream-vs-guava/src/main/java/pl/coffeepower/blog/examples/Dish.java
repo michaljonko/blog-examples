@@ -31,9 +31,9 @@ import java.io.Serializable;
 @Value
 public final class Dish implements Serializable {
 
-    private static final long serialVersionUID = -7494325349883513295L;
+  private static final long serialVersionUID = -7494325349883513295L;
 
-    String name;
-    int calories;
-    boolean withMeat;
+  String name;
+  int calories;
+  boolean withMeat;
 }

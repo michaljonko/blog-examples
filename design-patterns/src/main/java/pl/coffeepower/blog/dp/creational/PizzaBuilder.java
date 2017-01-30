@@ -41,27 +41,27 @@ import java.util.Set;
 @NoArgsConstructor(staticName = "aPizza")
 public final class PizzaBuilder {
 
-    private PizzaName pizzaName;
-    private Set<String> components = Sets.newHashSet();
-    private BigInteger price = BigInteger.ZERO;
+  private PizzaName pizzaName;
+  private Set<String> components = Sets.newHashSet();
+  private BigInteger price = BigInteger.ZERO;
 
-    public IPizza build() {
-        return new Pizza(pizzaName.name(), ImmutableSet.copyOf(components), price);
-    }
+  public IPizza build() {
+    return new Pizza(pizzaName.name(), ImmutableSet.copyOf(components), price);
+  }
 
-    public PizzaBuilder withName(@NonNull PizzaName value) {
-        pizzaName = value;
-        return this;
-    }
+  public PizzaBuilder withName(@NonNull PizzaName value) {
+    pizzaName = value;
+    return this;
+  }
 
-    public PizzaBuilder withPrice(BigInteger value) {
-        price = value;
-        return this;
-    }
+  public PizzaBuilder withPrice(BigInteger value) {
+    price = value;
+    return this;
+  }
 
-    public PizzaBuilder withComponents(Collection<String> values) {
-        components.clear();
-        components.addAll(values);
-        return this;
-    }
+  public PizzaBuilder withComponents(Collection<String> values) {
+    components.clear();
+    components.addAll(values);
+    return this;
+  }
 }

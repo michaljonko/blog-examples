@@ -38,33 +38,33 @@ import java.util.Map;
 
 public final class PizzaAbstractFactory {
 
-    private final static Map<PizzaName, PizzaFactory> FACTORIES = ImmutableMap.of(
-            PizzaName.VEGETARIANA, new VegetarianaPizzaFactory(),
-            PizzaName.FAMILY, new FamilyPizzaFactory()
-    );
+  private final static Map<PizzaName, PizzaFactory> FACTORIES = ImmutableMap.of(
+      PizzaName.VEGETARIANA, new VegetarianaPizzaFactory(),
+      PizzaName.FAMILY, new FamilyPizzaFactory()
+  );
 
-    public static PizzaFactory getFactory(@NonNull PizzaName pizzaName) {
-        return FACTORIES.get(pizzaName);
+  public static PizzaFactory getFactory(@NonNull PizzaName pizzaName) {
+    return FACTORIES.get(pizzaName);
+  }
+
+  public interface PizzaFactory {
+
+    IPizza createPizza();
+  }
+
+  private static final class VegetarianaPizzaFactory implements PizzaFactory {
+
+    @Override
+    public IPizza createPizza() {
+      return new Pizza(PizzaName.VEGETARIANA.name(), ImmutableSet.of("tomatoes", "onion", "beans"), BigInteger.TEN);
     }
+  }
 
-    public interface PizzaFactory {
+  private static final class FamilyPizzaFactory implements PizzaFactory {
 
-        IPizza createPizza();
+    @Override
+    public IPizza createPizza() {
+      return new Pizza(PizzaName.FAMILY.name(), ImmutableSet.of("tomatoes", "cheese", "meat"), BigInteger.ONE);
     }
-
-    private static final class VegetarianaPizzaFactory implements PizzaFactory {
-
-        @Override
-        public IPizza createPizza() {
-            return new Pizza(PizzaName.VEGETARIANA.name(), ImmutableSet.of("tomatoes", "onion", "beans"), BigInteger.TEN);
-        }
-    }
-
-    private static final class FamilyPizzaFactory implements PizzaFactory {
-
-        @Override
-        public IPizza createPizza() {
-            return new Pizza(PizzaName.FAMILY.name(), ImmutableSet.of("tomatoes", "cheese", "meat"), BigInteger.ONE);
-        }
-    }
+  }
 }

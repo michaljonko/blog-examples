@@ -40,34 +40,34 @@ import javax.inject.Inject;
 @Log4j2
 final class HazelcastSubscriber implements Subscriber {
 
-    private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final ITopic<byte[]> topic;
-    @Inject
-    private Handler handler;
+  private final AtomicBoolean opened = new AtomicBoolean(false);
+  private final ITopic<byte[]> topic;
+  @Inject
+  private Handler handler;
 
-    @Inject
-    private HazelcastSubscriber(@NonNull ITopic<byte[]> iTopic) {
-        topic = iTopic;
-        topic.addMessageListener(message -> {
-            Preconditions.checkNotNull(handler);
-            Preconditions.checkState(opened.get(), "Already closed");
-            byte[] data = message.getMessageObject();
-            handler.received(data, data.length);
-        });
-        opened.set(true);
-        log.info("Created Subscriber: topicId={}", iTopic.getName());
-    }
+  @Inject
+  private HazelcastSubscriber(@NonNull ITopic<byte[]> iTopic) {
+    topic = iTopic;
+    topic.addMessageListener(message -> {
+      Preconditions.checkNotNull(handler);
+      Preconditions.checkState(opened.get(), "Already closed");
+      byte[] data = message.getMessageObject();
+      handler.received(data, data.length);
+    });
+    opened.set(true);
+    log.info("Created Subscriber: topicId={}", iTopic.getName());
+  }
 
-    @Override
-    public void register(@NonNull Handler handler) {
-        this.handler = handler;
-    }
+  @Override
+  public void register(@NonNull Handler handler) {
+    this.handler = handler;
+  }
 
-    @Override
-    public void close() throws Exception {
-        Preconditions.checkState(opened.get(), "Already closed");
-        topic.destroy();
-        handler = null;
-        opened.set(false);
-    }
+  @Override
+  public void close() throws Exception {
+    Preconditions.checkState(opened.get(), "Already closed");
+    topic.destroy();
+    handler = null;
+    opened.set(false);
+  }
 }

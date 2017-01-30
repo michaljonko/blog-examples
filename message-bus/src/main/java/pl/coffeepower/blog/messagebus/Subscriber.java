@@ -28,11 +28,11 @@ import java.io.Serializable;
 
 public interface Subscriber extends AutoCloseable {
 
-    void register(Handler handler);
+  void register(Handler handler);
 
-    @FunctionalInterface
-    interface Handler extends Serializable {
+  @FunctionalInterface
+  interface Handler extends Serializable {
 
-        void received(byte[] data, int length);
-    }
+    void received(byte[] data, int length);
+  }
 }

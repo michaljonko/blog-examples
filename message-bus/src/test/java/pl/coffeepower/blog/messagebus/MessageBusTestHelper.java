@@ -60,131 +60,131 @@ import java.util.stream.LongStream;
 
 abstract class MessageBusTestHelper implements Serializable {
 
-    static final String NODE_SUBSCRIBER_1 = "sub-1";
-    static final String NODE_SUBSCRIBER_2 = "sub-2";
-    static final String NODE_SUBSCRIBER_3 = "sub-3";
-    static final String NODE_PUBLISHER = "pub";
-    private static final long serialVersionUID = -5525765906174658715L;
-    @Getter
-    private Cloud cloud;
+  static final String NODE_SUBSCRIBER_1 = "sub-1";
+  static final String NODE_SUBSCRIBER_2 = "sub-2";
+  static final String NODE_SUBSCRIBER_3 = "sub-3";
+  static final String NODE_PUBLISHER = "pub";
+  private static final long serialVersionUID = -5525765906174658715L;
+  @Getter
+  private Cloud cloud;
 
-    @Before
-    public void setUp() throws Exception {
-        cloud = CloudFactory.createCloud();
-        ViProps.at(cloud.node("**")).setLocalType();
-        JvmProps.at(cloud.node("**")).addJvmArgs("-Xms128m", "-Xmx128m");
-        cloud.node(NODE_SUBSCRIBER_1).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-1");
-        cloud.node(NODE_SUBSCRIBER_2).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-2");
-        cloud.node(NODE_SUBSCRIBER_3).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-3");
-        cloud.nodes(NODE_PUBLISHER, NODE_SUBSCRIBER_1, NODE_SUBSCRIBER_2, NODE_SUBSCRIBER_3).touch();
-    }
+  @Before
+  public void setUp() throws Exception {
+    cloud = CloudFactory.createCloud();
+    ViProps.at(cloud.node("**")).setLocalType();
+    JvmProps.at(cloud.node("**")).addJvmArgs("-Xms128m", "-Xmx128m");
+    cloud.node(NODE_SUBSCRIBER_1).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-1");
+    cloud.node(NODE_SUBSCRIBER_2).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-2");
+    cloud.node(NODE_SUBSCRIBER_3).setProp(Const.SUBSCRIBER_NAME_KEY, "SUB-3");
+    cloud.nodes(NODE_PUBLISHER, NODE_SUBSCRIBER_1, NODE_SUBSCRIBER_2, NODE_SUBSCRIBER_3).touch();
+  }
 
-    @After
-    public void tearDown() throws Exception {
-        cloud.shutdown();
-    }
+  @After
+  public void tearDown() throws Exception {
+    cloud.shutdown();
+  }
 
-    Publisher executePublisher(final Engine engine) throws InterruptedException {
-        Publisher publisher = Guice.createInjector(Stage.PRODUCTION, new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.execute(() -> {
-            Fixtures fixtures = new Fixtures();
-            Stopwatch stopwatch = Stopwatch.createStarted();
-            LongStream.rangeClosed(fixtures.getFirstMessageId(), fixtures.getNumberOfMessages())
-                    .forEach(value -> {
-                        IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(1L));
-                        while (!publisher.send(Bytes.concat(Longs.toByteArray(value), fixtures.getAdditionalData()))) {
-                            idleStrategy.idle();
-                        }
-                    });
-            System.out.println("Sent all messages in " + stopwatch.stop());
-        });
-        executorService.shutdown();
-        executorService.awaitTermination(1L, TimeUnit.MINUTES);
-        return publisher;
-    }
-
-    Future<Boolean> createSubscriberFuture(final Engine engine) {
-        return createSubscriberFuture(NODE_SUBSCRIBER_1, engine);
-    }
-
-    Future<Boolean> createSubscriberFuture(final String cloudNode, final Engine engine) {
-        return cloud.node(cloudNode).submit((Callable<Boolean> & Serializable) () -> {
-            Fixtures fixtures = new Fixtures();
-            AtomicBoolean state = new AtomicBoolean(true);
-            AtomicLong lastReceived = new AtomicLong();
-            AtomicLong messagesCounter = new AtomicLong();
-            Subscriber subscriber = Guice.createInjector(Stage.PRODUCTION, new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Subscriber.class);
-            subscriber.register((data, length) -> {
-                messagesCounter.incrementAndGet();
-                if (state.get()) {
-                    long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
-                    long lastReceivedValue = lastReceived.get();
-                    if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != fixtures.getLastAdditionalDataByte()) {
-                        state.set(false);
-                    }
-                }
-            });
+  Publisher executePublisher(final Engine engine) throws InterruptedException {
+    Publisher publisher = Guice.createInjector(Stage.PRODUCTION, new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Publisher.class);
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    executorService.execute(() -> {
+      Fixtures fixtures = new Fixtures();
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      LongStream.rangeClosed(fixtures.getFirstMessageId(), fixtures.getNumberOfMessages())
+          .forEach(value -> {
             IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(1L));
-            while (state.get() && lastReceived.get() < fixtures.getNumberOfMessages()) {
-                idleStrategy.idle();
+            while (!publisher.send(Bytes.concat(Longs.toByteArray(value), fixtures.getAdditionalData()))) {
+              idleStrategy.idle();
             }
-            subscriber.close();
-            if (!state.get()) {
-                System.out.println("Broken connection on messageId=" + lastReceived.get());
-                System.out.println("Last messageId=" + lastReceived);
-            }
-            return state.get();
-        });
+          });
+      System.out.println("Sent all messages in " + stopwatch.stop());
+    });
+    executorService.shutdown();
+    executorService.awaitTermination(1L, TimeUnit.MINUTES);
+    return publisher;
+  }
+
+  Future<Boolean> createSubscriberFuture(final Engine engine) {
+    return createSubscriberFuture(NODE_SUBSCRIBER_1, engine);
+  }
+
+  Future<Boolean> createSubscriberFuture(final String cloudNode, final Engine engine) {
+    return cloud.node(cloudNode).submit((Callable<Boolean> & Serializable) () -> {
+      Fixtures fixtures = new Fixtures();
+      AtomicBoolean state = new AtomicBoolean(true);
+      AtomicLong lastReceived = new AtomicLong();
+      AtomicLong messagesCounter = new AtomicLong();
+      Subscriber subscriber = Guice.createInjector(Stage.PRODUCTION, new TestConfigurationModule(), new BytesEventModule(), engine.getModule()).getInstance(Subscriber.class);
+      subscriber.register((data, length) -> {
+        messagesCounter.incrementAndGet();
+        if (state.get()) {
+          long prevReceivedValue = lastReceived.getAndSet(Longs.fromByteArray(data));
+          long lastReceivedValue = lastReceived.get();
+          if (lastReceivedValue != (prevReceivedValue + 1) || data[length - 1] != fixtures.getLastAdditionalDataByte()) {
+            state.set(false);
+          }
+        }
+      });
+      IdleStrategy idleStrategy = new SleepingIdleStrategy(TimeUnit.MICROSECONDS.toNanos(1L));
+      while (state.get() && lastReceived.get() < fixtures.getNumberOfMessages()) {
+        idleStrategy.idle();
+      }
+      subscriber.close();
+      if (!state.get()) {
+        System.out.println("Broken connection on messageId=" + lastReceived.get());
+        System.out.println("Last messageId=" + lastReceived);
+      }
+      return state.get();
+    });
+  }
+
+  private static final class TestConfigurationModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+      bind(Configuration.class).to(TestConfiguration.class).asEagerSingleton();
+    }
+  }
+
+  private static final class TestConfiguration implements Configuration {
+
+    @Override
+    public String getMulticastAddress() {
+      return "225.0.0.11";
     }
 
-    private static final class TestConfigurationModule extends AbstractModule {
-
-        @Override
-        protected void configure() {
-            bind(Configuration.class).to(TestConfiguration.class).asEagerSingleton();
-        }
+    @Override
+    public int getMulticastPort() {
+      return 12345;
     }
 
-    private static final class TestConfiguration implements Configuration {
-
-        @Override
-        public String getMulticastAddress() {
-            return "225.0.0.11";
-        }
-
-        @Override
-        public int getMulticastPort() {
-            return 12345;
-        }
-
-        @Override
-        public String getBindAddress() {
-            return "127.0.0.1";
-        }
-
-        @Override
-        public int getTopicId() {
-            return 1;
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                    .add("multicastAddress", getMulticastAddress())
-                    .add("multicastPort", getMulticastPort())
-                    .add("bindAddress", getBindAddress())
-                    .add("topicId", getTopicId())
-                    .toString();
-        }
+    @Override
+    public String getBindAddress() {
+      return "127.0.0.1";
     }
 
-    @Value
-    private static final class Fixtures implements Serializable {
-        long firstMessageId = 1L;
-        long numberOfMessages = 100_000L;
-        byte[] additionalData = "9876543210123456789qazxswedcvfrtgbnhyujm".getBytes();
-        int additionalDataLength = additionalData.length;
-        byte lastAdditionalDataByte = additionalData[additionalDataLength - 1];
+    @Override
+    public int getTopicId() {
+      return 1;
     }
+
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(this)
+          .add("multicastAddress", getMulticastAddress())
+          .add("multicastPort", getMulticastPort())
+          .add("bindAddress", getBindAddress())
+          .add("topicId", getTopicId())
+          .toString();
+    }
+  }
+
+  @Value
+  private static final class Fixtures implements Serializable {
+    long firstMessageId = 1L;
+    long numberOfMessages = 100_000L;
+    byte[] additionalData = "9876543210123456789qazxswedcvfrtgbnhyujm".getBytes();
+    int additionalDataLength = additionalData.length;
+    byte lastAdditionalDataByte = additionalData[additionalDataLength - 1];
+  }
 }

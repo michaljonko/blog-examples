@@ -36,24 +36,24 @@ import java.util.Random;
 @Log4j2
 public final class LambdaExpExample {
 
-    @Getter
-    private final List<Integer> numbers;
-    private final int numbersSize = 20;
+  @Getter
+  private final List<Integer> numbers;
+  private final int numbersSize = 20;
 
-    LambdaExpExample() {
-        Random random = new Random();
-        ImmutableList.Builder<Integer> listBuilder = ImmutableList.builder();
-        for (int i = 0; i < numbersSize; i++) {
-            listBuilder.add(random.nextInt(numbersSize));
-        }
-        numbers = listBuilder.build();
+  LambdaExpExample() {
+    Random random = new Random();
+    ImmutableList.Builder<Integer> listBuilder = ImmutableList.builder();
+    for (int i = 0; i < numbersSize; i++) {
+      listBuilder.add(random.nextInt(numbersSize));
     }
+    numbers = listBuilder.build();
+  }
 
-    public static void main(String[] args) {
-        LambdaExpExample example = new LambdaExpExample();
-        Joiner joiner = Joiner.on(", ");
-        log.info("numbers: " + joiner.join(example.getNumbers()));
-        log.info("odd numbers: " + NumberUtils.getOddNumbers(example.getNumbers()));
-        log.info("even numbers: " + NumberUtils.getEvenNumbers(example.getNumbers()));
-    }
+  public static void main(String[] args) {
+    LambdaExpExample example = new LambdaExpExample();
+    Joiner joiner = Joiner.on(", ");
+    log.info("numbers: " + joiner.join(example.getNumbers()));
+    log.info("odd numbers: " + NumberUtils.getOddNumbers(example.getNumbers()));
+    log.info("even numbers: " + NumberUtils.getEvenNumbers(example.getNumbers()));
+  }
 }

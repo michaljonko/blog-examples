@@ -25,7 +25,7 @@
 package pl.coffeepower.blog.dp.creational.vo;
 
 public enum PizzaName {
-    VEGETARIANA,
-    FAMILY,
-    DELUX
+  VEGETARIANA,
+  FAMILY,
+  DELUX
 }

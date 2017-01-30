@@ -31,25 +31,25 @@ import pl.coffeepower.blog.messagebus.fastcast.FastCastModule;
 import pl.coffeepower.blog.messagebus.hazelcast.HazelcastModule;
 
 public enum Engine {
-    FAST_CAST(FastCastModule.class),
-    AERON(AeronModule.class),
-    HAZELCAST(HazelcastModule.class);
+  FAST_CAST(FastCastModule.class),
+  AERON(AeronModule.class),
+  HAZELCAST(HazelcastModule.class);
 
-    private final Class<? extends Module> moduleClass;
-    private Module module;
+  private final Class<? extends Module> moduleClass;
+  private Module module;
 
-    Engine(Class<? extends Module> moduleClass) {
-        this.moduleClass = moduleClass;
+  Engine(Class<? extends Module> moduleClass) {
+    this.moduleClass = moduleClass;
+  }
+
+  public synchronized final Module getModule() {
+    if (module == null) {
+      try {
+        module = moduleClass.newInstance();
+      } catch (InstantiationException | IllegalAccessException e) {
+        throw new InternalError(e);
+      }
     }
-
-    public synchronized final Module getModule() {
-        if (module == null) {
-            try {
-                module = moduleClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new InternalError(e);
-            }
-        }
-        return module;
-    }
+    return module;
+  }
 }

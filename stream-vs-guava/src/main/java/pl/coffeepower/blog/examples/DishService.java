@@ -28,9 +28,9 @@ import java.util.List;
 
 public interface DishService {
 
-    List<String> findDishNamesWithMeat(List<Dish> dishes);
+  List<String> findDishNamesWithMeat(List<Dish> dishes);
 
-    List<Dish> findFitDishesWithoutMeat(List<Dish> dishes);
+  List<Dish> findFitDishesWithoutMeat(List<Dish> dishes);
 
-    List<String> getSortedFitDishNamesWithMeat(List<Dish> dishes);
+  List<String> getSortedFitDishNamesWithMeat(List<Dish> dishes);
 }

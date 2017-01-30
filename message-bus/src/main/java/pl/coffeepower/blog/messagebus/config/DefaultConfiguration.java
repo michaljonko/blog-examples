@@ -38,35 +38,35 @@ import javax.inject.Singleton;
 @Value
 final class DefaultConfiguration implements Configuration {
 
-    private int topicId;
-    private String multicastAddress;
-    private int multicastPort;
-    private String bindAddress;
+  private int topicId;
+  private String multicastAddress;
+  private int multicastPort;
+  private String bindAddress;
 
-    public DefaultConfiguration() {
-        this.topicId = Integer.parseInt(System.getProperty(Const.TOPIC_ID_KEY, "1"));
-        Preconditions.checkArgument(
-                InetAddresses.isInetAddress(this.multicastAddress = System.getProperty(Const.MULTICAST_ADDRESS_KEY, "225.0.0.11")),
-                "multicastAddress is not a valid IP");
-        Preconditions.checkArgument(
-                InetAddresses.forString(this.multicastAddress).isMulticastAddress(),
-                "multicastAddress is not a valid multicast IP");
-        this.multicastPort = Integer.parseInt(System.getProperty(Const.MULTICAST_PORT_KEY, "12345"));
-        Preconditions.checkArgument(
-                this.multicastPort > 0 && this.multicastPort < 65535,
-                "multicastPort must be a number between 1 and 65535");
-        Preconditions.checkArgument(
-                InetAddresses.isInetAddress(this.bindAddress = System.getProperty(Const.BIND_ADDRESS_KEY, "127.0.0.1")),
-                "bindAddress is not a valid IP");
-    }
+  public DefaultConfiguration() {
+    this.topicId = Integer.parseInt(System.getProperty(Const.TOPIC_ID_KEY, "1"));
+    Preconditions.checkArgument(
+        InetAddresses.isInetAddress(this.multicastAddress = System.getProperty(Const.MULTICAST_ADDRESS_KEY, "225.0.0.11")),
+        "multicastAddress is not a valid IP");
+    Preconditions.checkArgument(
+        InetAddresses.forString(this.multicastAddress).isMulticastAddress(),
+        "multicastAddress is not a valid multicast IP");
+    this.multicastPort = Integer.parseInt(System.getProperty(Const.MULTICAST_PORT_KEY, "12345"));
+    Preconditions.checkArgument(
+        this.multicastPort > 0 && this.multicastPort < 65535,
+        "multicastPort must be a number between 1 and 65535");
+    Preconditions.checkArgument(
+        InetAddresses.isInetAddress(this.bindAddress = System.getProperty(Const.BIND_ADDRESS_KEY, "127.0.0.1")),
+        "bindAddress is not a valid IP");
+  }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("topicId", topicId)
-                .add("multicastAddress", multicastAddress)
-                .add("multicastPort", multicastPort)
-                .add("bindAddress", bindAddress)
-                .toString();
-    }
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("topicId", topicId)
+        .add("multicastAddress", multicastAddress)
+        .add("multicastPort", multicastPort)
+        .add("bindAddress", bindAddress)
+        .toString();
+  }
 }

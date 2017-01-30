@@ -24,6 +24,9 @@
 
 package pl.coffeepower.blog.messagebus;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 import com.google.common.base.Stopwatch;
 
 import org.junit.Test;
@@ -31,23 +34,20 @@ import org.junit.Test;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 public class FastCastMISOTest extends MessageBusTestHelper {
 
-    @Test
-    public void shouldRetrieveAllMessages() throws Exception {
-        long timeout = 60L;
-        Future<Boolean> subscriberFuture1 = createSubscriberFuture(NODE_SUBSCRIBER_1, Engine.FAST_CAST);
-        TimeUnit.SECONDS.sleep(5L);
-        Future<Boolean> subscriberFuture2 = createSubscriberFuture(NODE_SUBSCRIBER_2, Engine.FAST_CAST);
-        TimeUnit.SECONDS.sleep(5L);
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Publisher publisher = executePublisher(Engine.FAST_CAST);
-        assertThat(subscriberFuture1.get(timeout, TimeUnit.SECONDS), is(true));
-        assertThat(subscriberFuture2.get(timeout, TimeUnit.SECONDS), is(true));
-        System.out.println("All messages received in " + stopwatch.stop());
-        publisher.close();
-    }
+  @Test
+  public void shouldRetrieveAllMessages() throws Exception {
+    long timeout = 60L;
+    Future<Boolean> subscriberFuture1 = createSubscriberFuture(NODE_SUBSCRIBER_1, Engine.FAST_CAST);
+    TimeUnit.SECONDS.sleep(5L);
+    Future<Boolean> subscriberFuture2 = createSubscriberFuture(NODE_SUBSCRIBER_2, Engine.FAST_CAST);
+    TimeUnit.SECONDS.sleep(5L);
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    Publisher publisher = executePublisher(Engine.FAST_CAST);
+    assertThat(subscriberFuture1.get(timeout, TimeUnit.SECONDS), is(true));
+    assertThat(subscriberFuture2.get(timeout, TimeUnit.SECONDS), is(true));
+    System.out.println("All messages received in " + stopwatch.stop());
+    publisher.close();
+  }
 }

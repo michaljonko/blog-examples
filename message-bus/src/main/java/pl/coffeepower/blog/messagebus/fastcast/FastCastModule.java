@@ -52,62 +52,62 @@ import javax.inject.Singleton;
 @Log4j2
 public final class FastCastModule extends AbstractModule {
 
-    private final Properties properties = new Properties();
+  private final Properties properties = new Properties();
 
-    public FastCastModule() {
-        if (log.isDebugEnabled()) {
-            FCLog.get().setLogLevel(FCLog.DEBUG);
-        } else if (log.isFatalEnabled()) {
-            FCLog.get().setLogLevel(FCLog.FATAL);
-        } else if (log.isInfoEnabled()) {
-            FCLog.get().setLogLevel(FCLog.INFO);
-        } else if (log.isErrorEnabled()) {
-            FCLog.get().setLogLevel(FCLog.SEVER);
-        } else {
-            FCLog.get().setLogLevel(FCLog.WARN);
-        }
-        properties.setProperty(Const.PUBLISHER_NAME_KEY,
-                System.getProperty(Const.PUBLISHER_NAME_KEY, "PUB"));
-        properties.setProperty(Const.SUBSCRIBER_NAME_KEY,
-                System.getProperty(Const.SUBSCRIBER_NAME_KEY, "SUB"));
+  public FastCastModule() {
+    if (log.isDebugEnabled()) {
+      FCLog.get().setLogLevel(FCLog.DEBUG);
+    } else if (log.isFatalEnabled()) {
+      FCLog.get().setLogLevel(FCLog.FATAL);
+    } else if (log.isInfoEnabled()) {
+      FCLog.get().setLogLevel(FCLog.INFO);
+    } else if (log.isErrorEnabled()) {
+      FCLog.get().setLogLevel(FCLog.SEVER);
+    } else {
+      FCLog.get().setLogLevel(FCLog.WARN);
     }
+    properties.setProperty(Const.PUBLISHER_NAME_KEY,
+        System.getProperty(Const.PUBLISHER_NAME_KEY, "PUB"));
+    properties.setProperty(Const.SUBSCRIBER_NAME_KEY,
+        System.getProperty(Const.SUBSCRIBER_NAME_KEY, "SUB"));
+  }
 
-    protected void configure() {
-        bind(Publisher.class).to(FastCastPublisher.class);
-        bind(Subscriber.class).to(FastCastSubscriber.class);
-        bind(Subscriber.Handler.class).to(LoggerReceiveHandler.class);
-        Names.bindProperties(binder(), properties);
-    }
+  protected void configure() {
+    bind(Publisher.class).to(FastCastPublisher.class);
+    bind(Subscriber.class).to(FastCastSubscriber.class);
+    bind(Subscriber.Handler.class).to(LoggerReceiveHandler.class);
+    Names.bindProperties(binder(), properties);
+  }
 
-    @Provides
-    private FastCast getFastCast() {
-        return FastCast.getFastCast();
-    }
+  @Provides
+  private FastCast getFastCast() {
+    return FastCast.getFastCast();
+  }
 
-    @Provides
-    @Singleton
-    @Inject
-    private PhysicalTransportConf createPhysicalTransportConf(@NonNull Configuration configuration) {
-        log.info("Creating PhysicalTransportConf with Configuration: {}", configuration);
-        return new PhysicalTransportConf(FastCastConst.STREAM_NAME)
-                .loopBack(InetAddresses.forString(configuration.getBindAddress()).isLoopbackAddress())
-                .interfaceAdr(configuration.getBindAddress())
-                .mulitcastAdr(configuration.getMulticastAddress())
-                .port(configuration.getMulticastPort());
-    }
+  @Provides
+  @Singleton
+  @Inject
+  private PhysicalTransportConf createPhysicalTransportConf(@NonNull Configuration configuration) {
+    log.info("Creating PhysicalTransportConf with Configuration: {}", configuration);
+    return new PhysicalTransportConf(FastCastConst.STREAM_NAME)
+        .loopBack(InetAddresses.forString(configuration.getBindAddress()).isLoopbackAddress())
+        .interfaceAdr(configuration.getBindAddress())
+        .mulitcastAdr(configuration.getMulticastAddress())
+        .port(configuration.getMulticastPort());
+  }
 
-    @Provides
-    @Singleton
-    @Inject
-    private PublisherConf createPublisherConf(@NonNull Configuration configuration) {
-        return new PublisherConf(configuration.getTopicId())
-                .numPacketHistory(25_000);
-    }
+  @Provides
+  @Singleton
+  @Inject
+  private PublisherConf createPublisherConf(@NonNull Configuration configuration) {
+    return new PublisherConf(configuration.getTopicId())
+        .numPacketHistory(25_000);
+  }
 
-    @Provides
-    @Singleton
-    @Inject
-    private SubscriberConf createSubscriberConf(@NonNull Configuration configuration) {
-        return new SubscriberConf(configuration.getTopicId());
-    }
+  @Provides
+  @Singleton
+  @Inject
+  private SubscriberConf createSubscriberConf(@NonNull Configuration configuration) {
+    return new SubscriberConf(configuration.getTopicId());
+  }
 }

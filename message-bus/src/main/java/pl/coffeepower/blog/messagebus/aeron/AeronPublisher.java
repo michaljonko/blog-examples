@@ -46,44 +46,44 @@ import javax.inject.Inject;
 @Log4j2
 final class AeronPublisher implements Publisher {
 
-    private final CASLock lock = new CASLock();
-    private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(AeronConst.BUFFER_SIZE));
-    private final Aeron aeron;
-    private final Publication publication;
+  private final CASLock lock = new CASLock();
+  private final AtomicBoolean opened = new AtomicBoolean(false);
+  private final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(AeronConst.BUFFER_SIZE));
+  private final Aeron aeron;
+  private final Publication publication;
 
-    @Inject
-    private AeronPublisher(@NonNull Aeron aeron, @NonNull Configuration configuration) {
-        Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
-        String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
-        this.aeron = aeron;
-        this.publication = this.aeron.addPublication(channel, configuration.getTopicId());
-        this.opened.set(true);
-        log.info("Created Publisher: channel={}, streamId={}", channel, configuration.getTopicId());
-    }
+  @Inject
+  private AeronPublisher(@NonNull Aeron aeron, @NonNull Configuration configuration) {
+    Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
+    String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
+    this.aeron = aeron;
+    this.publication = this.aeron.addPublication(channel, configuration.getTopicId());
+    this.opened.set(true);
+    log.info("Created Publisher: channel={}, streamId={}", channel, configuration.getTopicId());
+  }
 
-    @Override
-    public boolean send(@NonNull byte[] data) {
-        try {
-            lock.lock();
-            Preconditions.checkState(opened.get(), "Already closed");
-            buffer.putBytes(0, data);
-            return publication.offer(buffer, 0, data.length) >= 0;
-        } finally {
-            lock.unlock();
-        }
+  @Override
+  public boolean send(@NonNull byte[] data) {
+    try {
+      lock.lock();
+      Preconditions.checkState(opened.get(), "Already closed");
+      buffer.putBytes(0, data);
+      return publication.offer(buffer, 0, data.length) >= 0;
+    } finally {
+      lock.unlock();
     }
+  }
 
-    @Override
-    public void close() throws Exception {
-        try {
-            lock.lock();
-            Preconditions.checkState(opened.get(), "Already closed");
-            publication.close();
-            aeron.close();
-            opened.set(false);
-        } finally {
-            lock.unlock();
-        }
+  @Override
+  public void close() throws Exception {
+    try {
+      lock.lock();
+      Preconditions.checkState(opened.get(), "Already closed");
+      publication.close();
+      aeron.close();
+      opened.set(false);
+    } finally {
+      lock.unlock();
     }
+  }
 }

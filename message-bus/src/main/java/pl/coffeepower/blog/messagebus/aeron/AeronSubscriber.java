@@ -51,61 +51,61 @@ import javax.inject.Inject;
 @Log4j2
 final class AeronSubscriber implements Subscriber {
 
-    private final AtomicBoolean opened = new AtomicBoolean(false);
-    private final Aeron aeron;
-    private final Subscription subscription;
-    private final ExecutorService executor;
-    private final IdleStrategy idleStrategy;
-    private final Disruptor<BytesEventFactory.BytesEvent> disruptor;
-    private final RingBuffer<BytesEventFactory.BytesEvent> ringBuffer;
-    @Inject
-    private Handler handler;
+  private final AtomicBoolean opened = new AtomicBoolean(false);
+  private final Aeron aeron;
+  private final Subscription subscription;
+  private final ExecutorService executor;
+  private final IdleStrategy idleStrategy;
+  private final Disruptor<BytesEventFactory.BytesEvent> disruptor;
+  private final RingBuffer<BytesEventFactory.BytesEvent> ringBuffer;
+  @Inject
+  private Handler handler;
 
-    @Inject
-    private AeronSubscriber(@NonNull Aeron aeron,
-                            @NonNull IdleStrategy idleStrategy,
-                            @NonNull Configuration configuration,
-                            @NonNull Disruptor<BytesEventFactory.BytesEvent> disruptor) {
-        Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
-        String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
-        this.aeron = aeron;
-        this.subscription = this.aeron.addSubscription(channel, configuration.getTopicId());
-        this.idleStrategy = idleStrategy;
-        this.disruptor = disruptor;
-        this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
-            Preconditions.checkNotNull(handler);
-            handler.received(event.getBuffer(), event.getCurrentLength());
-        });
-        this.ringBuffer = this.disruptor.start();
-        this.opened.set(true);
-        this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("subscriber-thread").build());
-        this.executor.execute(() -> {
-            byte[] bytes = new byte[AeronConst.BUFFER_SIZE];
-            while (opened.get()) {
-                this.idleStrategy.idle(this.subscription.poll((buffer, offset, length, header) -> {
-                    Preconditions.checkState(opened.get(), "Already closed");
-                    buffer.getBytes(offset, bytes, 0, length);
-                    ringBuffer.publishEvent((event, sequence) -> event.copyToBuffer(bytes, length));
-                }, 1));
-            }
-        });
-        this.executor.shutdown();
-        log.info("Created Subscriber: channel={}, streamId={}", channel, configuration.getTopicId());
-    }
+  @Inject
+  private AeronSubscriber(@NonNull Aeron aeron,
+                          @NonNull IdleStrategy idleStrategy,
+                          @NonNull Configuration configuration,
+                          @NonNull Disruptor<BytesEventFactory.BytesEvent> disruptor) {
+    Preconditions.checkArgument(InetAddresses.forString(configuration.getMulticastAddress()).getAddress()[3] % 2 != 0, "Lowest byte in multicast address has to be odd");
+    String channel = "aeron:udp?group=" + configuration.getMulticastAddress() + ":" + configuration.getMulticastPort() + "|interface=" + configuration.getBindAddress();
+    this.aeron = aeron;
+    this.subscription = this.aeron.addSubscription(channel, configuration.getTopicId());
+    this.idleStrategy = idleStrategy;
+    this.disruptor = disruptor;
+    this.disruptor.handleEventsWith((event, sequence, endOfBatch) -> {
+      Preconditions.checkNotNull(handler);
+      handler.received(event.getBuffer(), event.getCurrentLength());
+    });
+    this.ringBuffer = this.disruptor.start();
+    this.opened.set(true);
+    this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("subscriber-thread").build());
+    this.executor.execute(() -> {
+      byte[] bytes = new byte[AeronConst.BUFFER_SIZE];
+      while (opened.get()) {
+        this.idleStrategy.idle(this.subscription.poll((buffer, offset, length, header) -> {
+          Preconditions.checkState(opened.get(), "Already closed");
+          buffer.getBytes(offset, bytes, 0, length);
+          ringBuffer.publishEvent((event, sequence) -> event.copyToBuffer(bytes, length));
+        }, 1));
+      }
+    });
+    this.executor.shutdown();
+    log.info("Created Subscriber: channel={}, streamId={}", channel, configuration.getTopicId());
+  }
 
-    @Override
-    public void register(@NonNull Handler handler) {
-        this.handler = handler;
-    }
+  @Override
+  public void register(@NonNull Handler handler) {
+    this.handler = handler;
+  }
 
-    @Override
-    public void close() throws Exception {
-        Preconditions.checkState(opened.get(), "Already closed");
-        disruptor.shutdown();
-        executor.shutdownNow();
-        subscription.close();
-        aeron.close();
-        handler = null;
-        opened.set(false);
-    }
+  @Override
+  public void close() throws Exception {
+    Preconditions.checkState(opened.get(), "Already closed");
+    disruptor.shutdown();
+    executor.shutdownNow();
+    subscription.close();
+    aeron.close();
+    handler = null;
+    opened.set(false);
+  }
 }

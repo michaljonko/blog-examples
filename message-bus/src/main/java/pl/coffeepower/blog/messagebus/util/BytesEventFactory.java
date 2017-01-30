@@ -35,41 +35,41 @@ import lombok.NonNull;
 
 public final class BytesEventFactory implements EventFactory<BytesEventFactory.BytesEvent> {
 
-    public static final int BUFFER_SIZE = 1024;
+  public static final int BUFFER_SIZE = 1024;
+
+  @Override
+  public BytesEvent newInstance() {
+    return new BytesEvent(BUFFER_SIZE);
+  }
+
+  @Getter
+  @EqualsAndHashCode
+  public static final class BytesEvent {
+
+    private final byte[] buffer;
+    private int currentLength;
+
+    BytesEvent(int capacity) {
+      Preconditions.checkArgument(capacity > 0, "Capacity has to be greater than 0");
+      buffer = new byte[capacity];
+    }
+
+    public void copyToBuffer(@NonNull byte[] data) {
+      copyToBuffer(data, data.length);
+    }
+
+    public void copyToBuffer(@NonNull byte[] data, int length) {
+      Preconditions.checkArgument(length <= buffer.length, "Data to copy has length greater than buffer");
+      Preconditions.checkArgument(length >= 0, "Length argument is less then zero");
+      System.arraycopy(data, 0, buffer, 0, currentLength = length);
+    }
 
     @Override
-    public BytesEvent newInstance() {
-        return new BytesEvent(BUFFER_SIZE);
+    public String toString() {
+      return MoreObjects.toStringHelper(this)
+          .add("bufferSize", buffer.length)
+          .add("currentLength", currentLength)
+          .toString();
     }
-
-    @Getter
-    @EqualsAndHashCode
-    public static final class BytesEvent {
-
-        private final byte[] buffer;
-        private int currentLength;
-
-        BytesEvent(int capacity) {
-            Preconditions.checkArgument(capacity > 0, "Capacity has to be greater than 0");
-            buffer = new byte[capacity];
-        }
-
-        public void copyToBuffer(@NonNull byte[] data) {
-            copyToBuffer(data, data.length);
-        }
-
-        public void copyToBuffer(@NonNull byte[] data, int length) {
-            Preconditions.checkArgument(length <= buffer.length, "Data to copy has length greater than buffer");
-            Preconditions.checkArgument(length >= 0, "Length argument is less then zero");
-            System.arraycopy(data, 0, buffer, 0, currentLength = length);
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                    .add("bufferSize", buffer.length)
-                    .add("currentLength", currentLength)
-                    .toString();
-        }
-    }
+  }
 }

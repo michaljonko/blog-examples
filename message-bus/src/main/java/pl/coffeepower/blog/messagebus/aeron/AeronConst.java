@@ -30,5 +30,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class AeronConst {
 
-    static final int BUFFER_SIZE = 3 * 1400 - 200; //default datagram size in FastCast
+  static final int BUFFER_SIZE = 3 * 1400 - 200; //default datagram size in FastCast
 }

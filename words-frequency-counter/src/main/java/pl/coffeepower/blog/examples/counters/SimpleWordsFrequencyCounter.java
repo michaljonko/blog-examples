@@ -35,18 +35,18 @@ import java.util.Map;
 @NoArgsConstructor
 public final class SimpleWordsFrequencyCounter implements WordsFrequencyCounter {
 
-    private static final Integer ONE = Integer.valueOf(1);
-    private final Map<String, Integer> map = Maps.newConcurrentMap();
+  private static final Integer ONE = Integer.valueOf(1);
+  private final Map<String, Integer> map = Maps.newConcurrentMap();
 
-    @Override
-    public final void increase(String word) {
-        Integer counter = map.get(word);
-        counter = counter == null ? ONE : counter + 1;
-        map.put(word, counter);
-    }
+  @Override
+  public final void increase(String word) {
+    Integer counter = map.get(word);
+    counter = counter == null ? ONE : counter + 1;
+    map.put(word, counter);
+  }
 
-    @Override
-    public final Map<String, Integer> wordsFrequency() {
-        return map;
-    }
+  @Override
+  public final Map<String, Integer> wordsFrequency() {
+    return map;
+  }
 }

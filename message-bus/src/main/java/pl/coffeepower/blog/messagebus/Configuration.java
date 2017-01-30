@@ -29,21 +29,21 @@ import lombok.NoArgsConstructor;
 
 public interface Configuration {
 
-    String getMulticastAddress();
+  String getMulticastAddress();
 
-    int getMulticastPort();
+  int getMulticastPort();
 
-    String getBindAddress();
+  String getBindAddress();
 
-    int getTopicId();
+  int getTopicId();
 
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    final class Const {
-        public static final String TOPIC_ID_KEY = "topic.id";
-        public static final String MULTICAST_ADDRESS_KEY = "multicast.address";
-        public static final String MULTICAST_PORT_KEY = "multicast.port";
-        public static final String BIND_ADDRESS_KEY = "bind.address";
-        public static final String PUBLISHER_NAME_KEY = "publisher.name";
-        public static final String SUBSCRIBER_NAME_KEY = "subscriber.name";
-    }
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  final class Const {
+    public static final String TOPIC_ID_KEY = "topic.id";
+    public static final String MULTICAST_ADDRESS_KEY = "multicast.address";
+    public static final String MULTICAST_PORT_KEY = "multicast.port";
+    public static final String BIND_ADDRESS_KEY = "bind.address";
+    public static final String PUBLISHER_NAME_KEY = "publisher.name";
+    public static final String SUBSCRIBER_NAME_KEY = "subscriber.name";
+  }
 }

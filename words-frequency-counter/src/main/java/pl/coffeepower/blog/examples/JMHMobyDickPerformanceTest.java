@@ -65,64 +65,64 @@ import java.util.List;
 @Fork(value = 3, jvmArgsAppend = "-ea")
 public class JMHMobyDickPerformanceTest {
 
-    private static final boolean FAIL_ON_ERROR = true;
+  private static final boolean FAIL_ON_ERROR = true;
 
-    private final List<String> words = Lists.newLinkedList();
+  private final List<String> words = Lists.newLinkedList();
 
-    private WordsFrequencyCounter simpleWordsFrequencyCounter;
-    private WordsFrequencyCounter atomicWordsFrequencyCounter;
-    private WordsFrequencyCounter arrayWordsFrequencyCounter;
-    private WordsFrequencyCounter classWordsFrequencyCounter;
+  private WordsFrequencyCounter simpleWordsFrequencyCounter;
+  private WordsFrequencyCounter atomicWordsFrequencyCounter;
+  private WordsFrequencyCounter arrayWordsFrequencyCounter;
+  private WordsFrequencyCounter classWordsFrequencyCounter;
 
-    {
-        try {
-            Tokenizer tokenizer = new TokenizerME(
-                    new TokenizerModel(Resources.getResource("en-token.bin")));
-            Resources.readLines(Resources.getResource("mobydick.txt"), Charsets.UTF_8)
-                    .forEach(line -> words.addAll(Arrays.asList(tokenizer.tokenize(line))));
-        } catch (IOException e) {
-            log.error("Exception while init", e);
-            System.exit(-1);
-        }
+  {
+    try {
+      Tokenizer tokenizer = new TokenizerME(
+          new TokenizerModel(Resources.getResource("en-token.bin")));
+      Resources.readLines(Resources.getResource("mobydick.txt"), Charsets.UTF_8)
+          .forEach(line -> words.addAll(Arrays.asList(tokenizer.tokenize(line))));
+    } catch (IOException e) {
+      log.error("Exception while init", e);
+      System.exit(-1);
     }
+  }
 
-    public static void main(String[] args) throws RunnerException {
-        new Runner(new OptionsBuilder()
-                .include(JMHMobyDickPerformanceTest.class.getSimpleName())
-                .shouldFailOnError(FAIL_ON_ERROR)
-                .build()
-        ).run();
-    }
+  public static void main(String[] args) throws RunnerException {
+    new Runner(new OptionsBuilder()
+        .include(JMHMobyDickPerformanceTest.class.getSimpleName())
+        .shouldFailOnError(FAIL_ON_ERROR)
+        .build()
+    ).run();
+  }
 
-    @Setup
-    public void setup() throws IOException {
-        this.simpleWordsFrequencyCounter = new SimpleWordsFrequencyCounter();
-        this.atomicWordsFrequencyCounter = new AtomicWordsFrequencyCounter();
-        this.arrayWordsFrequencyCounter = new ArrayWordsFrequencyCounter();
-        this.classWordsFrequencyCounter = new ClassWordsFrequencyCounter();
-    }
+  @Setup
+  public void setup() throws IOException {
+    this.simpleWordsFrequencyCounter = new SimpleWordsFrequencyCounter();
+    this.atomicWordsFrequencyCounter = new AtomicWordsFrequencyCounter();
+    this.arrayWordsFrequencyCounter = new ArrayWordsFrequencyCounter();
+    this.classWordsFrequencyCounter = new ClassWordsFrequencyCounter();
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureClassicValues() {
-        this.words.forEach(word -> simpleWordsFrequencyCounter.increase(word));
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureClassicValues() {
+    this.words.forEach(word -> simpleWordsFrequencyCounter.increase(word));
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureAtomicValues() {
-        this.words.forEach(word -> atomicWordsFrequencyCounter.increase(word));
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureAtomicValues() {
+    this.words.forEach(word -> atomicWordsFrequencyCounter.increase(word));
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureArrayValues() {
-        this.words.forEach(word -> arrayWordsFrequencyCounter.increase(word));
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureArrayValues() {
+    this.words.forEach(word -> arrayWordsFrequencyCounter.increase(word));
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureClassValues() {
-        this.words.forEach(word -> classWordsFrequencyCounter.increase(word));
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureClassValues() {
+    this.words.forEach(word -> classWordsFrequencyCounter.increase(word));
+  }
 }

@@ -47,34 +47,34 @@ import javax.inject.Singleton;
 @Log4j2
 public final class HazelcastModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
-        bind(Publisher.class).to(HazelcastPublisher.class);
-        bind(Subscriber.class).to(HazelcastSubscriber.class);
-        bind(Subscriber.Handler.class).to(LoggerReceiveHandler.class);
-    }
+  @Override
+  protected void configure() {
+    bind(Publisher.class).to(HazelcastPublisher.class);
+    bind(Subscriber.class).to(HazelcastSubscriber.class);
+    bind(Subscriber.Handler.class).to(LoggerReceiveHandler.class);
+  }
 
-    @Provides
-    @Inject
-    private HazelcastInstance getHazelcastInstance(@NonNull Config config) {
-        return Hazelcast.newHazelcastInstance(config);
-    }
+  @Provides
+  @Inject
+  private HazelcastInstance getHazelcastInstance(@NonNull Config config) {
+    return Hazelcast.newHazelcastInstance(config);
+  }
 
-    @Provides
-    @Inject
-    private ITopic<byte[]> createTopic(@NonNull HazelcastInstance hazelcastInstance, @NonNull Configuration configuration) {
-        return hazelcastInstance.getTopic(String.valueOf(configuration.getTopicId()));
-    }
+  @Provides
+  @Inject
+  private ITopic<byte[]> createTopic(@NonNull HazelcastInstance hazelcastInstance, @NonNull Configuration configuration) {
+    return hazelcastInstance.getTopic(String.valueOf(configuration.getTopicId()));
+  }
 
-    @Provides
-    @Singleton
-    private Config createConfig(@NonNull Configuration configuration) {
-        Config config = new Config();
-        NetworkConfig networkConfig = config.getNetworkConfig()
-                .setPublicAddress(configuration.getBindAddress())
-                .setPort(configuration.getMulticastPort())
-                .setReuseAddress(true);
-        configuration.getMulticastAddress();
-        return config;
-    }
+  @Provides
+  @Singleton
+  private Config createConfig(@NonNull Configuration configuration) {
+    Config config = new Config();
+    NetworkConfig networkConfig = config.getNetworkConfig()
+        .setPublicAddress(configuration.getBindAddress())
+        .setPort(configuration.getMulticastPort())
+        .setReuseAddress(true);
+    configuration.getMulticastAddress();
+    return config;
+  }
 }

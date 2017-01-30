@@ -40,14 +40,9 @@ import java.math.BigInteger;
 @EqualsAndHashCode
 @ToString
 @AllArgsConstructor
-public class Pizza implements IPizza, Cloneable {
+public class Pizza implements IPizza {
 
-    String name;
-    ImmutableSet<String> components;
-    BigInteger price;
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
+  String name;
+  ImmutableSet<String> components;
+  BigInteger price;
 }

@@ -30,9 +30,9 @@ import java.math.BigInteger;
 
 public interface IPizza {
 
-    String getName();
+  String getName();
 
-    ImmutableSet<String> getComponents();
+  ImmutableSet<String> getComponents();
 
-    BigInteger getPrice();
+  BigInteger getPrice();
 }

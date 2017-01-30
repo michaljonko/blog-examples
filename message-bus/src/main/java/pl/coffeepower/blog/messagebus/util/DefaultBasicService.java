@@ -34,26 +34,26 @@ import java.util.Collections;
 
 public final class DefaultBasicService implements BasicService {
 
-    private final ServiceManager serviceManager;
+  private final ServiceManager serviceManager;
 
-    public DefaultBasicService(@NonNull Service service) {
-        this.serviceManager = new ServiceManager(Collections.singleton(service));
-    }
+  public DefaultBasicService(@NonNull Service service) {
+    this.serviceManager = new ServiceManager(Collections.singleton(service));
+  }
 
-    @Override
-    public void start() throws Exception {
-        serviceManager.startAsync().awaitHealthy();
-    }
+  @Override
+  public void start() throws Exception {
+    serviceManager.startAsync().awaitHealthy();
+  }
 
-    @Override
-    public void stop() throws Exception {
-        serviceManager.stopAsync().awaitStopped();
-    }
+  @Override
+  public void stop() throws Exception {
+    serviceManager.stopAsync().awaitStopped();
+  }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("serviceManager", serviceManager)
-                .toString();
-    }
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("serviceManager", serviceManager)
+        .toString();
+  }
 }

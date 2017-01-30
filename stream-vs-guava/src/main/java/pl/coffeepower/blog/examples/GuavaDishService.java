@@ -24,6 +24,9 @@
 
 package pl.coffeepower.blog.examples;
 
+import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Collections2.transform;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
@@ -33,59 +36,56 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static com.google.common.collect.Collections2.filter;
-import static com.google.common.collect.Collections2.transform;
-
 public final class GuavaDishService implements DishService {
 
-    private static final Predicate<Dish> DISH_WITH_MEAT_PREDICATE = new Predicate<Dish>() {
-        @Override
-        public boolean apply(Dish dish) {
-            return dish.isWithMeat();
-        }
-    };
-    private static final Function<Dish, String> DISH_NAME_FUNCTION = new Function<Dish, String>() {
-        @Override
-        public String apply(Dish dish) {
-            return dish.getName();
-        }
-    };
-    private static final Predicate<Dish> FIT_DISH_WITHOUT_MEAT_PREDICATE = new Predicate<Dish>() {
-        @Override
-        public boolean apply(Dish dish) {
-            return !dish.isWithMeat() && dish.getCalories() < 200;
-        }
-    };
-    private static final Predicate<Dish> FIT_DISH_WITH_MEAT_PREDICATE = new Predicate<Dish>() {
-        @Override
-        public boolean apply(Dish dish) {
-            return dish.isWithMeat() && dish.getCalories() < 200;
-        }
-    };
-    private static final Ordering<Comparable> NATURAL_ORDERING = Ordering.natural();
-
+  private static final Predicate<Dish> DISH_WITH_MEAT_PREDICATE = new Predicate<Dish>() {
     @Override
-    public List<String> findDishNamesWithMeat(@NonNull List<Dish> dishes) {
-        return Lists.newArrayList(
-                transform(
-                        filter(dishes, DISH_WITH_MEAT_PREDICATE),
-                        DISH_NAME_FUNCTION
-                ));
+    public boolean apply(Dish dish) {
+      return dish.isWithMeat();
     }
-
+  };
+  private static final Function<Dish, String> DISH_NAME_FUNCTION = new Function<Dish, String>() {
     @Override
-    public List<Dish> findFitDishesWithoutMeat(@NonNull List<Dish> dishes) {
-        return Lists.newArrayList(
-                filter(dishes, FIT_DISH_WITHOUT_MEAT_PREDICATE));
+    public String apply(Dish dish) {
+      return dish.getName();
     }
-
+  };
+  private static final Predicate<Dish> FIT_DISH_WITHOUT_MEAT_PREDICATE = new Predicate<Dish>() {
     @Override
-    public List<String> getSortedFitDishNamesWithMeat(@NonNull List<Dish> dishes) {
-        return NATURAL_ORDERING.sortedCopy(
-                Lists.newArrayList(
-                        transform(
-                                filter(dishes, FIT_DISH_WITH_MEAT_PREDICATE),
-                                DISH_NAME_FUNCTION
-                        )));
+    public boolean apply(Dish dish) {
+      return !dish.isWithMeat() && dish.getCalories() < 200;
     }
+  };
+  private static final Predicate<Dish> FIT_DISH_WITH_MEAT_PREDICATE = new Predicate<Dish>() {
+    @Override
+    public boolean apply(Dish dish) {
+      return dish.isWithMeat() && dish.getCalories() < 200;
+    }
+  };
+  private static final Ordering<Comparable> NATURAL_ORDERING = Ordering.natural();
+
+  @Override
+  public List<String> findDishNamesWithMeat(@NonNull List<Dish> dishes) {
+    return Lists.newArrayList(
+        transform(
+            filter(dishes, DISH_WITH_MEAT_PREDICATE),
+            DISH_NAME_FUNCTION
+        ));
+  }
+
+  @Override
+  public List<Dish> findFitDishesWithoutMeat(@NonNull List<Dish> dishes) {
+    return Lists.newArrayList(
+        filter(dishes, FIT_DISH_WITHOUT_MEAT_PREDICATE));
+  }
+
+  @Override
+  public List<String> getSortedFitDishNamesWithMeat(@NonNull List<Dish> dishes) {
+    return NATURAL_ORDERING.sortedCopy(
+        Lists.newArrayList(
+            transform(
+                filter(dishes, FIT_DISH_WITH_MEAT_PREDICATE),
+                DISH_NAME_FUNCTION
+            )));
+  }
 }

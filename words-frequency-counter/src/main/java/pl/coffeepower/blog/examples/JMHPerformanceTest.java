@@ -55,51 +55,51 @@ import java.util.concurrent.TimeUnit;
 @Fork(value = 3, jvmArgsAppend = "-ea")
 public class JMHPerformanceTest {
 
-    private static final boolean FAIL_ON_ERROR = true;
+  private static final boolean FAIL_ON_ERROR = true;
 
-    private final String word = UUID.randomUUID().toString();
-    private WordsFrequencyCounter simpleWordsFrequencyCounter;
-    private WordsFrequencyCounter atomicWordsFrequencyCounter;
-    private WordsFrequencyCounter arrayWordsFrequencyCounter;
-    private WordsFrequencyCounter classWordsFrequencyCounter;
+  private final String word = UUID.randomUUID().toString();
+  private WordsFrequencyCounter simpleWordsFrequencyCounter;
+  private WordsFrequencyCounter atomicWordsFrequencyCounter;
+  private WordsFrequencyCounter arrayWordsFrequencyCounter;
+  private WordsFrequencyCounter classWordsFrequencyCounter;
 
-    public static void main(String[] args) throws RunnerException {
-        new Runner(new OptionsBuilder()
-                .include(JMHPerformanceTest.class.getSimpleName())
-                .shouldFailOnError(FAIL_ON_ERROR)
-                .build()
-        ).run();
-    }
+  public static void main(String[] args) throws RunnerException {
+    new Runner(new OptionsBuilder()
+        .include(JMHPerformanceTest.class.getSimpleName())
+        .shouldFailOnError(FAIL_ON_ERROR)
+        .build()
+    ).run();
+  }
 
-    @Setup
-    public void setup() {
-        simpleWordsFrequencyCounter = new SimpleWordsFrequencyCounter();
-        atomicWordsFrequencyCounter = new AtomicWordsFrequencyCounter();
-        arrayWordsFrequencyCounter = new ArrayWordsFrequencyCounter();
-        classWordsFrequencyCounter = new ClassWordsFrequencyCounter();
-    }
+  @Setup
+  public void setup() {
+    simpleWordsFrequencyCounter = new SimpleWordsFrequencyCounter();
+    atomicWordsFrequencyCounter = new AtomicWordsFrequencyCounter();
+    arrayWordsFrequencyCounter = new ArrayWordsFrequencyCounter();
+    classWordsFrequencyCounter = new ClassWordsFrequencyCounter();
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureClassicValues() {
-        simpleWordsFrequencyCounter.increase(word);
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureClassicValues() {
+    simpleWordsFrequencyCounter.increase(word);
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureAtomicValues() {
-        atomicWordsFrequencyCounter.increase(word);
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureAtomicValues() {
+    atomicWordsFrequencyCounter.increase(word);
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureArrayValues() {
-        arrayWordsFrequencyCounter.increase(word);
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureArrayValues() {
+    arrayWordsFrequencyCounter.increase(word);
+  }
 
-    @Benchmark
-    @BenchmarkMode(Mode.All)
-    public void measureClassValues() {
-        classWordsFrequencyCounter.increase(word);
-    }
+  @Benchmark
+  @BenchmarkMode(Mode.All)
+  public void measureClassValues() {
+    classWordsFrequencyCounter.increase(word);
+  }
 }

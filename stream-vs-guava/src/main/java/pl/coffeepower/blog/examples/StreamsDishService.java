@@ -31,27 +31,27 @@ import java.util.stream.Collectors;
 
 public final class StreamsDishService implements DishService {
 
-    @Override
-    public List<String> findDishNamesWithMeat(@NonNull List<Dish> dishes) {
-        return dishes.stream()
-                .filter(Dish::isWithMeat)
-                .map(Dish::getName)
-                .collect(Collectors.toList());
-    }
+  @Override
+  public List<String> findDishNamesWithMeat(@NonNull List<Dish> dishes) {
+    return dishes.stream()
+        .filter(Dish::isWithMeat)
+        .map(Dish::getName)
+        .collect(Collectors.toList());
+  }
 
-    @Override
-    public List<Dish> findFitDishesWithoutMeat(@NonNull List<Dish> dishes) {
-        return dishes.stream()
-                .filter(dish -> !dish.isWithMeat() && dish.getCalories() < 200)
-                .collect(Collectors.toList());
-    }
+  @Override
+  public List<Dish> findFitDishesWithoutMeat(@NonNull List<Dish> dishes) {
+    return dishes.stream()
+        .filter(dish -> !dish.isWithMeat() && dish.getCalories() < 200)
+        .collect(Collectors.toList());
+  }
 
-    @Override
-    public List<String> getSortedFitDishNamesWithMeat(@NonNull List<Dish> dishes) {
-        return dishes.stream()
-                .filter(dish -> dish.isWithMeat() && dish.getCalories() < 200)
-                .map(Dish::getName)
-                .sorted()
-                .collect(Collectors.toList());
-    }
+  @Override
+  public List<String> getSortedFitDishNamesWithMeat(@NonNull List<Dish> dishes) {
+    return dishes.stream()
+        .filter(dish -> dish.isWithMeat() && dish.getCalories() < 200)
+        .map(Dish::getName)
+        .sorted()
+        .collect(Collectors.toList());
+  }
 }

@@ -30,5 +30,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class FastCastConst {
 
-    static final String STREAM_NAME = "coffeepower";
+  static final String STREAM_NAME = "coffeepower";
 }

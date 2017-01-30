@@ -24,6 +24,12 @@
 
 package pl.coffeepower.blog.dp.creational;
 
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
+
 import com.google.common.collect.ImmutableSet;
 
 import lombok.Value;
@@ -37,49 +43,45 @@ import pl.coffeepower.blog.dp.creational.vo.PizzaName;
 
 import java.math.BigInteger;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
-
 public class CreationalPatternsTest {
 
-    private final Fixtures fixtures = new Fixtures();
+  private final Fixtures fixtures = new Fixtures();
 
-    @Test
-    public void shouldCreatePizzaWithBuilder() throws Exception {
-        PizzaBuilder pizzaBuilder = PizzaBuilder.aPizza();
-        assertThat(pizzaBuilder
-                        .withName(fixtures.getPizzaName())
-                        .withPrice(fixtures.getPizzaPrice())
-                        .withComponents(fixtures.getPizzaComponents())
-                        .build(),
-                is(fixtures.getExpectedPizza()));
-        assertThat(pizzaBuilder
-                        .withName(PizzaName.FAMILY).build(),
-                is(not(fixtures.getExpectedPizza())));
-    }
+  @Test
+  public void shouldCreatePizzaWithBuilder() throws Exception {
+    PizzaBuilder pizzaBuilder = PizzaBuilder.aPizza();
 
-    @Test
-    public void shouldCreatePizzaWithAbstractFactory() throws Exception {
-        PizzaFactory pizzaFactory = PizzaAbstractFactory.getFactory(fixtures.getPizzaName());
-        assertThat(pizzaFactory.createPizza(), is(fixtures.getExpectedPizza()));
-    }
+    assertThat(pizzaBuilder
+            .withName(fixtures.pizzaName)
+            .withPrice(fixtures.pizzaPrice)
+            .withComponents(fixtures.pizzaComponents)
+            .build(),
+        is(fixtures.expectedPizza));
+    assertThat(pizzaBuilder.withName(PizzaName.FAMILY).build(),
+        is(not(fixtures.expectedPizza)));
+  }
 
-    @Test
-    public void shouldCreateCloneablePizzaWithPrototype() throws Exception {
-        PizzaPrototype pizzaPrototype = new PizzaPrototype(fixtures.getPizzaName().name(), fixtures.getPizzaComponents(), fixtures.getPizzaPrice());
-        PizzaPrototype pizzaClone = pizzaPrototype.clone();
-        assertThat(pizzaPrototype, is(fixtures.expectedPizza));
-        assertThat(pizzaClone, allOf(is(pizzaPrototype), not(sameInstance(pizzaPrototype)), not(sameInstance(pizzaClone.clone()))));
-    }
+  @Test
+  public void shouldCreatePizzaWithAbstractFactory() throws Exception {
+    PizzaFactory pizzaFactory = PizzaAbstractFactory.getFactory(fixtures.pizzaName);
 
-    @Value
-    private static final class Fixtures {
-        PizzaName pizzaName = PizzaName.VEGETARIANA;
-        BigInteger pizzaPrice = BigInteger.TEN;
-        ImmutableSet<String> pizzaComponents = ImmutableSet.of("tomatoes", "onion", "beans");
-        IPizza expectedPizza = new Pizza(pizzaName.name(), pizzaComponents, pizzaPrice);
-    }
+    assertThat(pizzaFactory.createPizza(), is(fixtures.expectedPizza));
+  }
+
+  @Test
+  public void shouldCreateCloneablePizzaWithPrototype() throws Exception {
+    PizzaPrototype pizzaPrototype = new PizzaPrototype(
+        fixtures.pizzaName.name(), fixtures.pizzaComponents, fixtures.pizzaPrice);
+    PizzaPrototype pizzaClone = pizzaPrototype.clone();
+    assertThat(pizzaPrototype, is(fixtures.expectedPizza));
+    assertThat(pizzaClone, allOf(is(pizzaPrototype), not(sameInstance(pizzaPrototype))));
+  }
+
+  @Value
+  private static final class Fixtures {
+    PizzaName pizzaName = PizzaName.VEGETARIANA;
+    BigInteger pizzaPrice = BigInteger.TEN;
+    ImmutableSet<String> pizzaComponents = ImmutableSet.of("tomatoes", "onion", "beans");
+    IPizza expectedPizza = new Pizza(pizzaName.name(), pizzaComponents, pizzaPrice);
+  }
 }

@@ -26,22 +26,22 @@ package pl.coffeepower.blog.dp.creational;
 
 import com.google.common.collect.ImmutableSet;
 
+import pl.coffeepower.blog.dp.creational.vo.IPizza;
 import pl.coffeepower.blog.dp.creational.vo.Pizza;
 
 import java.math.BigInteger;
 
 public final class PizzaPrototype extends Pizza {
 
-    public PizzaPrototype(String name, ImmutableSet<String> components, BigInteger price) {
-        super(name, components, price);
-    }
+  public PizzaPrototype(String name, ImmutableSet<String> components, BigInteger price) {
+    super(name, components, price);
+  }
 
-    @Override
-    protected PizzaPrototype clone() {
-        try {
-            return (PizzaPrototype) (super.clone());
-        } catch (CloneNotSupportedException e) {
-            throw new UnsupportedOperationException("Cannot clone current instance of Pizza", e);
-        }
-    }
+  private PizzaPrototype(IPizza pizza) {
+    super(pizza.getName(), pizza.getComponents(), pizza.getPrice());
+  }
+
+  public PizzaPrototype clone() {
+    return new PizzaPrototype(this);
+  }
 }

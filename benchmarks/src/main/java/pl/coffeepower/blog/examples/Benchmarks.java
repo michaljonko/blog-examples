@@ -51,32 +51,32 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(value = TimeUnit.NANOSECONDS)
 public class Benchmarks {
 
-    private float randomNumber;
+  private float randomNumber;
 
-    public static void main(String[] args) throws RunnerException {
-        new Runner(new OptionsBuilder()
-                .include(Benchmarks.class.getSimpleName())
-                .shouldFailOnError(true)
-                .build()
-        ).run();
-    }
+  public static void main(String[] args) throws RunnerException {
+    new Runner(new OptionsBuilder()
+        .include(Benchmarks.class.getSimpleName())
+        .shouldFailOnError(true)
+        .build()
+    ).run();
+  }
 
-    @Setup(value = Level.Iteration)
-    public void setup() {
-        randomNumber = (float) Math.random();
-    }
+  @Setup(value = Level.Iteration)
+  public void setup() {
+    randomNumber = (float) Math.random();
+  }
 
-    @Benchmark
-    @BenchmarkMode(value = Mode.All)
-    public void measureMathOpsMul(Blackhole blackhole) {
-        float result = FloatMathOperations.mul(randomNumber, 0.01f);
-        blackhole.consume(result);
-    }
+  @Benchmark
+  @BenchmarkMode(value = Mode.All)
+  public void measureMathOpsMul(Blackhole blackhole) {
+    float result = FloatMathOperations.mul(randomNumber, 0.01f);
+    blackhole.consume(result);
+  }
 
-    @Benchmark
-    @BenchmarkMode(value = Mode.All)
-    public void measureMathOpsDiv(Blackhole blackhole) {
-        float result = FloatMathOperations.div(randomNumber, 100.0f);
-        blackhole.consume(result);
-    }
+  @Benchmark
+  @BenchmarkMode(value = Mode.All)
+  public void measureMathOpsDiv(Blackhole blackhole) {
+    float result = FloatMathOperations.div(randomNumber, 100.0f);
+    blackhole.consume(result);
+  }
 }
