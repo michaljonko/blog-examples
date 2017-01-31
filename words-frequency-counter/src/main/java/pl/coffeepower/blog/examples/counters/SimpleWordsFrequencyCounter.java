@@ -35,7 +35,7 @@ import java.util.Map;
 @NoArgsConstructor
 public final class SimpleWordsFrequencyCounter implements WordsFrequencyCounter {
 
-  private static final Integer ONE = Integer.valueOf(1);
+  private static final Integer ONE = 1;
   private final Map<String, Integer> map = Maps.newConcurrentMap();
 
   @Override

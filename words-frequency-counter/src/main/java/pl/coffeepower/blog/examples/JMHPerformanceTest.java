@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 10)
 @Measurement(iterations = 10)
 @Threads(1)
-@Fork(value = 3, jvmArgsAppend = "-ea")
+@Fork(value = 1, jvmArgsAppend = "-ea")
 public class JMHPerformanceTest {
 
   private static final boolean FAIL_ON_ERROR = true;

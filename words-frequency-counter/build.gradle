@@ -3,7 +3,7 @@ apply plugin: 'application'
 mainClassName = 'pl.coffeepower.blog.examples.JMHMobyDickPerformanceTest'
 
 dependencies {
-//    compile 'org.projectlombok:lombok:1.16.8'
+    compile 'org.projectlombok:lombok:1.16.12'
     compile 'org.openjdk.jmh:jmh-core:1.11.3'
     compile 'org.openjdk.jmh:jmh-generator-annprocess:1.11.3'
     compile 'org.apache.opennlp:opennlp-tools:1.6.0'

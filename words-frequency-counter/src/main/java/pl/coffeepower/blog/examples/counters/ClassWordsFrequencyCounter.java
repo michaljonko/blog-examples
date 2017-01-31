@@ -70,10 +70,6 @@ public final class ClassWordsFrequencyCounter implements WordsFrequencyCounter {
       value++;
     }
 
-    public final void dec() {
-      value--;
-    }
-
     @Override
     public String toString() {
       return String.valueOf(value);

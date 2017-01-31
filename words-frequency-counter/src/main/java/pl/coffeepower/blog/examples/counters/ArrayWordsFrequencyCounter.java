@@ -53,6 +53,6 @@ public final class ArrayWordsFrequencyCounter implements WordsFrequencyCounter {
   public final Map<String, Integer> wordsFrequency() {
     return map.entrySet()
         .stream()
-        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()[0]));
+        .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()[0]));
   }
 }
