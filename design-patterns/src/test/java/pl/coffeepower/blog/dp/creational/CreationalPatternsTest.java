@@ -40,8 +40,10 @@ import pl.coffeepower.blog.dp.creational.PizzaAbstractFactory.PizzaFactory;
 import pl.coffeepower.blog.dp.creational.vo.IPizza;
 import pl.coffeepower.blog.dp.creational.vo.Pizza;
 import pl.coffeepower.blog.dp.creational.vo.PizzaName;
+import pl.coffeepower.blog.dp.creational.vo.PizzaPrototype;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 public class CreationalPatternsTest {
 
@@ -69,18 +71,28 @@ public class CreationalPatternsTest {
   }
 
   @Test
-  public void shouldCreateCloneablePizzaWithPrototype() throws Exception {
+  public void shouldCreateAndClonePizzaWithPrototype() throws Exception {
     PizzaPrototype pizzaPrototype = new PizzaPrototype(
         fixtures.pizzaName.name(), fixtures.pizzaComponents, fixtures.pizzaPrice);
-    PizzaPrototype pizzaClone = pizzaPrototype.clone();
+    IPizza pizzaClone = pizzaPrototype.clone();
     assertThat(pizzaPrototype, is(fixtures.expectedPizza));
-    assertThat(pizzaClone, allOf(is(pizzaPrototype), not(sameInstance(pizzaPrototype))));
+    assertThat(pizzaClone,
+        allOf(Arrays.asList(is(pizzaPrototype), not(sameInstance(pizzaPrototype)))));
+  }
+
+  @Test
+  public void shouldCreatePizzaWithSingleton() throws Exception {
+    PizzaSingleton singleton = PizzaSingleton.getInstance();
+    IPizza pizza = singleton.getVegetarianaPizza();
+
+    assertThat(pizza, allOf(
+        Arrays.asList(is(fixtures.expectedPizza), sameInstance(singleton.getVegetarianaPizza()))));
   }
 
   @Value
   private static final class Fixtures {
     PizzaName pizzaName = PizzaName.VEGETARIANA;
-    BigInteger pizzaPrice = BigInteger.TEN;
+    BigInteger pizzaPrice = BigInteger.valueOf(90L);
     ImmutableSet<String> pizzaComponents = ImmutableSet.of("tomatoes", "onion", "beans");
     IPizza expectedPizza = new Pizza(pizzaName.name(), pizzaComponents, pizzaPrice);
   }

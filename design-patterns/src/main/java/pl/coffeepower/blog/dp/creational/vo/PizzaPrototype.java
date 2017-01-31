@@ -22,16 +22,26 @@
  * SOFTWARE.
  */
 
-package pl.coffeepower.blog.springvsguice.spring;
+package pl.coffeepower.blog.dp.creational.vo;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.google.common.collect.ImmutableSet;
 
-@SpringBootApplication
-@Slf4j
-public class SpringApp {
+import java.math.BigInteger;
 
-    public static void main(String[] args) {
-        log.info("SpringBootApplication");
-    }
+/**
+ * I decided to not use Cloneable interface like J.Bloch suggests in Effective Java
+ */
+public final class PizzaPrototype extends Pizza {
+
+  public PizzaPrototype(String name, ImmutableSet<String> components, BigInteger price) {
+    super(name, components, price);
+  }
+
+  private PizzaPrototype(IPizza pizza) {
+    super(pizza.getName(), pizza.getComponents(), pizza.getPrice());
+  }
+
+  public PizzaPrototype clone() {
+    return new PizzaPrototype(this);
+  }
 }

@@ -24,23 +24,25 @@
 
 package pl.coffeepower.blog.springvsguice;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.junit.Test;
-import pl.coffeepower.blog.springvsguice.guice.GuiceConfig;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.Assert.assertThat;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import org.junit.Test;
+
+import pl.coffeepower.blog.springvsguice.guice.GuiceConfig;
+
 public class GuiceTest {
 
-    private final Injector injector = Guice.createInjector(new GuiceConfig());
+  private final Injector injector = Guice.createInjector(new GuiceConfig());
 
-    @Test
-    public void shouldGetMapContainer() throws Exception {
-        MapContainer mapContainer = injector.getInstance(MapContainer.class);
-        assertThat(mapContainer.getMyMap().size(), is(2));
-        assertThat(mapContainer.getMyMap(), hasEntry("1", "Guice"));
-    }
+  @Test
+  public void shouldGetMapContainer() throws Exception {
+    MapContainer mapContainer = injector.getInstance(MapContainer.class);
+    assertThat(mapContainer.getMyMap().size(), is(2));
+    assertThat(mapContainer.getMyMap(), hasEntry("1", "Guice"));
+  }
 }

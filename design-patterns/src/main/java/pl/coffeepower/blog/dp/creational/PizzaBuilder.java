@@ -64,4 +64,10 @@ public final class PizzaBuilder {
     components.addAll(values);
     return this;
   }
+
+  public PizzaBuilder addComponent(String value) {
+    components.add(value);
+    return this;
+  }
+
 }

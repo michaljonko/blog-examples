@@ -26,28 +26,30 @@ package pl.coffeepower.blog.springvsguice.spring;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
 import pl.coffeepower.blog.springvsguice.Config;
 import pl.coffeepower.blog.springvsguice.MapContainer;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Named;
 
 @Configuration
 public class SpringConfig {
 
-    @Singleton
-    @Bean(name = Config.MAP_QUALIFIER)
-    public Map<String, String> createMap() {
-        Map<String, String> map = new HashMap<>();
-        map.put("1", "Spring");
-        map.put("2", "framework");
-        return map;
-    }
+  @Primary
+  @Bean(name = Config.MAP_QUALIFIER)
+  public Map<String, String> createMap() {
+    Map<String, String> map = new HashMap<>();
+    map.put("1", "Spring");
+    map.put("2", "framework");
+    return map;
+  }
 
-    @Bean
-    public MapContainer createMapContainer(@Named(Config.MAP_QUALIFIER) Map<String, String> map) {
-        return new MapContainer(map);
-    }
+  @Bean
+  public MapContainer createMapContainer(@Named(Config.MAP_QUALIFIER) Map<String, String> map) {
+    return new MapContainer(map);
+  }
 }

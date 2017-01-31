@@ -26,48 +26,51 @@ package pl.coffeepower.blog.springvsguice.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+
 import lombok.extern.slf4j.Slf4j;
+
 import pl.coffeepower.blog.springvsguice.Config;
 import pl.coffeepower.blog.springvsguice.MapContainer;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 public class GuiceConfig extends AbstractModule {
 
-    public GuiceConfig() {
-        log.info("Using {}", this.getClass().getSimpleName());
-    }
+  public GuiceConfig() {
+    log.info("Using {}", this.getClass().getSimpleName());
+  }
 
-    protected void configure() {
-    }
+  protected void configure() {
+  }
 
-    @Singleton
-    @Provides
-    @Named(Config.MAP_QUALIFIER)
-    private Map<String, String> createMap() {
-        Map<String, String> map = new HashMap<>();
-        map.put("1", "Guice");
-        map.put("2", "framework");
-        return map;
-    }
+  @Singleton
+  @Provides
+  @Named(Config.MAP_QUALIFIER)
+  private Map<String, String> createMap() {
+    Map<String, String> map = new HashMap<>();
+    map.put("1", "Guice");
+    map.put("2", "framework");
+    return map;
+  }
 
-    @Singleton
-    @Provides
-    private Map<String, String> createAnotherMap() {
-        Map<String, String> map = new HashMap<>();
-        map.put("1", "Other");
-        map.put("2", "framework");
-        return map;
-    }
+  @Singleton
+  @Provides
+  private Map<String, String> createAnotherMap() {
+    Map<String, String> map = new HashMap<>();
+    map.put("1", "Other");
+    map.put("2", "framework");
+    return map;
+  }
 
-    @Provides
-    @Inject
-    private MapContainer createMapContainer(@Named(Config.MAP_QUALIFIER) Map<String, String> map) {
-        return new MapContainer(map);
-    }
+  @Provides
+  @Inject
+  private MapContainer createMapContainer(@Named(Config.MAP_QUALIFIER) Map<String, String> map) {
+    return new MapContainer(map);
+  }
 }

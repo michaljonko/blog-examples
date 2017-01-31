@@ -30,5 +30,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Config {
 
-    public static final String MAP_QUALIFIER = "MyMap";
+  public static final String MAP_QUALIFIER = "MyMap";
 }

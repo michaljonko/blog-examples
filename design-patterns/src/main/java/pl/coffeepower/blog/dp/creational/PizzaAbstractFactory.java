@@ -56,7 +56,9 @@ public final class PizzaAbstractFactory {
 
     @Override
     public IPizza createPizza() {
-      return new Pizza(PizzaName.VEGETARIANA.name(), ImmutableSet.of("tomatoes", "onion", "beans"), BigInteger.TEN);
+      return new Pizza(PizzaName.VEGETARIANA.name(),
+          ImmutableSet.of("tomatoes", "onion", "beans"),
+          BigInteger.valueOf(90L));
     }
   }
 
@@ -64,7 +66,9 @@ public final class PizzaAbstractFactory {
 
     @Override
     public IPizza createPizza() {
-      return new Pizza(PizzaName.FAMILY.name(), ImmutableSet.of("tomatoes", "cheese", "meat"), BigInteger.ONE);
+      return new Pizza(PizzaName.FAMILY.name(),
+          ImmutableSet.of("tomatoes", "cheese", "meat"),
+          BigInteger.valueOf(100L));
     }
   }
 }

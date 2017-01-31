@@ -31,5 +31,5 @@ import java.util.Map;
 @Value
 public class MapContainer {
 
-    Map<String, String> myMap;
+  Map<String, String> myMap;
 }

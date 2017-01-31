@@ -24,29 +24,30 @@
 
 package pl.coffeepower.blog.springvsguice;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import pl.coffeepower.blog.springvsguice.spring.SpringApp;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.assertThat;
+import pl.coffeepower.blog.springvsguice.spring.SpringConfig;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(SpringApp.class)
+@SpringApplicationConfiguration(SpringConfig.class)
 public class SpringTest {
 
-    @Autowired
-    private ApplicationContext context;
+  @Autowired
+  private ApplicationContext context;
 
-    @Test
-    public void shouldGetMapContainer() throws Exception {
-        MapContainer mapContainer = context.getBean(MapContainer.class);
-        assertThat(mapContainer.getMyMap().size(), is(2));
-        assertThat(mapContainer.getMyMap(), hasEntry("1", "Spring"));
-    }
+  @Test
+  public void shouldGetMapContainer() throws Exception {
+    MapContainer mapContainer = context.getBean(MapContainer.class);
+    assertThat(mapContainer.getMyMap().size(), is(2));
+    assertThat(mapContainer.getMyMap(), hasEntry("1", "Spring"));
+  }
 }

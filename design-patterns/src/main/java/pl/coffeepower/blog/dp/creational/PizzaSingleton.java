@@ -26,22 +26,35 @@ package pl.coffeepower.blog.dp.creational;
 
 import com.google.common.collect.ImmutableSet;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import pl.coffeepower.blog.dp.creational.vo.IPizza;
 import pl.coffeepower.blog.dp.creational.vo.Pizza;
+import pl.coffeepower.blog.dp.creational.vo.PizzaName;
 
 import java.math.BigInteger;
 
-public final class PizzaPrototype extends Pizza {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class PizzaSingleton {
 
-  public PizzaPrototype(String name, ImmutableSet<String> components, BigInteger price) {
-    super(name, components, price);
+  private final IPizza vegetarianaPizza = new Pizza(
+      PizzaName.VEGETARIANA.name(),
+      ImmutableSet.of("tomatoes", "onion", "beans"),
+      BigInteger.valueOf(90L));
+  private final IPizza familyPizza = new Pizza(
+      PizzaName.FAMILY.name(),
+      ImmutableSet.of("tomatoes", "cheese", "meat"),
+      BigInteger.valueOf(100L));
+
+  public static PizzaSingleton getInstance() {
+    return PizzaSingletonHelper.INSTANCE;
   }
 
-  private PizzaPrototype(IPizza pizza) {
-    super(pizza.getName(), pizza.getComponents(), pizza.getPrice());
-  }
+  private final static class PizzaSingletonHelper {
 
-  public PizzaPrototype clone() {
-    return new PizzaPrototype(this);
+    private static final PizzaSingleton INSTANCE = new PizzaSingleton();
   }
 }
