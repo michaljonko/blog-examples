@@ -4,5 +4,6 @@ include ':words-frequency-counter',
         ':message-bus',
         ':stream-vs-guava',
         ':benchmarks',
+        ':spring-vs-guice',
         ':design-patterns'
 
