@@ -24,15 +24,12 @@
 
 package pl.coffeepower.blog.dp.creational;
 
-import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableSet;
-
-import lombok.Value;
 
 import org.junit.Test;
 
@@ -43,57 +40,61 @@ import pl.coffeepower.blog.dp.creational.vo.PizzaName;
 import pl.coffeepower.blog.dp.creational.vo.PizzaPrototype;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 public class CreationalPatternsTest {
 
-  private final Fixtures fixtures = new Fixtures();
-
   @Test
-  public void shouldCreatePizzaWithBuilder() throws Exception {
+  public void shouldCreatePizzaVegetarianaWithBuilder() throws Exception {
     PizzaBuilder pizzaBuilder = PizzaBuilder.aPizza();
 
-    assertThat(pizzaBuilder
-            .withName(fixtures.pizzaName)
-            .withPrice(fixtures.pizzaPrice)
-            .withComponents(fixtures.pizzaComponents)
-            .build(),
-        is(fixtures.expectedPizza));
+    IPizza pizzaVegetariana = pizzaBuilder
+        .withName(Fixtures.PIZZA_NAME)
+        .withPrice(Fixtures.PIZZA_PRICE)
+        .withComponents(Fixtures.PIZZA_COMPONENTS)
+        .build();
+
+    assertThat(pizzaVegetariana, is(Fixtures.EXPECTED_PIZZA));
     assertThat(pizzaBuilder.withName(PizzaName.FAMILY).build(),
-        is(not(fixtures.expectedPizza)));
+        is(not(Fixtures.EXPECTED_PIZZA)));
   }
 
   @Test
-  public void shouldCreatePizzaWithAbstractFactory() throws Exception {
-    PizzaFactory pizzaFactory = PizzaAbstractFactory.getFactory(fixtures.pizzaName);
+  public void shouldCreatePizzaVegetarianaWithAbstractFactory() throws Exception {
+    PizzaFactory pizzaFactory = PizzaAbstractFactory.getFactory(Fixtures.PIZZA_NAME);
 
-    assertThat(pizzaFactory.createPizza(), is(fixtures.expectedPizza));
+    IPizza pizzaVegetariana = pizzaFactory.createPizza();
+
+    assertThat(pizzaVegetariana, is(Fixtures.EXPECTED_PIZZA));
+    assertThat(pizzaVegetariana, not(sameInstance(pizzaFactory.createPizza())));
   }
 
   @Test
-  public void shouldCreateAndClonePizzaWithPrototype() throws Exception {
-    PizzaPrototype pizzaPrototype = new PizzaPrototype(
-        fixtures.pizzaName.name(), fixtures.pizzaComponents, fixtures.pizzaPrice);
-    IPizza pizzaClone = pizzaPrototype.clone();
-    assertThat(pizzaPrototype, is(fixtures.expectedPizza));
-    assertThat(pizzaClone,
-        allOf(Arrays.asList(is(pizzaPrototype), not(sameInstance(pizzaPrototype)))));
+  public void shouldCreateAndClonePizzaVegetarianaWithPrototype() throws Exception {
+    PizzaPrototype pizzaVegetarianaPrototype = new PizzaPrototype(
+        Fixtures.PIZZA_NAME.name(), Fixtures.PIZZA_COMPONENTS, Fixtures.PIZZA_PRICE);
+
+    IPizza pizzaVegetarianaClone = pizzaVegetarianaPrototype.clone();
+
+    assertThat(pizzaVegetarianaPrototype, is(Fixtures.EXPECTED_PIZZA));
+    assertThat(pizzaVegetarianaPrototype, not(sameInstance(pizzaVegetarianaClone)));
+    assertThat(pizzaVegetarianaClone, is(pizzaVegetarianaPrototype));
   }
 
   @Test
   public void shouldCreatePizzaWithSingleton() throws Exception {
     PizzaSingleton singleton = PizzaSingleton.getInstance();
-    IPizza pizza = singleton.getVegetarianaPizza();
 
-    assertThat(pizza, allOf(
-        Arrays.asList(is(fixtures.expectedPizza), sameInstance(singleton.getVegetarianaPizza()))));
+    IPizza pizzaVegetariana = singleton.getVegetarianaPizza();
+
+    assertThat(pizzaVegetariana, is(Fixtures.EXPECTED_PIZZA));
+    assertThat(pizzaVegetariana, sameInstance(singleton.getVegetarianaPizza()));
   }
 
-  @Value
   private static final class Fixtures {
-    PizzaName pizzaName = PizzaName.VEGETARIANA;
-    BigInteger pizzaPrice = BigInteger.valueOf(90L);
-    ImmutableSet<String> pizzaComponents = ImmutableSet.of("tomatoes", "onion", "beans");
-    IPizza expectedPizza = new Pizza(pizzaName.name(), pizzaComponents, pizzaPrice);
+
+    private static final PizzaName PIZZA_NAME = PizzaName.VEGETARIANA;
+    private static final BigInteger PIZZA_PRICE = BigInteger.valueOf(90L);
+    private static final ImmutableSet<String> PIZZA_COMPONENTS = ImmutableSet.of("tomatoes", "onion", "beans");
+    private static final IPizza EXPECTED_PIZZA = new Pizza(PIZZA_NAME.name(), PIZZA_COMPONENTS, PIZZA_PRICE);
   }
 }
